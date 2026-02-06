@@ -1,6 +1,10 @@
-# IntentKeeper
+<p align="center">
+  <img src="docs/logo.png" alt="IntentKeeper" width="180">
+</p>
 
-**A digital bodyguard for your mind.**
+<h1 align="center">IntentKeeper</h1>
+
+<p align="center"><strong>A digital bodyguard for your mind.</strong></p>
 
 IntentKeeper is a local-first content filter that classifies online content by its underlying intent — ragebait, fearmongering, hype, or genuine insight. It sits between you and your feed, surfacing manipulation before it affects you.
 
