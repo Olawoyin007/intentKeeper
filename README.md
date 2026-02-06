@@ -2,122 +2,152 @@
 
 **A digital bodyguard for your mind.**
 
-IntentKeeper is a local-first content filter that classifies online content by its underlying intent — ragebait, fearmongering, hype, or genuine insight. It helps you consume content mindfully by surfacing manipulation before it affects you.
+IntentKeeper is a local-first content filter that classifies online content by its underlying intent — ragebait, fearmongering, hype, or genuine insight. It sits between you and your feed, surfacing manipulation before it affects you.
 
-## Philosophy
+> **Status**: Early development. The core classification engine and Chrome extension scaffold are built. Not yet packaged for general use.
+
+---
+
+## The Problem
+
+Every major platform optimizes for engagement. Engagement is driven by emotion. The strongest emotions — outrage, fear, tribal identity — are the easiest to manufacture.
+
+The result: your feed is optimized to make you angry, afraid, and divided. Not because the platform is evil, but because that's what the algorithm rewards.
+
+IntentKeeper doesn't fix the platforms. It gives you a lens to see the manipulation before it hooks you.
+
+## The Idea
 
 > "The content isn't the problem. The intent behind it is."
 
-A post about politics can be thoughtful analysis or manufactured outrage. Same topic, opposite effect on your wellbeing. IntentKeeper classifies the *energy* of content, not its subject matter.
+A post about politics can be thoughtful analysis or manufactured outrage. A health tip can be genuine advice or fearmongering. Same topic, opposite effect on your wellbeing.
+
+IntentKeeper classifies the **energy** behind the words — not the words themselves. It doesn't censor topics. It surfaces manipulation.
 
 ## How It Works
 
 ```
-Browser Extension → Local API Server → Ollama LLM → Classification Result
-     ↓                                                      ↓
-Intercepts content                                   Blur/tag/pass
-before you see it                                    based on intent
+You open Twitter/X
+        │
+        ▼
+Extension intercepts content before you read it
+        │
+        ▼
+Local LLM classifies the intent (via Ollama)
+        │
+        ▼
+Content is blurred, tagged, hidden, or passed through
+        │
+        ▼
+You decide what to engage with
 ```
 
-All processing happens locally via Ollama. No cloud, no data collection, no tracking.
+All processing happens on your machine. No cloud. No data collection. No tracking.
 
-## Intent Categories
+## What It Detects
 
-| Intent | Description | Default Action |
-|--------|-------------|----------------|
-| `ragebait` | Designed to provoke anger/outrage | Blur + warning |
-| `fearmongering` | Exaggerated threats, doom content | Tag |
-| `hype` | Manufactured urgency, FOMO triggers | Tag |
-| `engagement_bait` | "Reply with your X!", empty interaction | Hide |
-| `divisive` | Us-vs-them framing, tribal triggers | Tag |
-| `genuine` | Authentic insight, honest perspective | Pass |
-| `neutral` | Informational, no manipulation | Pass |
+| Intent | What It Looks Like | What Happens |
+|--------|-------------------|--------------|
+| **Ragebait** | "This is EXACTLY why I hate [group]. Every. Single. Time." | Blurred with reveal button |
+| **Fearmongering** | "Society is COLLAPSING. Get out while you still can." | Tagged with label |
+| **Hype** | "This AI tool changes EVERYTHING. You're missing out!" | Tagged with label |
+| **Engagement bait** | "Reply with your favorite X and I'll tell you Y!" | Hidden (expandable) |
+| **Divisive** | "People who don't do X are just lazy. Winners have discipline." | Tagged with label |
+| **Genuine** | "I've dealt with anxiety for 10 years. Here's what helped me." | Passes through |
+| **Neutral** | "The new transit line opens March 15. Here's the schedule." | Passes through |
 
-## Quick Start
+## Architecture
 
-### Prerequisites
-
-- Python 3.10+
-- [Ollama](https://ollama.ai) running locally with a model (e.g., `llama3.2`)
-- Chrome/Chromium browser
-
-### 1. Start the Classification Server
-
-```bash
-cd intentKeeper
-pip install -e .
-intentkeeper-server
-# Server runs at http://localhost:8420
+```
+┌──────────────────────────────────────────────────────────┐
+│  Your Machine (everything stays here)                     │
+│                                                           │
+│  Browser ──► Extension ──► Local API ──► Ollama (LLM)    │
+│                               :8420        :11434         │
+│                                                           │
+│  No external calls. No cloud. No telemetry.              │
+└──────────────────────────────────────────────────────────┘
 ```
 
-### 2. Install the Browser Extension
+| Component | Tech | Purpose |
+|-----------|------|---------|
+| Extension | Chrome Manifest V3 | Intercepts content, applies visual treatments |
+| Server | FastAPI (Python) | Classification API on localhost |
+| Classifier | Ollama + LLM | Intent detection via local model |
+| Config | YAML | Intent definitions, few-shot examples |
 
-1. Open Chrome → `chrome://extensions/`
-2. Enable "Developer mode"
-3. Click "Load unpacked" → select the `extension/` folder
+## Principles
 
-### 3. Browse Mindfully
+**Intent over topic.** We never filter by subject matter. Political content isn't inherently manipulative. The same topic can be genuine or manufactured — we classify the framing.
 
-The extension will automatically classify content on supported sites (Twitter/X initially).
+**Fail-open.** When classification fails, content passes through unchanged. We will never block content because of a bug. False negatives are acceptable; false positives are not.
 
-## Configuration
+**Local-first.** All classification on your device. Your browsing patterns never leave your machine.
 
-Copy `.env.example` to `.env` and configure:
+**User sovereignty.** You control what gets filtered, how aggressively, and whether it runs at all. Every blurred or hidden post can be revealed with one click.
 
-```bash
-OLLAMA_HOST=http://localhost:11434
-OLLAMA_MODEL=llama3.2
-INTENTKEEPER_PORT=8420
-```
+**Transparency.** Every classification comes with a reasoning field. You can always see *why* content was flagged.
+
+See [MANIFESTO.md](MANIFESTO.md) for the full principles.
+
+## Roadmap
+
+| Phase | What | Status |
+|-------|------|--------|
+| 1 | Core classifier + Chrome extension (Twitter/X) | Done |
+| 2 | YouTube support (titles, descriptions, comments) | Planned |
+| 3 | Reddit support | Planned |
+| 4 | User-configurable sensitivity per intent | Planned |
+| 5 | Local statistics dashboard | Planned |
+| 6 | Firefox extension | Planned |
+| 7 | Advanced classification (sarcasm, multimedia) | Long-term |
+| 8 | Cross-platform (desktop app, mobile) | Long-term |
+
+See [ROADMAP.md](ROADMAP.md) for detailed phase descriptions.
 
 ## Project Structure
 
 ```
 intentKeeper/
+├── server/              # Classification API (FastAPI)
+│   ├── api.py           # Endpoints: /classify, /health, /intents
+│   └── classifier.py    # IntentClassifier + Ollama integration
 ├── extension/           # Chrome extension (Manifest V3)
-│   ├── manifest.json
-│   ├── content.js       # Intercepts page content
-│   ├── background.js    # Service worker
-│   └── popup/           # Extension popup UI
-├── server/              # Local classification API
-│   ├── api.py           # FastAPI server
-│   └── classifier.py    # Intent classifier
-├── scenarios/           # Intent definitions (YAML)
-│   └── intents.yaml
-├── tests/
-└── docs/
+│   ├── content.js       # Intercepts tweets, applies treatments
+│   ├── background.js    # Service worker, settings, health checks
+│   ├── styles.css       # Blur, tag, hide visual treatments
+│   └── popup/           # Extension settings UI
+├── scenarios/
+│   └── intents.yaml     # Intent definitions + few-shot examples
+├── tests/               # Pytest test suite
+└── docs/                # Architecture, usage guide
 ```
-
-## Development
-
-```bash
-# Install with dev dependencies
-pip install -e ".[dev]"
-
-# Run tests
-pytest tests/
-
-# Run server in development mode
-uvicorn server.api:app --reload --port 8420
-```
-
-## Roadmap
-
-- [x] Phase 1: Core classifier + Chrome extension (Twitter/X)
-- [ ] Phase 2: YouTube support (titles, descriptions, comments)
-- [ ] Phase 3: Reddit support
-- [ ] Phase 4: User-configurable sensitivity levels
-- [ ] Phase 5: Statistics dashboard (local only)
-- [ ] Phase 6: Firefox extension
 
 ## Sibling Project
 
-IntentKeeper shares classification patterns with [empathySync](https://github.com/Olawoyin007/empathySync), a local-first wellness assistant. Both projects prioritize:
+IntentKeeper is a sibling to [empathySync](https://github.com/Olawoyin007/empathySync), a local-first AI wellness assistant. Both share the same philosophy:
 
-- **Local-first**: All processing on your device
-- **Privacy**: No telemetry, no cloud, no tracking
-- **Restraint**: Technology that respects your attention
+| | empathySync | IntentKeeper |
+|-|-------------|--------------|
+| **Protects against** | Over-reliance on AI for emotional support | Content designed to manipulate emotions |
+| **Approach** | Restraint — limits itself on sensitive topics | Transparency — labels manipulation, lets you decide |
+| **Processing** | Local Ollama | Local Ollama |
+| **Tracking** | None | None |
+
+Same mission, different surface areas.
+
+## Documentation
+
+- [MANIFESTO.md](MANIFESTO.md) — Core principles and ethical guidelines
+- [ROADMAP.md](ROADMAP.md) — Phased implementation plan
+- [CLAUDE.md](CLAUDE.md) — Technical architecture reference
+- [docs/architecture.md](docs/architecture.md) — Visual system diagrams
+- [docs/usage.md](docs/usage.md) — User guide and troubleshooting
 
 ## License
 
 MIT
+
+---
+
+*"Protect your attention. Question the energy, not the topic."*
