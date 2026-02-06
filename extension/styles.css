@@ -1,0 +1,147 @@
+/* IntentKeeper Extension Styles */
+
+/* Blurred content */
+.intentkeeper-blurred {
+  filter: blur(8px);
+  transition: filter 0.3s ease;
+}
+
+.intentkeeper-blurred:hover {
+  filter: blur(4px);
+}
+
+/* Overlay for blurred content */
+.intentkeeper-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  border-radius: 12px;
+}
+
+.intentkeeper-warning {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  color: white;
+  text-align: center;
+  padding: 16px;
+}
+
+.intentkeeper-icon {
+  font-size: 24px;
+}
+
+.intentkeeper-label {
+  font-weight: 600;
+  font-size: 14px;
+  color: #ff6b6b;
+}
+
+.intentkeeper-reason {
+  font-size: 12px;
+  color: #aaa;
+  max-width: 250px;
+}
+
+.intentkeeper-reveal {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 12px;
+  margin-top: 8px;
+  transition: background 0.2s;
+}
+
+.intentkeeper-reveal:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Hidden content */
+.intentkeeper-hidden {
+  display: none !important;
+}
+
+.intentkeeper-hidden-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  background: #1a1a2e;
+  border-radius: 8px;
+  margin: 8px 0;
+  font-size: 13px;
+  color: #888;
+}
+
+.intentkeeper-show {
+  background: transparent;
+  border: 1px solid #444;
+  color: #888;
+  padding: 4px 10px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 11px;
+}
+
+.intentkeeper-show:hover {
+  border-color: #666;
+  color: #aaa;
+}
+
+/* Intent tags */
+.intentkeeper-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 12px;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.intentkeeper-tag-ragebait {
+  background: rgba(255, 107, 107, 0.2);
+  color: #ff6b6b;
+}
+
+.intentkeeper-tag-fearmongering {
+  background: rgba(255, 165, 0, 0.2);
+  color: #ffa500;
+}
+
+.intentkeeper-tag-hype {
+  background: rgba(255, 215, 0, 0.2);
+  color: #ffd700;
+}
+
+.intentkeeper-tag-engagement_bait {
+  background: rgba(147, 112, 219, 0.2);
+  color: #9370db;
+}
+
+.intentkeeper-tag-divisive {
+  background: rgba(255, 140, 0, 0.2);
+  color: #ff8c00;
+}
+
+.intentkeeper-tag-genuine {
+  background: rgba(50, 205, 50, 0.2);
+  color: #32cd32;
+}
+
+.intentkeeper-tag-neutral {
+  background: rgba(128, 128, 128, 0.2);
+  color: #808080;
+}

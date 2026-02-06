@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>IntentKeeper</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      width: 320px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #1a1a2e;
+      color: #e0e0e0;
+      padding: 16px;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #333;
+    }
+
+    .header h1 {
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .header .icon {
+      font-size: 24px;
+    }
+
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      font-size: 13px;
+    }
+
+    .status.connected {
+      background: rgba(76, 175, 80, 0.1);
+      color: #4CAF50;
+    }
+
+    .status.disconnected {
+      background: rgba(244, 67, 54, 0.1);
+      color: #f44336;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    .setting {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid #2a2a4a;
+    }
+
+    .setting:last-child {
+      border-bottom: none;
+    }
+
+    .setting-label {
+      font-size: 13px;
+    }
+
+    .setting-desc {
+      font-size: 11px;
+      color: #888;
+      margin-top: 2px;
+    }
+
+    /* Toggle switch */
+    .toggle {
+      position: relative;
+      width: 44px;
+      height: 24px;
+    }
+
+    .toggle input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: #333;
+      border-radius: 24px;
+      transition: 0.3s;
+    }
+
+    .toggle-slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background: white;
+      border-radius: 50%;
+      transition: 0.3s;
+    }
+
+    .toggle input:checked + .toggle-slider {
+      background: #4CAF50;
+    }
+
+    .toggle input:checked + .toggle-slider:before {
+      transform: translateX(20px);
+    }
+
+    /* Slider */
+    .slider-container {
+      margin-top: 16px;
+      padding-top: 12px;
+      border-top: 1px solid #333;
+    }
+
+    .slider-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      margin-bottom: 8px;
+    }
+
+    .slider-value {
+      color: #4CAF50;
+      font-weight: 500;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      height: 4px;
+      border-radius: 2px;
+      background: #333;
+      outline: none;
+      -webkit-appearance: none;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #4CAF50;
+      cursor: pointer;
+    }
+
+    .footer {
+      margin-top: 16px;
+      padding-top: 12px;
+      border-top: 1px solid #333;
+      font-size: 11px;
+      color: #666;
+      text-align: center;
+    }
+
+    .footer a {
+      color: #888;
+      text-decoration: none;
+    }
+
+    .footer a:hover {
+      color: #aaa;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <span class="icon">🛡️</span>
+    <h1>IntentKeeper</h1>
+  </div>
+
+  <div id="status" class="status disconnected">
+    <span class="status-dot"></span>
+    <span id="status-text">Checking connection...</span>
+  </div>
+
+  <div class="settings">
+    <div class="setting">
+      <div>
+        <div class="setting-label">Enable filtering</div>
+        <div class="setting-desc">Turn IntentKeeper on/off</div>
+      </div>
+      <label class="toggle">
+        <input type="checkbox" id="enabled" checked>
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+
+    <div class="setting">
+      <div>
+        <div class="setting-label">Show intent tags</div>
+        <div class="setting-desc">Label detected content</div>
+      </div>
+      <label class="toggle">
+        <input type="checkbox" id="showTags" checked>
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+
+    <div class="setting">
+      <div>
+        <div class="setting-label">Blur ragebait</div>
+        <div class="setting-desc">Blur anger-provoking content</div>
+      </div>
+      <label class="toggle">
+        <input type="checkbox" id="blurRagebait" checked>
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+
+    <div class="setting">
+      <div>
+        <div class="setting-label">Hide engagement bait</div>
+        <div class="setting-desc">Collapse empty interactions</div>
+      </div>
+      <label class="toggle">
+        <input type="checkbox" id="hideEngagementBait" checked>
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+  </div>
+
+  <div class="slider-container">
+    <div class="slider-label">
+      <span>Sensitivity</span>
+      <span class="slider-value" id="thresholdValue">60%</span>
+    </div>
+    <input type="range" id="threshold" min="30" max="90" value="60">
+  </div>
+
+  <div class="footer">
+    <a href="https://github.com/Olawoyin007/intentKeeper" target="_blank">GitHub</a>
+    &nbsp;·&nbsp;
+    Local-first. Your data stays on your device.
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

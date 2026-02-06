@@ -1,0 +1,126 @@
+# IntentKeeper Intent Definitions
+#
+# Each intent has:
+# - description: What this intent means
+# - action: Default action (blur, tag, hide, pass)
+# - weight: Base manipulation score (0.0 = benign, 1.0 = highly manipulative)
+
+intents:
+  ragebait:
+    description: "Content designed to provoke anger, outrage, or hostile reactions"
+    action: blur
+    weight: 0.9
+    indicators:
+      - "Inflammatory language targeting groups"
+      - "Strawman arguments presented as real positions"
+      - "Cherry-picked examples presented as universal"
+      - "Mocking tone toward perceived opponents"
+      - "Absolutist framing (always, never, all, none)"
+
+  fearmongering:
+    description: "Exaggerated threats, doom content, catastrophizing"
+    action: tag
+    weight: 0.7
+    indicators:
+      - "Apocalyptic framing of current events"
+      - "Vague but scary predictions"
+      - "They're coming for your X language"
+      - "Everything is worse than ever claims"
+      - "Urgency without actionable information"
+
+  hype:
+    description: "Manufactured urgency, FOMO triggers, artificial excitement"
+    action: tag
+    weight: 0.5
+    indicators:
+      - "Limited time pressure"
+      - "Everyone is doing X"
+      - "You're missing out on..."
+      - "This changes everything"
+      - "BREAKING (for non-breaking content)"
+
+  engagement_bait:
+    description: "Content designed solely to generate metrics, not value"
+    action: hide
+    weight: 0.6
+    indicators:
+      - "Reply with your X"
+      - "Tag someone who..."
+      - "Retweet if you agree"
+      - "What's your unpopular opinion"
+      - "Questions with obvious answers"
+
+  divisive:
+    description: "Us-vs-them framing, tribal triggers, manufactured conflict"
+    action: tag
+    weight: 0.7
+    indicators:
+      - "People who X are Y"
+      - "The left/right always..."
+      - "If you don't support X, you're Y"
+      - "Real [group] would never..."
+      - "Which side are you on"
+
+  genuine:
+    description: "Authentic insight, honest perspective, original thought"
+    action: pass
+    weight: 0.0
+    indicators:
+      - "Personal experience with specifics"
+      - "Nuanced take acknowledging complexity"
+      - "Asks genuine questions seeking understanding"
+      - "Shares information without emotional manipulation"
+      - "Admits uncertainty or limitations"
+
+  neutral:
+    description: "Informational content without manipulation intent"
+    action: pass
+    weight: 0.0
+    indicators:
+      - "Factual statements"
+      - "News without editorializing"
+      - "Questions seeking information"
+      - "Announcements and updates"
+      - "Resource sharing"
+
+# Few-shot examples to improve classification accuracy
+few_shot_examples:
+  - content: "This is EXACTLY why I hate [political party]. They always do this. Every. Single. Time."
+    intent: ragebait
+
+  - content: "They're trying to take everything from us. By 2025, you won't recognize this country."
+    intent: fearmongering
+
+  - content: "BREAKING: This new AI tool is going to change EVERYTHING. I can't believe more people aren't talking about this!"
+    intent: hype
+
+  - content: "Reply with your favorite pizza topping and I'll tell you your personality type!"
+    intent: engagement_bait
+
+  - content: "People who don't wake up at 5am are just lazy. Winners have discipline."
+    intent: divisive
+
+  - content: "I've been dealing with anxiety for 10 years. Here's what actually helped me, though everyone's different."
+    intent: genuine
+
+  - content: "The new transit line opens March 15. Here's the schedule and route map."
+    intent: neutral
+
+  - content: "So tired of people who can't see the OBVIOUS truth. If you don't get it by now, you never will."
+    intent: ragebait
+
+  - content: "Tried this recipe last night. The garlic was perfect but I'd add more salt next time. 7/10."
+    intent: genuine
+
+  - content: "🚨 ALERT: Society is COLLAPSING. Get out while you still can."
+    intent: fearmongering
+
+# Classification rules (for the LLM prompt)
+rules:
+  - "Focus on HOW content is framed, not the topic itself"
+  - "Political content can be genuine OR manipulative - analyze the framing"
+  - "Personal stories with specific details tend to be genuine"
+  - "Sensational language and ALL CAPS often indicate manipulation"
+  - "Content triggering strong immediate emotional reaction is likely manipulative"
+  - "Nuance and uncertainty are markers of genuine content"
+  - "Questions seeking genuine answers are different from engagement bait"
