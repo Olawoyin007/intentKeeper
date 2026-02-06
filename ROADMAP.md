@@ -19,7 +19,7 @@
 - [x] Define 7 intent categories (ragebait, fearmongering, hype, engagement_bait, divisive, genuine, neutral)
 - [x] Build classification prompt with few-shot examples
 - [x] JSON response parsing with fallback handling
-- [x] Fail-open design (errors pass content through)
+- [x] Fail-open design (errors pass content through)I'
 
 ### 1.2 FastAPI Server ✅ DONE
 - [x] `POST /classify` — Single content classification
