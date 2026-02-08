@@ -1,7 +1,8 @@
 /**
  * IntentKeeper Background Service Worker
  *
- * Handles extension lifecycle and messaging between components.
+ * Handles extension lifecycle, API proxying, and messaging between components.
+ * All localhost API calls go through here to avoid Chrome's Private Network Access blocking.
  */
 
 const API_URL = 'http://localhost:8420';
@@ -29,15 +30,37 @@ chrome.runtime.onInstalled.addListener(async () => {
 });
 
 /**
- * Check API health periodically
+ * Check API health
  */
 async function checkApiHealth() {
   try {
     const response = await fetch(`${API_URL}/health`);
     const data = await response.json();
-    return data.status === 'ok';
+    return data;
   } catch (e) {
-    return false;
+    return { status: 'disconnected', ollama_connected: false, model: 'none' };
+  }
+}
+
+/**
+ * Classify content via the local API
+ */
+async function classifyContent(content, source) {
+  try {
+    const response = await fetch(`${API_URL}/classify`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ content, source: source || 'twitter' })
+    });
+
+    if (!response.ok) {
+      throw new Error(`API error: ${response.status}`);
+    }
+
+    return await response.json();
+  } catch (e) {
+    console.error('IntentKeeper: Classification failed', e);
+    return null;
   }
 }
 
@@ -46,10 +69,17 @@ async function checkApiHealth() {
  */
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === 'CHECK_HEALTH') {
-    checkApiHealth().then(healthy => {
-      sendResponse({ healthy });
+    checkApiHealth().then(data => {
+      sendResponse(data);
     });
-    return true; // async response
+    return true;
+  }
+
+  if (message.type === 'CLASSIFY') {
+    classifyContent(message.content, message.source).then(result => {
+      sendResponse(result);
+    });
+    return true;
   }
 
   if (message.type === 'GET_SETTINGS') {
@@ -71,9 +101,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
  * Update badge based on API status
  */
 async function updateBadge() {
-  const healthy = await checkApiHealth();
+  const health = await checkApiHealth();
 
-  if (healthy) {
+  if (health.status === 'ok') {
     chrome.action.setBadgeText({ text: '' });
     chrome.action.setBadgeBackgroundColor({ color: '#4CAF50' });
   } else {

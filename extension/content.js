@@ -3,9 +3,11 @@
  *
  * Intercepts tweets on Twitter/X and classifies their intent.
  * Applies visual treatments based on classification results.
+ *
+ * All API calls are routed through the background service worker
+ * to avoid Chrome's Private Network Access blocking localhost.
  */
 
-const API_URL = 'http://localhost:8420';
 const PROCESSED_ATTR = 'data-intentkeeper-processed';
 const INTENT_ATTR = 'data-intentkeeper-intent';
 
@@ -36,7 +38,7 @@ async function loadSettings() {
 }
 
 /**
- * Classify content via the local API
+ * Classify content via background service worker
  */
 async function classifyContent(content) {
   // Check cache
@@ -46,25 +48,21 @@ async function classifyContent(content) {
   }
 
   try {
-    const response = await fetch(`${API_URL}/classify`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ content, source: 'twitter' })
+    const result = await chrome.runtime.sendMessage({
+      type: 'CLASSIFY',
+      content: content,
+      source: 'twitter'
     });
 
-    if (!response.ok) {
-      throw new Error(`API error: ${response.status}`);
-    }
+    if (result) {
+      // Cache result
+      classificationCache.set(cacheKey, result);
 
-    const result = await response.json();
-
-    // Cache result
-    classificationCache.set(cacheKey, result);
-
-    // Limit cache size
-    if (classificationCache.size > 1000) {
-      const firstKey = classificationCache.keys().next().value;
-      classificationCache.delete(firstKey);
+      // Limit cache size
+      if (classificationCache.size > 1000) {
+        const firstKey = classificationCache.keys().next().value;
+        classificationCache.delete(firstKey);
+      }
     }
 
     return result;
@@ -129,10 +127,6 @@ function applyTreatment(tweetElement, classification) {
  * Blur content with reveal option
  */
 function applyBlur(element, intent, reasoning) {
-  // Create wrapper
-  const wrapper = document.createElement('div');
-  wrapper.className = 'intentkeeper-blur-wrapper';
-
   // Create overlay with warning
   const overlay = document.createElement('div');
   overlay.className = 'intentkeeper-overlay';
@@ -274,16 +268,16 @@ async function init() {
     return;
   }
 
-  // Check API health
+  // Check API health via background worker
   try {
-    const health = await fetch(`${API_URL}/health`);
-    if (!health.ok) {
+    const health = await chrome.runtime.sendMessage({ type: 'CHECK_HEALTH' });
+    if (!health || health.status === 'disconnected') {
       console.error('IntentKeeper: API not available');
       return;
     }
-    console.log('IntentKeeper: API connected');
+    console.log(`IntentKeeper: API connected (model: ${health.model})`);
   } catch (e) {
-    console.error('IntentKeeper: Cannot connect to API. Is the server running?');
+    console.error('IntentKeeper: Cannot connect to background worker', e);
     return;
   }
 

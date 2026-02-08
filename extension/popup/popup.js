@@ -1,8 +1,8 @@
 /**
  * IntentKeeper Popup Script
+ *
+ * All API calls routed through background worker to avoid CORS/PNA issues.
  */
-
-const API_URL = 'http://localhost:8420';
 
 // Settings elements
 const elements = {
@@ -49,19 +49,21 @@ async function saveSettings() {
 }
 
 /**
- * Check API health
+ * Check API health via background worker
  */
 async function checkHealth() {
   try {
-    const response = await fetch(`${API_URL}/health`);
-    const data = await response.json();
+    const data = await chrome.runtime.sendMessage({ type: 'CHECK_HEALTH' });
 
-    if (data.status === 'ok') {
+    if (data && data.status === 'ok') {
       elements.status.className = 'status connected';
       elements.statusText.textContent = `Connected (${data.model})`;
-    } else {
+    } else if (data && data.ollama_connected === false) {
       elements.status.className = 'status disconnected';
       elements.statusText.textContent = 'Ollama not connected';
+    } else {
+      elements.status.className = 'status disconnected';
+      elements.statusText.textContent = 'Server not running';
     }
   } catch (e) {
     elements.status.className = 'status disconnected';
