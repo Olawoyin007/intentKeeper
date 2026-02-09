@@ -10,13 +10,14 @@ import os
 from contextlib import asynccontextmanager
 from typing import List, Optional
 
+import httpx
 import uvicorn
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
-from .classifier import ClassificationResult, IntentClassifier
+from .classifier import IntentClassifier, MAX_CONTENT_LENGTH
 
 # Load environment
 load_dotenv()
@@ -34,18 +35,21 @@ classifier: Optional[IntentClassifier] = None
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Initialize classifier on startup."""
+    """Initialize classifier and shared HTTP client on startup."""
     global classifier
     logger.info("Starting IntentKeeper server...")
-    classifier = IntentClassifier()
 
-    # Check Ollama health
-    if classifier.check_health():
-        logger.info(f"Ollama connection OK ({classifier.ollama_host})")
-    else:
-        logger.warning(f"Ollama not reachable at {classifier.ollama_host}")
+    # Create a shared HTTP client with connection pooling for the classifier
+    async with httpx.AsyncClient(timeout=30) as client:
+        classifier = IntentClassifier(http_client=client)
 
-    yield
+        # Check Ollama health
+        if await classifier.check_health():
+            logger.info(f"Ollama connection OK ({classifier.ollama_host})")
+        else:
+            logger.warning(f"Ollama not reachable at {classifier.ollama_host}")
+
+        yield
 
     logger.info("Shutting down IntentKeeper server")
 
@@ -53,14 +57,18 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="IntentKeeper",
     description="Local content intent classification API",
-    version="0.1.0",
+    version="0.2.0",
     lifespan=lifespan,
 )
 
-# CORS for browser extension
+# CORS — restrict to browser extension and localhost origins
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Extension runs from chrome-extension:// origin
+    allow_origins=[
+        "chrome-extension://*",
+        "http://localhost:*",
+        "http://127.0.0.1:*",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -71,7 +79,10 @@ app.add_middleware(
 class ClassifyRequest(BaseModel):
     """Request to classify content."""
 
-    content: str = Field(..., min_length=1, description="Text content to classify")
+    content: str = Field(
+        ..., min_length=1, max_length=MAX_CONTENT_LENGTH,
+        description="Text content to classify",
+    )
     source: Optional[str] = Field(None, description="Source platform (twitter, youtube, etc)")
     url: Optional[str] = Field(None, description="URL of the content")
 
@@ -110,7 +121,7 @@ class HealthResponse(BaseModel):
 @app.get("/health", response_model=HealthResponse)
 async def health_check():
     """Check server and Ollama health."""
-    ollama_ok = classifier.check_health() if classifier else False
+    ollama_ok = await classifier.check_health() if classifier else False
     return HealthResponse(
         status="ok" if ollama_ok else "degraded",
         ollama_connected=ollama_ok,
@@ -128,7 +139,7 @@ async def classify_content(request: ClassifyRequest):
     if not classifier:
         raise HTTPException(status_code=503, detail="Classifier not initialized")
 
-    result = classifier.classify(request.content)
+    result = await classifier.classify(request.content)
 
     logger.debug(
         f"Classified: {request.content[:50]}... -> {result.intent} ({result.confidence:.2f})"
@@ -146,25 +157,27 @@ async def classify_content(request: ClassifyRequest):
 @app.post("/classify/batch", response_model=BatchClassifyResponse)
 async def classify_batch(request: BatchClassifyRequest):
     """
-    Classify multiple pieces of content.
+    Classify multiple pieces of content in parallel.
 
-    More efficient than multiple single requests.
+    More efficient than multiple single requests — classifications
+    run concurrently via asyncio.gather().
     """
     if not classifier:
         raise HTTPException(status_code=503, detail="Classifier not initialized")
 
-    results = []
-    for item in request.items:
-        result = classifier.classify(item.content)
-        results.append(
-            ClassifyResponse(
-                intent=result.intent,
-                confidence=result.confidence,
-                reasoning=result.reasoning,
-                action=result.action,
-                manipulation_score=result.manipulation_score,
-            )
+    contents = [item.content for item in request.items]
+    classifications = await classifier.classify_batch(contents)
+
+    results = [
+        ClassifyResponse(
+            intent=r.intent,
+            confidence=r.confidence,
+            reasoning=r.reasoning,
+            action=r.action,
+            manipulation_score=r.manipulation_score,
         )
+        for r in classifications
+    ]
 
     return BatchClassifyResponse(results=results)
 

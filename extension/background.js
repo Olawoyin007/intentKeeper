@@ -7,6 +7,9 @@
 
 const API_URL = 'http://localhost:8420';
 
+// Health check interval — 20s provides faster feedback when server goes down
+const HEALTH_CHECK_INTERVAL = 20000;
+
 // Default settings
 const DEFAULT_SETTINGS = {
   enabled: true,
@@ -20,8 +23,6 @@ const DEFAULT_SETTINGS = {
  * Initialize settings on install
  */
 chrome.runtime.onInstalled.addListener(async () => {
-  console.log('IntentKeeper: Extension installed');
-
   // Set default settings
   const stored = await chrome.storage.local.get('intentkeeper_settings');
   if (!stored.intentkeeper_settings) {
@@ -71,6 +72,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === 'CHECK_HEALTH') {
     checkApiHealth().then(data => {
       sendResponse(data);
+    }).catch(() => {
+      sendResponse({ status: 'disconnected', ollama_connected: false, model: 'none' });
     });
     return true;
   }
@@ -78,6 +81,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === 'CLASSIFY') {
     classifyContent(message.content, message.source).then(result => {
       sendResponse(result);
+    }).catch(() => {
+      sendResponse(null);
     });
     return true;
   }
@@ -85,6 +90,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === 'GET_SETTINGS') {
     chrome.storage.local.get('intentkeeper_settings').then(stored => {
       sendResponse(stored.intentkeeper_settings || DEFAULT_SETTINGS);
+    }).catch(() => {
+      sendResponse(DEFAULT_SETTINGS);
     });
     return true;
   }
@@ -92,6 +99,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === 'SAVE_SETTINGS') {
     chrome.storage.local.set({ intentkeeper_settings: message.settings }).then(() => {
       sendResponse({ success: true });
+    }).catch(() => {
+      sendResponse({ success: false });
     });
     return true;
   }
@@ -114,4 +123,4 @@ async function updateBadge() {
 
 // Check health on startup and periodically
 updateBadge();
-setInterval(updateBadge, 60000);
+setInterval(updateBadge, HEALTH_CHECK_INTERVAL);

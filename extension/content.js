@@ -12,8 +12,25 @@ const PROCESSED_ATTR = 'data-intentkeeper-processed';
 const INTENT_ATTR = 'data-intentkeeper-intent';
 const MAX_CONCURRENT = 5;
 
-// Cache to avoid re-classifying same content
+// Minimum tweet length to bother classifying (matches server MIN_CONTENT_LENGTH)
+const MIN_CONTENT_LENGTH = 20;
+
+// Max cache entries before LRU eviction
+const MAX_CACHE_SIZE = 1000;
+
+// Cache to avoid re-classifying same content (keyed by full content hash)
 const classificationCache = new Map();
+
+// Guard against concurrent processTweets() re-entry
+let isProcessing = false;
+
+// Debug logger — only logs when DEBUG is enabled
+const debug = {
+  _enabled: false,
+  log: (...args) => { if (debug._enabled) console.log('IntentKeeper:', ...args); },
+  error: (...args) => console.error('IntentKeeper:', ...args),
+  warn: (...args) => { if (debug._enabled) console.warn('IntentKeeper:', ...args); },
+};
 
 // Settings (loaded from storage)
 let settings = {
@@ -25,6 +42,19 @@ let settings = {
 };
 
 /**
+ * Generate a simple hash for cache keys using the full content string.
+ * Uses djb2 algorithm — fast and produces good distribution for strings.
+ */
+function hashContent(str) {
+  let hash = 5381;
+  for (let i = 0; i < str.length; i++) {
+    hash = ((hash << 5) + hash) + str.charCodeAt(i);
+    hash = hash & hash; // Convert to 32-bit integer
+  }
+  return hash.toString(36);
+}
+
+/**
  * Load settings from Chrome storage
  */
 async function loadSettings() {
@@ -34,16 +64,29 @@ async function loadSettings() {
       settings = { ...settings, ...stored.intentkeeper_settings };
     }
   } catch (e) {
-    console.log('IntentKeeper: Using default settings');
+    debug.log('Using default settings');
   }
 }
+
+/**
+ * Listen for settings changes so they take effect without page reload
+ */
+chrome.storage.onChanged.addListener((changes, area) => {
+  if (area === 'local' && changes.intentkeeper_settings) {
+    const newSettings = changes.intentkeeper_settings.newValue;
+    if (newSettings) {
+      settings = { ...settings, ...newSettings };
+      debug.log('Settings updated');
+    }
+  }
+});
 
 /**
  * Classify content via background service worker
  */
 async function classifyContent(content) {
-  // Check cache
-  const cacheKey = content.substring(0, 100);
+  // Check cache using full content hash
+  const cacheKey = hashContent(content);
   if (classificationCache.has(cacheKey)) {
     return classificationCache.get(cacheKey);
   }
@@ -59,8 +102,8 @@ async function classifyContent(content) {
       // Cache result
       classificationCache.set(cacheKey, result);
 
-      // Limit cache size
-      if (classificationCache.size > 1000) {
+      // LRU eviction — remove oldest entry when over limit
+      if (classificationCache.size > MAX_CACHE_SIZE) {
         const firstKey = classificationCache.keys().next().value;
         classificationCache.delete(firstKey);
       }
@@ -68,7 +111,8 @@ async function classifyContent(content) {
 
     return result;
   } catch (e) {
-    console.error('IntentKeeper: Classification failed', e);
+    // Background worker may be dead/restarting — fail silently
+    debug.error('Classification failed', e.message || e);
     return null;
   }
 }
@@ -116,7 +160,7 @@ async function classifyAndApply(tweet) {
   const text = extractTweetText(tweet);
 
   // Skip very short tweets
-  if (text.length < 20) {
+  if (text.length < MIN_CONTENT_LENGTH) {
     tweet.setAttribute(PROCESSED_ATTR, 'skipped');
     return;
   }
@@ -185,7 +229,7 @@ function applyBlur(element, intent, reasoning) {
   overlay.className = 'intentkeeper-overlay';
   overlay.innerHTML = `
     <div class="intentkeeper-warning">
-      <span class="intentkeeper-icon">🛡️</span>
+      <span class="intentkeeper-icon">&#x1f6e1;&#xfe0f;</span>
       <span class="intentkeeper-label">${formatIntent(intent)}</span>
       <span class="intentkeeper-reason">${reasoning}</span>
       <button class="intentkeeper-reveal">Show anyway</button>
@@ -222,7 +266,7 @@ function applyHide(element, intent) {
   const showBar = document.createElement('div');
   showBar.className = 'intentkeeper-hidden-bar';
   showBar.innerHTML = `
-    <span>🛡️ Hidden: ${formatIntent(intent)}</span>
+    <span>&#x1f6e1;&#xfe0f; Hidden: ${formatIntent(intent)}</span>
     <button class="intentkeeper-show">Show</button>
   `;
 
@@ -240,7 +284,7 @@ function applyHide(element, intent) {
 function applyTag(element, intent, confidence) {
   const tag = document.createElement('div');
   tag.className = `intentkeeper-tag intentkeeper-tag-${intent}`;
-  tag.innerHTML = `🛡️ ${formatIntent(intent)}`;
+  tag.innerHTML = `&#x1f6e1;&#xfe0f; ${formatIntent(intent)}`;
   tag.title = `Confidence: ${(confidence * 100).toFixed(0)}%`;
 
   // Insert at top of tweet
@@ -265,20 +309,26 @@ function formatIntent(intent) {
 }
 
 /**
- * Process tweets on the page in parallel batches
+ * Process tweets on the page in parallel batches.
+ * Guarded against concurrent re-entry.
  */
 async function processTweets() {
-  if (!settings.enabled) return;
+  if (!settings.enabled || isProcessing) return;
 
-  // Find unprocessed tweets
-  const tweets = Array.from(document.querySelectorAll(
-    `[data-testid="tweet"]:not([${PROCESSED_ATTR}])`
-  ));
+  isProcessing = true;
+  try {
+    // Find unprocessed tweets
+    const tweets = Array.from(document.querySelectorAll(
+      `[data-testid="tweet"]:not([${PROCESSED_ATTR}])`
+    ));
 
-  // Process in batches of MAX_CONCURRENT
-  for (let i = 0; i < tweets.length; i += MAX_CONCURRENT) {
-    const batch = tweets.slice(i, i + MAX_CONCURRENT);
-    await Promise.allSettled(batch.map(t => classifyAndApply(t)));
+    // Process in batches of MAX_CONCURRENT
+    for (let i = 0; i < tweets.length; i += MAX_CONCURRENT) {
+      const batch = tweets.slice(i, i + MAX_CONCURRENT);
+      await Promise.allSettled(batch.map(t => classifyAndApply(t)));
+    }
+  } finally {
+    isProcessing = false;
   }
 }
 
@@ -302,12 +352,12 @@ function setupObserver() {
  * Initialize the content script
  */
 async function init() {
-  console.log('IntentKeeper: Initializing...');
+  debug.log('Initializing...');
 
   await loadSettings();
 
   if (!settings.enabled) {
-    console.log('IntentKeeper: Disabled');
+    debug.log('Disabled');
     return;
   }
 
@@ -315,12 +365,12 @@ async function init() {
   try {
     const health = await chrome.runtime.sendMessage({ type: 'CHECK_HEALTH' });
     if (!health || health.status === 'disconnected') {
-      console.error('IntentKeeper: API not available');
+      debug.error('API not available');
       return;
     }
-    console.log(`IntentKeeper: API connected (model: ${health.model})`);
+    debug.log(`API connected (model: ${health.model})`);
   } catch (e) {
-    console.error('IntentKeeper: Cannot connect to background worker', e);
+    debug.error('Cannot connect to background worker', e.message || e);
     return;
   }
 
@@ -330,7 +380,7 @@ async function init() {
   // Watch for new tweets
   setupObserver();
 
-  console.log('IntentKeeper: Active');
+  debug.log('Active');
 }
 
 // Start
