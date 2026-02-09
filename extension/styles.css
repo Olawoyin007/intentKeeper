@@ -1,5 +1,16 @@
 /* IntentKeeper Extension Styles */
 
+/* Loading indicator for tweets being classified */
+.intentkeeper-classifying {
+  border-left: 3px solid rgba(100, 100, 255, 0.5);
+  animation: intentkeeper-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes intentkeeper-pulse {
+  0%, 100% { border-left-color: rgba(100, 100, 255, 0.2); }
+  50% { border-left-color: rgba(100, 100, 255, 0.6); }
+}
+
 /* Blurred content */
 .intentkeeper-blurred {
   filter: blur(8px);

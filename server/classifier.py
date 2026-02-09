@@ -5,10 +5,12 @@ Uses local Ollama LLM to detect manipulation patterns in text content.
 Adapted from empathySync's classification pipeline.
 """
 
+import hashlib
 import json
 import logging
 import os
 import re
+from collections import OrderedDict
 from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
@@ -47,6 +49,13 @@ class IntentClassifier:
 
         # Load intent definitions
         self.intents = self._load_intents()
+
+        # In-memory LRU cache: content_hash -> ClassificationResult
+        self._cache: OrderedDict = OrderedDict()
+        self._max_cache_size = 500
+
+        # Cache the static portion of the prompt template
+        self._prompt_prefix = self._build_prompt_prefix()
 
     def _load_intents(self) -> Dict:
         """Load intent definitions from YAML."""
@@ -102,8 +111,8 @@ class IntentClassifier:
             }
         }
 
-    def _build_classification_prompt(self, content: str) -> str:
-        """Build the LLM prompt for intent classification."""
+    def _build_prompt_prefix(self) -> str:
+        """Build the static portion of the classification prompt (cached at init)."""
         intents_desc = "\n".join(
             f"- {name}: {info['description']}"
             for name, info in self.intents.get("intents", {}).items()
@@ -130,7 +139,11 @@ Rules:
 - Content that triggers strong immediate emotional reaction is likely manipulative
 {examples_text}
 Content to classify:
-"{content}"
+\""""
+
+    def _build_classification_prompt(self, content: str) -> str:
+        """Build the LLM prompt for intent classification."""
+        return f"""{self._prompt_prefix}{content}"
 
 Respond in JSON format:
 {{"intent": "<category>", "confidence": <0.0-1.0>, "reasoning": "<brief explanation>"}}
@@ -157,21 +170,35 @@ JSON response:"""
                 manipulation_score=0.0,
             )
 
+        # Check in-memory cache
+        content_hash = hashlib.md5(content.encode()).hexdigest()
+        if content_hash in self._cache:
+            self._cache.move_to_end(content_hash)
+            return self._cache[content_hash]
+
         prompt = self._build_classification_prompt(content)
 
         try:
             result = self._call_ollama(prompt)
-            return self._parse_response(result)
+            classification = self._parse_response(result)
         except Exception as e:
             logger.error(f"Classification error: {e}")
             # Fail open - don't block content if classification fails
-            return ClassificationResult(
+            classification = ClassificationResult(
                 intent="neutral",
                 confidence=0.0,
                 reasoning=f"Classification failed: {str(e)}",
                 action="pass",
                 manipulation_score=0.0,
             )
+
+        # Store in cache (only successful classifications)
+        if classification.confidence > 0.0:
+            self._cache[content_hash] = classification
+            if len(self._cache) > self._max_cache_size:
+                self._cache.popitem(last=False)
+
+        return classification
 
     def _call_ollama(self, prompt: str) -> str:
         """Call Ollama API for classification."""
@@ -181,7 +208,7 @@ JSON response:"""
             "stream": False,
             "options": {
                 "temperature": self.temperature,
-                "num_predict": 150,  # Classification responses are short
+                "num_predict": 80,  # JSON response is ~40-60 tokens
             },
         }
 

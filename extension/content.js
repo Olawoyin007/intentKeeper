@@ -10,6 +10,7 @@
 
 const PROCESSED_ATTR = 'data-intentkeeper-processed';
 const INTENT_ATTR = 'data-intentkeeper-intent';
+const MAX_CONCURRENT = 5;
 
 // Cache to avoid re-classifying same content
 const classificationCache = new Map();
@@ -73,15 +74,67 @@ async function classifyContent(content) {
 }
 
 /**
- * Extract tweet text from a tweet element
+ * Extract tweet text from a tweet element, including quoted tweets,
+ * link cards, and image alt text for richer classification context.
  */
 function extractTweetText(tweetElement) {
-  // Twitter's tweet text container
-  const textElement = tweetElement.querySelector('[data-testid="tweetText"]');
-  if (textElement) {
-    return textElement.innerText.trim();
+  const parts = [];
+
+  // Main tweet text
+  const text = tweetElement.querySelector('[data-testid="tweetText"]');
+  if (text) parts.push(text.innerText.trim());
+
+  // Quoted tweet text (nested tweet inside this tweet)
+  const quoted = tweetElement.querySelector('[data-testid="tweet"] [data-testid="tweetText"]');
+  if (quoted && quoted !== text) parts.push(quoted.innerText.trim());
+
+  // Link card title/description
+  const card = tweetElement.querySelector('[data-testid="card.wrapper"]');
+  if (card) {
+    const cardText = card.querySelector(
+      '[data-testid="card.layoutLarge.detail"] span, a[role="link"] span'
+    );
+    if (cardText) parts.push(cardText.innerText.trim());
   }
-  return '';
+
+  // Image alt text (skip generic/short alt text)
+  const imgs = tweetElement.querySelectorAll('img[alt]:not([alt=""])');
+  imgs.forEach(img => {
+    if (img.alt && !img.alt.startsWith('Image') && img.alt.length > 10) {
+      parts.push(img.alt);
+    }
+  });
+
+  return parts.join(' | ');
+}
+
+/**
+ * Classify a single tweet and apply treatment.
+ * Adds/removes the classifying indicator during processing.
+ */
+async function classifyAndApply(tweet) {
+  const text = extractTweetText(tweet);
+
+  // Skip very short tweets
+  if (text.length < 20) {
+    tweet.setAttribute(PROCESSED_ATTR, 'skipped');
+    return;
+  }
+
+  // Show loading indicator
+  tweet.classList.add('intentkeeper-classifying');
+
+  try {
+    const classification = await classifyContent(text);
+    if (classification) {
+      applyTreatment(tweet, classification);
+    } else {
+      tweet.setAttribute(PROCESSED_ATTR, 'failed');
+    }
+  } finally {
+    // Always remove loading indicator
+    tweet.classList.remove('intentkeeper-classifying');
+  }
 }
 
 /**
@@ -212,30 +265,20 @@ function formatIntent(intent) {
 }
 
 /**
- * Process tweets on the page
+ * Process tweets on the page in parallel batches
  */
 async function processTweets() {
   if (!settings.enabled) return;
 
   // Find unprocessed tweets
-  const tweets = document.querySelectorAll(
+  const tweets = Array.from(document.querySelectorAll(
     `[data-testid="tweet"]:not([${PROCESSED_ATTR}])`
-  );
+  ));
 
-  for (const tweet of tweets) {
-    const text = extractTweetText(tweet);
-
-    // Skip very short tweets
-    if (text.length < 20) {
-      tweet.setAttribute(PROCESSED_ATTR, 'skipped');
-      continue;
-    }
-
-    // Classify and apply treatment
-    const classification = await classifyContent(text);
-    if (classification) {
-      applyTreatment(tweet, classification);
-    }
+  // Process in batches of MAX_CONCURRENT
+  for (let i = 0; i < tweets.length; i += MAX_CONCURRENT) {
+    const batch = tweets.slice(i, i + MAX_CONCURRENT);
+    await Promise.allSettled(batch.map(t => classifyAndApply(t)));
   }
 }
 
