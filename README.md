@@ -8,8 +8,6 @@
 
 IntentKeeper is a local-first content filter that classifies online content by its underlying intent — ragebait, fearmongering, hype, or genuine insight. It sits between you and your feed, surfacing manipulation before it affects you.
 
-> **Status**: v0.2.0 — Core classification engine and Chrome extension for Twitter/X are production-ready with async pipeline, batch classification, caching, and 30+ tests.
-
 ---
 
 ## The Problem
@@ -94,23 +92,6 @@ All processing happens on your machine. No cloud. No data collection. No trackin
 
 See [MANIFESTO.md](MANIFESTO.md) for the full principles.
 
-## Roadmap
-
-| Phase | What | Status |
-|-------|------|--------|
-| 1 | Core classifier + Chrome extension (Twitter/X) | Done |
-| 2 | Hardening & reliability (async, cache, security, 30+ tests) | Done |
-| 3 | YouTube support (titles, descriptions, comments) | Next |
-| 4 | Reddit support | Planned |
-| 5 | Classification accuracy improvements | Planned |
-| 6 | User-configurable sensitivity per intent | Planned |
-| 7 | Local statistics dashboard | Planned |
-| 8 | Firefox extension | Planned |
-| 9 | Advanced classification (sarcasm, multimedia) | Long-term |
-| 10 | Cross-platform (desktop app, mobile) | Long-term |
-
-See [ROADMAP.md](ROADMAP.md) for detailed phase descriptions.
-
 ## Project Structure
 
 ```
@@ -128,19 +109,6 @@ intentKeeper/
 ├── tests/               # Pytest test suite
 └── docs/                # Architecture, usage guide
 ```
-
-## Sibling Project
-
-IntentKeeper is a sibling to [empathySync](https://github.com/Olawoyin007/empathySync), a local-first AI wellness assistant. Both share the same philosophy:
-
-| | empathySync | IntentKeeper |
-|-|-------------|--------------|
-| **Protects against** | Over-reliance on AI for emotional support | Content designed to manipulate emotions |
-| **Approach** | Restraint — limits itself on sensitive topics | Transparency — labels manipulation, lets you decide |
-| **Processing** | Local Ollama | Local Ollama |
-| **Tracking** | None | None |
-
-Same mission, different surface areas.
 
 ## Documentation
 
