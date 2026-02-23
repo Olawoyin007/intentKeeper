@@ -22,6 +22,8 @@ IntentKeeper doesn't fix the platforms. It gives you a lens to see the manipulat
 
 > "The content isn't the problem. The intent behind it is."
 
+<![intentKeeper interface showing the transparency panel](docs/screenshot.png) -->
+
 A post about politics can be thoughtful analysis or manufactured outrage. A health tip can be genuine advice or fearmongering. Same topic, opposite effect on your wellbeing.
 
 IntentKeeper classifies the **energy** behind the words — not the words themselves. It doesn't censor topics. It surfaces manipulation.
