@@ -66,6 +66,30 @@ async function classifyContent(content, source) {
 }
 
 /**
+ * Classify multiple content items via the batch API endpoint.
+ * Returns an array of results in the same order as items.
+ */
+async function classifyBatch(items) {
+  try {
+    const response = await fetch(`${API_URL}/classify/batch`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ items })
+    });
+
+    if (!response.ok) {
+      throw new Error(`API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data.results;
+  } catch (e) {
+    console.error('IntentKeeper: Batch classification failed', e);
+    return null;
+  }
+}
+
+/**
  * Handle messages from content scripts and popup
  */
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -81,6 +105,15 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === 'CLASSIFY') {
     classifyContent(message.content, message.source).then(result => {
       sendResponse(result);
+    }).catch(() => {
+      sendResponse(null);
+    });
+    return true;
+  }
+
+  if (message.type === 'CLASSIFY_BATCH') {
+    classifyBatch(message.items).then(results => {
+      sendResponse(results);
     }).catch(() => {
       sendResponse(null);
     });

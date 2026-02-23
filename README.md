@@ -8,7 +8,7 @@
 
 IntentKeeper is a local-first content filter that classifies online content by its underlying intent — ragebait, fearmongering, hype, or genuine insight. It sits between you and your feed, surfacing manipulation before it affects you.
 
-> **Status**: Early development. The core classification engine and Chrome extension scaffold are built. Not yet packaged for general use.
+> **Status**: v0.2.0 — Core classification engine and Chrome extension for Twitter/X are production-ready with async pipeline, batch classification, caching, and 30+ tests.
 
 ---
 
@@ -99,13 +99,15 @@ See [MANIFESTO.md](MANIFESTO.md) for the full principles.
 | Phase | What | Status |
 |-------|------|--------|
 | 1 | Core classifier + Chrome extension (Twitter/X) | Done |
-| 2 | YouTube support (titles, descriptions, comments) | Planned |
-| 3 | Reddit support | Planned |
-| 4 | User-configurable sensitivity per intent | Planned |
-| 5 | Local statistics dashboard | Planned |
-| 6 | Firefox extension | Planned |
-| 7 | Advanced classification (sarcasm, multimedia) | Long-term |
-| 8 | Cross-platform (desktop app, mobile) | Long-term |
+| 2 | Hardening & reliability (async, cache, security, 30+ tests) | Done |
+| 3 | YouTube support (titles, descriptions, comments) | Next |
+| 4 | Reddit support | Planned |
+| 5 | Classification accuracy improvements | Planned |
+| 6 | User-configurable sensitivity per intent | Planned |
+| 7 | Local statistics dashboard | Planned |
+| 8 | Firefox extension | Planned |
+| 9 | Advanced classification (sarcasm, multimedia) | Long-term |
+| 10 | Cross-platform (desktop app, mobile) | Long-term |
 
 See [ROADMAP.md](ROADMAP.md) for detailed phase descriptions.
 

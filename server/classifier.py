@@ -22,9 +22,9 @@ logger = logging.getLogger(__name__)
 
 # --- Named constants ---
 # Content shorter than this is auto-classified as neutral (skips LLM).
-# Set low enough to catch short toxic content but avoid noise from
-# stray UI text or empty elements.
-MIN_CONTENT_LENGTH = 10
+# Aligned with the extension's MIN_CONTENT_LENGTH (20) so both sides
+# agree on what's too short to classify.
+MIN_CONTENT_LENGTH = 20
 
 # Maximum content length sent to the LLM. Longer content is truncated
 # to avoid excessive token usage and slow responses.

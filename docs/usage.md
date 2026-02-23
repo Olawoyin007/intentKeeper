@@ -9,7 +9,7 @@ This guide explains how to use IntentKeeper day-to-day.
 1. **Ollama** installed and running with a model:
    ```bash
    # Install Ollama (https://ollama.ai)
-   ollama pull llama3.2
+   ollama pull mistral:7b-instruct
    ollama serve
    ```
 
@@ -111,7 +111,7 @@ Click **Show** to expand.
 
 ### Passed Content (Genuine, Neutral)
 
-Genuine and neutral content displays normally with no modifications.
+Genuine and neutral content displays normally with an intent tag (when tags are enabled), so you can always see that classification is working.
 
 ## Intent Categories
 
@@ -161,7 +161,7 @@ The same topic can be classified differently based on its framing and intent.
    ```
 3. Verify your model is downloaded:
    ```bash
-   ollama pull llama3.2
+   ollama pull mistral:7b-instruct
    ```
 
 ### No content being classified
@@ -181,7 +181,9 @@ Classification speed depends on your hardware and model:
 Consider using a smaller model for faster classification:
 ```bash
 # In .env
-OLLAMA_MODEL=qwen2.5:3b-instruct
+OLLAMA_MODEL=qwen2.5:3b-instruct  # ~1-3s per tweet
+# or keep the default for better accuracy:
+OLLAMA_MODEL=mistral:7b-instruct  # ~3-8s per tweet
 ```
 
 ### Too many false positives

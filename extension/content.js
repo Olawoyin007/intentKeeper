@@ -24,6 +24,9 @@ const classificationCache = new Map();
 // Guard against concurrent processTweets() re-entry
 let isProcessing = false;
 
+// Flag: new tweets arrived while we were processing a batch
+let pendingReprocess = false;
+
 // Debug logger — only logs when DEBUG is enabled
 const debug = {
   _enabled: false,
@@ -82,47 +85,82 @@ chrome.storage.onChanged.addListener((changes, area) => {
 });
 
 /**
- * Classify content via background service worker
+ * Cache a classification result with LRU eviction.
  */
-async function classifyContent(content) {
-  // Check cache using full content hash
+function cacheResult(content, result) {
   const cacheKey = hashContent(content);
-  if (classificationCache.has(cacheKey)) {
-    return classificationCache.get(cacheKey);
-  }
-
-  try {
-    const result = await chrome.runtime.sendMessage({
-      type: 'CLASSIFY',
-      content: content,
-      source: 'twitter'
-    });
-
-    if (result) {
-      // Cache result
-      classificationCache.set(cacheKey, result);
-
-      // LRU eviction — remove oldest entry when over limit
-      if (classificationCache.size > MAX_CACHE_SIZE) {
-        const firstKey = classificationCache.keys().next().value;
-        classificationCache.delete(firstKey);
-      }
-    }
-
-    return result;
-  } catch (e) {
-    // Background worker may be dead/restarting — fail silently
-    debug.error('Classification failed', e.message || e);
-    return null;
+  classificationCache.set(cacheKey, result);
+  if (classificationCache.size > MAX_CACHE_SIZE) {
+    const firstKey = classificationCache.keys().next().value;
+    classificationCache.delete(firstKey);
   }
 }
 
 /**
- * Extract tweet text from a tweet element, including quoted tweets,
- * link cards, and image alt text for richer classification context.
+ * Get a cached classification result, or null if not cached.
+ */
+function getCached(content) {
+  const cacheKey = hashContent(content);
+  return classificationCache.get(cacheKey) || null;
+}
+
+/**
+ * Classify a batch of content items via the background service worker.
+ * Returns a Map of content -> result.
+ */
+async function classifyBatch(contentItems) {
+  // Separate cached from uncached
+  const results = new Map();
+  const uncached = [];
+
+  for (const content of contentItems) {
+    const cached = getCached(content);
+    if (cached) {
+      results.set(content, cached);
+    } else {
+      uncached.push(content);
+    }
+  }
+
+  if (uncached.length === 0) return results;
+
+  try {
+    const items = uncached.map(c => ({ content: c, source: 'twitter' }));
+    const batchResults = await chrome.runtime.sendMessage({
+      type: 'CLASSIFY_BATCH',
+      items
+    });
+
+    if (batchResults && Array.isArray(batchResults)) {
+      for (let i = 0; i < uncached.length; i++) {
+        const result = batchResults[i];
+        if (result) {
+          cacheResult(uncached[i], result);
+          results.set(uncached[i], result);
+        }
+      }
+    }
+  } catch (e) {
+    debug.error('Batch classification failed', e.message || e);
+  }
+
+  return results;
+}
+
+/**
+ * Extract tweet text from a tweet element, including author name,
+ * quoted tweets, link cards, poll options, video context,
+ * and image alt text for richer classification context.
  */
 function extractTweetText(tweetElement) {
   const parts = [];
+
+  // Author display name — helps detect mockery and quote-tweet dunking
+  const author = tweetElement.querySelector('[data-testid="User-Name"]');
+  if (author) {
+    const displayName = author.querySelector('span');
+    if (displayName) parts.push(`[Author: ${displayName.innerText.trim()}]`);
+  }
 
   // Main tweet text
   const text = tweetElement.querySelector('[data-testid="tweetText"]');
@@ -141,6 +179,32 @@ function extractTweetText(tweetElement) {
     if (cardText) parts.push(cardText.innerText.trim());
   }
 
+  // Video context — grab any accessible description/title near the video player
+  const video = tweetElement.querySelector('[data-testid="videoPlayer"], video, [data-testid="videoComponent"]');
+  if (video) {
+    // Twitter sometimes puts video titles in nearby spans or aria-labels
+    const videoLabel = video.getAttribute('aria-label')
+      || video.closest('[aria-label]')?.getAttribute('aria-label');
+    if (videoLabel && videoLabel.length > 5) {
+      parts.push(`[Video: ${videoLabel}]`);
+    }
+    // If tweet has no text at all, flag it as a video tweet so LLM still sees something
+    if (!text) {
+      parts.push('[Video tweet]');
+    }
+  }
+
+  // Poll options — polls are often engagement bait
+  const pollOptions = tweetElement.querySelectorAll('[data-testid="cardPoll"] [role="radio"], [data-testid="cardPoll"] span');
+  if (pollOptions.length > 0) {
+    const pollTexts = [];
+    pollOptions.forEach(opt => {
+      const t = opt.innerText?.trim();
+      if (t && t.length > 1) pollTexts.push(t);
+    });
+    if (pollTexts.length > 0) parts.push(`[Poll: ${pollTexts.join(' / ')}]`);
+  }
+
   // Image alt text (skip generic/short alt text)
   const imgs = tweetElement.querySelectorAll('img[alt]:not([alt=""])');
   imgs.forEach(img => {
@@ -149,35 +213,24 @@ function extractTweetText(tweetElement) {
     }
   });
 
+  // Social context — "X liked" / "X retweeted" banners above the tweet
+  const socialContext = tweetElement.querySelector('[data-testid="socialContext"]');
+  if (socialContext) {
+    parts.push(`[Context: ${socialContext.innerText.trim()}]`);
+  }
+
   return parts.join(' | ');
 }
 
 /**
- * Classify a single tweet and apply treatment.
- * Adds/removes the classifying indicator during processing.
+ * Apply classification to a single tweet given its pre-fetched result.
  */
-async function classifyAndApply(tweet) {
-  const text = extractTweetText(tweet);
-
-  // Skip very short tweets
-  if (text.length < MIN_CONTENT_LENGTH) {
-    tweet.setAttribute(PROCESSED_ATTR, 'skipped');
-    return;
-  }
-
-  // Show loading indicator
-  tweet.classList.add('intentkeeper-classifying');
-
-  try {
-    const classification = await classifyContent(text);
-    if (classification) {
-      applyTreatment(tweet, classification);
-    } else {
-      tweet.setAttribute(PROCESSED_ATTR, 'failed');
-    }
-  } finally {
-    // Always remove loading indicator
-    tweet.classList.remove('intentkeeper-classifying');
+function applyClassificationToTweet(tweet, classification) {
+  tweet.classList.remove('intentkeeper-classifying');
+  if (classification) {
+    applyTreatment(tweet, classification);
+  } else {
+    tweet.setAttribute(PROCESSED_ATTR, 'failed');
   }
 }
 
@@ -193,30 +246,18 @@ function applyTreatment(tweetElement, classification) {
   tweetElement.setAttribute(PROCESSED_ATTR, 'true');
   tweetElement.setAttribute(INTENT_ATTR, intent);
 
-  // Skip if manipulation score below threshold
-  if (manipulation_score < settings.manipulationThreshold) {
-    return;
+  // Always show tags on every classified tweet so the user sees what's happening
+  if (settings.showTags) {
+    applyTag(tweetElement, intent, confidence);
   }
 
-  // Apply action-based treatment
-  switch (action) {
-    case 'blur':
-      if (settings.blurRagebait) {
-        applyBlur(tweetElement, intent, reasoning);
-      }
-      break;
-
-    case 'hide':
-      if (settings.hideEngagementBait) {
-        applyHide(tweetElement, intent);
-      }
-      break;
-
-    case 'tag':
-      if (settings.showTags) {
-        applyTag(tweetElement, intent, confidence);
-      }
-      break;
+  // Blur and hide only apply when manipulation score exceeds the threshold
+  if (manipulation_score >= settings.manipulationThreshold) {
+    if (action === 'blur' && settings.blurRagebait) {
+      applyBlur(tweetElement, intent, reasoning);
+    } else if (action === 'hide' && settings.hideEngagementBait) {
+      applyHide(tweetElement, intent);
+    }
   }
 }
 
@@ -309,11 +350,18 @@ function formatIntent(intent) {
 }
 
 /**
- * Process tweets on the page in parallel batches.
- * Guarded against concurrent re-entry.
+ * Process tweets on the page using the batch API endpoint.
+ * Guarded against concurrent re-entry — if new tweets arrive while
+ * a batch is being classified, they're queued for immediate reprocessing.
  */
 async function processTweets() {
-  if (!settings.enabled || isProcessing) return;
+  if (!settings.enabled) return;
+
+  // If already processing, flag for reprocess when current batch finishes
+  if (isProcessing) {
+    pendingReprocess = true;
+    return;
+  }
 
   isProcessing = true;
   try {
@@ -322,13 +370,36 @@ async function processTweets() {
       `[data-testid="tweet"]:not([${PROCESSED_ATTR}])`
     ));
 
-    // Process in batches of MAX_CONCURRENT
-    for (let i = 0; i < tweets.length; i += MAX_CONCURRENT) {
-      const batch = tweets.slice(i, i + MAX_CONCURRENT);
-      await Promise.allSettled(batch.map(t => classifyAndApply(t)));
+    // Extract text and filter out short tweets
+    const tweetData = [];
+    for (const tweet of tweets) {
+      const text = extractTweetText(tweet);
+      if (text.length < MIN_CONTENT_LENGTH) {
+        tweet.setAttribute(PROCESSED_ATTR, 'skipped');
+      } else {
+        tweet.classList.add('intentkeeper-classifying');
+        tweetData.push({ tweet, text });
+      }
+    }
+
+    // Classify in batches of MAX_CONCURRENT via the batch endpoint
+    for (let i = 0; i < tweetData.length; i += MAX_CONCURRENT) {
+      const batch = tweetData.slice(i, i + MAX_CONCURRENT);
+      const contents = batch.map(d => d.text);
+      const results = await classifyBatch(contents);
+
+      for (const { tweet, text } of batch) {
+        applyClassificationToTweet(tweet, results.get(text) || null);
+      }
     }
   } finally {
     isProcessing = false;
+
+    // If new tweets arrived while we were processing, go again immediately
+    if (pendingReprocess) {
+      pendingReprocess = false;
+      processTweets();
+    }
   }
 }
 
@@ -337,9 +408,9 @@ async function processTweets() {
  */
 function setupObserver() {
   const observer = new MutationObserver((mutations) => {
-    // Debounce processing
+    // Debounce — 200ms balances responsiveness with avoiding excessive calls
     clearTimeout(window.intentkeeperTimeout);
-    window.intentkeeperTimeout = setTimeout(processTweets, 500);
+    window.intentkeeperTimeout = setTimeout(processTweets, 200);
   });
 
   observer.observe(document.body, {

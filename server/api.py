@@ -17,7 +17,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
-from .classifier import IntentClassifier, MAX_CONTENT_LENGTH
+from .classifier import MAX_CONTENT_LENGTH, IntentClassifier
 
 # Load environment
 load_dotenv()

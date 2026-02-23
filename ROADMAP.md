@@ -58,52 +58,55 @@
 
 ---
 
-## Phase 2: Hardening & Reliability 🔜 NEXT
+## Phase 2: Hardening & Reliability ✅ COMPLETE
 
 **Goal**: Fix critical issues from Phase 1 before expanding to new platforms. Make the core engine production-grade.
 
 ### 2.1 Async Pipeline (Critical)
-- [ ] Replace synchronous `requests` with `httpx.AsyncClient` in classifier
-- [ ] Make `classify()` and `_call_ollama()` async methods
-- [ ] Use long-lived `AsyncClient` with connection pooling (created at startup, closed at shutdown)
-- [ ] Make batch endpoint truly parallel with `asyncio.gather()`
+- [x] Replace synchronous `requests` with `httpx.AsyncClient` in classifier
+- [x] Make `classify()` and `_call_ollama()` async methods
+- [x] Use long-lived `AsyncClient` with connection pooling (created at startup, closed at shutdown)
+- [x] Make batch endpoint truly parallel with `asyncio.gather()`
 
 ### 2.2 Cache Improvements (Critical)
-- [ ] Implement cache TTL — honor `CACHE_TTL` from `.env` (default 300s)
-- [ ] Make `_max_cache_size` configurable via environment variable
-- [ ] Wire up all `.env` config that's currently ignored (`OLLAMA_TEMPERATURE`, `MANIPULATION_THRESHOLD`)
+- [x] Implement cache TTL — honor `CACHE_TTL` from `.env` (default 300s)
+- [x] Make `_max_cache_size` configurable via environment variable
+- [x] Wire up all `.env` config that's currently ignored (`OLLAMA_TEMPERATURE`, `MANIPULATION_THRESHOLD`)
 
 ### 2.3 Prompt Security (High)
-- [ ] Add XML-tag delimiters around user content in classification prompt to mitigate prompt injection
-- [ ] Validate that returned confidence is within 0.0–1.0 range
-- [ ] Use Ollama's `format: "json"` parameter to force valid JSON output (eliminates brittle regex parsing)
-- [ ] Increase `num_predict` from 80 to 150 for safer headroom
+- [x] Add XML-tag delimiters around user content in classification prompt to mitigate prompt injection
+- [x] Validate that returned confidence is within 0.0–1.0 range
+- [x] Use Ollama's `format: "json"` parameter to force valid JSON output (eliminates brittle regex parsing)
+- [x] Increase `num_predict` from 80 to 150 for safer headroom
 
 ### 2.4 Server Resilience (High)
-- [ ] Add retry logic for Ollama calls (1 retry with 2s backoff)
-- [ ] Add max content length validation on `/classify` endpoint
-- [ ] Restrict CORS origins from `*` to `chrome-extension://` and localhost
-- [ ] Add request timeout middleware
+- [x] Add retry logic for Ollama calls (1 retry with 2s backoff)
+- [x] Add max content length validation on `/classify` endpoint
+- [x] Restrict CORS origins from `*` to `chrome-extension://` and localhost
+- [x] Add request timeout middleware (httpx client timeout)
 
 ### 2.5 Extension Stability (High)
-- [ ] Fix cache key — use full content hash instead of first 100 characters
-- [ ] Add `chrome.storage.onChanged` listener so settings are reactive without page reload
-- [ ] Add error handling for `chrome.runtime.sendMessage` when background worker is dead
-- [ ] Guard `processTweets()` against concurrent re-entry (processing lock)
-- [ ] Reduce health check interval from 60s to 20s
+- [x] Fix cache key — use full content hash instead of first 100 characters
+- [x] Add `chrome.storage.onChanged` listener so settings are reactive without page reload
+- [x] Add error handling for `chrome.runtime.sendMessage` when background worker is dead
+- [x] Guard `processTweets()` against concurrent re-entry (processing lock)
+- [x] Reduce health check interval from 60s to 20s
+- [x] Use batch API endpoint instead of individual requests
+- [x] Align MIN_CONTENT_LENGTH between server and extension (20 chars)
+- [x] Extract poll text and author name for richer classification context
 
 ### 2.6 Testing (Critical)
-- [ ] Add integration tests for all FastAPI endpoints using `TestClient`
-- [ ] Add cache behavior tests (TTL expiration, LRU eviction, hash collisions)
-- [ ] Add edge case tests (very long content, unicode/emoji, empty strings, malformed Ollama responses)
-- [ ] Add concurrency tests for batch processing
+- [x] Add integration tests for all FastAPI endpoints using `TestClient`
+- [x] Add cache behavior tests (TTL expiration, LRU eviction, hash collisions)
+- [x] Add edge case tests (very long content, unicode/emoji, empty strings, malformed Ollama responses)
+- [x] Add concurrency tests for batch processing
 - [ ] Set up pytest-cov configuration and establish coverage baseline
 
 ### 2.7 Code Quality (Medium)
-- [ ] Extract magic numbers into named constants with justification comments
-- [ ] Remove unused `ClassificationResult` import in `api.py` (already covered by Pydantic model)
-- [ ] Replace `console.log` in extension with a togglable debug logger
-- [ ] Add structured logging configuration for the server
+- [x] Extract magic numbers into named constants with justification comments
+- [x] Remove unused `ClassificationResult` import in `api.py` (already covered by Pydantic model)
+- [x] Replace `console.log` in extension with a togglable debug logger
+- [x] Add structured logging configuration for the server
 
 ---
 
@@ -275,8 +278,8 @@
 | Phase | Impact | Effort | Priority |
 |-------|--------|--------|----------|
 | 1. Core + Twitter | High | Medium | ✅ COMPLETE |
-| 2. Hardening & Reliability | Critical | Medium | 🔴 Next |
-| 3. YouTube | High | Medium | 🔵 After 2 |
+| 2. Hardening & Reliability | Critical | Medium | ✅ COMPLETE |
+| 3. YouTube | High | Medium | 🔴 Next |
 | 4. Reddit | High | Medium | 🔵 After 3 |
 | 5. Classification Accuracy | High | Low | 🔵 After 3 |
 | 6. User Sensitivity | Medium | Low | 🔵 After 5 |
@@ -287,16 +290,19 @@
 
 ---
 
-## Current Status (2026-02-09)
+## Current Status (2026-02-23)
 
-**Completed**: Phase 1 (Core classifier + Chrome extension for Twitter/X)
+**Completed**: Phase 1 (Core classifier + Chrome extension for Twitter/X), Phase 2 (Hardening & Reliability)
 
-**Next Up**: Phase 2 (Hardening & Reliability)
+**Next Up**: Phase 3 (YouTube Support)
 
 **Stats**:
-- 12 tests passing
+
+- 30+ tests passing
 - 7 intent categories
 - 1 platform supported (Twitter/X)
+- Async pipeline with batch classification
+- LRU cache with TTL expiration
 
 ---
 

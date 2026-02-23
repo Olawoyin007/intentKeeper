@@ -51,7 +51,7 @@ Content Intercepted (tweet text)
     ▼
 ┌─────────────────────────────────────────────┐
 │  1. LENGTH CHECK                            │
-│     < 10 characters → neutral (skip LLM)    │
+│     < 20 characters → neutral (skip LLM)    │
 └─────────────────────────────────────────────┘
     │ Pass
     ▼
