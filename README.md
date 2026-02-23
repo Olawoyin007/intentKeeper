@@ -22,7 +22,7 @@ IntentKeeper doesn't fix the platforms. It gives you a lens to see the manipulat
 
 > "The content isn't the problem. The intent behind it is."
 
-<![intentKeeper interface showing the transparency panel](docs/screenshot.png) -->
+<![intentKeeper interface showing the transparency panel](docs/Screenshot.png) -->
 
 A post about politics can be thoughtful analysis or manufactured outrage. A health tip can be genuine advice or fearmongering. Same topic, opposite effect on your wellbeing.
 
