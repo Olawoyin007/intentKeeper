@@ -21,15 +21,16 @@ intentkeeper-server
 # or
 uvicorn server.api:app --reload --port 8420
 
-# Run tests (12 tests)
+# Run tests (30 tests)
 pytest tests/
 
 # Run tests with coverage
 pytest tests/ --cov=server
 
 # Linting and formatting
+ruff check server/
+ruff check --fix server/
 black server/
-flake8 server/
 ```
 
 ## Required Environment Variables
@@ -38,11 +39,15 @@ Configure in `.env` file (see `.env.example`):
 
 **Required:**
 - `OLLAMA_HOST` - Ollama server URL (default: `http://localhost:11434`)
-- `OLLAMA_MODEL` - Model name (default: `llama3.2`)
+- `OLLAMA_MODEL` - Model name (default: `mistral:7b-instruct`)
 
 **Optional:**
+- `OLLAMA_TEMPERATURE` - LLM temperature (default: `0.1`)
 - `INTENTKEEPER_HOST` - Server bind address (default: `127.0.0.1`)
 - `INTENTKEEPER_PORT` - Server port (default: `8420`)
+- `MANIPULATION_THRESHOLD` - Score threshold for treatments (default: `0.6`)
+- `CACHE_TTL` - Cache time-to-live in seconds (default: `300`)
+- `CACHE_MAX_SIZE` - Max LRU cache entries (default: `1000`)
 - `DEBUG` - Enable debug logging (default: `false`)
 
 ## Architecture
@@ -64,7 +69,7 @@ intentKeeper/
 │       └── popup.js
 ├── scenarios/                   # Configuration (YAML)
 │   └── intents.yaml            # Intent definitions, few-shot examples, rules
-├── tests/                       # Pytest test suite (12 tests)
+├── tests/                       # Pytest test suite (30 tests)
 ├── docs/                        # Documentation
 ├── pyproject.toml              # Package metadata, dependencies, entry points
 └── .env.example                # Environment template
@@ -86,12 +91,16 @@ intentKeeper/
 
 **Extension** (`extension/`):
 - [extension/content.js](extension/content.js) - Content script that:
-  - Observes DOM for new tweets
-  - Sends content to local API for classification
-  - Applies visual treatments based on result
+  - Observes DOM for new tweets via MutationObserver (200ms debounce)
+  - Extracts tweet text, author, video context, polls, social context
+  - Sends batches to background worker for classification
+  - Applies visual treatments (tags on all tweets, blur/hide gated by threshold)
+  - Client-side LRU cache with content hash keys
 - [extension/background.js](extension/background.js) - Service worker:
+  - Proxies API calls to localhost (avoids Private Network Access blocking)
+  - Batch classification via `/classify/batch` endpoint
   - Manages settings in `chrome.storage.local`
-  - Periodic health checks (badge indicator)
+  - Periodic health checks (20s interval, badge indicator)
 - [extension/popup/](extension/popup/) - Settings UI:
   - Enable/disable toggle
   - Show tags, blur ragebait, hide engagement bait toggles
@@ -123,7 +132,7 @@ Content Intercepted (content.js)
     ▼
 ┌─────────────────────────────────────┐
 │  Length Check                        │
-│  < 10 chars → neutral (skip LLM)    │
+│  < 20 chars → neutral (skip LLM)    │
 └─────────────────────────────────────┘
     │
     ▼
@@ -222,12 +231,16 @@ except Exception as e:
 
 ### Testing
 
-Tests are in [tests/test_classifier.py](tests/test_classifier.py) with 12 tests covering:
+Tests are in [tests/test_classifier.py](tests/test_classifier.py) with 30 tests covering:
 - Intent classification for each category
-- Short content handling
-- Fallback behavior on errors
-- Health check endpoint
-- Batch classification
+- Short content handling and min-length boundary
+- Fallback behavior on errors (fail-open)
+- Health check endpoint (healthy and degraded)
+- Batch classification and concurrency
+- Cache behavior (TTL expiration, LRU eviction)
+- Edge cases (long content, unicode, confidence clamping)
+- API endpoint validation (empty content, max length)
+- Retry on transient Ollama failures
 
 ### Sibling Project
 
@@ -241,8 +254,10 @@ IntentKeeper shares patterns with [empathySync](https://github.com/Olawoyin007/e
 
 See [ROADMAP.md](ROADMAP.md) for the phased implementation plan:
 - Phase 1: Core classifier + Chrome extension (Twitter/X) ✅
-- Phase 2: YouTube support
-- Phase 3: Reddit support
-- Phase 4: User-configurable sensitivity
-- Phase 5: Statistics dashboard
-- Phase 6: Firefox extension
+- Phase 2: Hardening & reliability ✅
+- Phase 3: YouTube support
+- Phase 4: Reddit support
+- Phase 5: Classification accuracy
+- Phase 6: User-configurable sensitivity
+- Phase 7: Statistics dashboard
+- Phase 8: Firefox extension

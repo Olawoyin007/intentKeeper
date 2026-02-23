@@ -46,6 +46,10 @@ logs/
 .coverage
 htmlcov/
 
+# Linting / Build artifacts
+.ruff_cache/
+*.egg-info/
+
 # OS
 .DS_Store
 Thumbs.db
