@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/logo.png" alt="IntentKeeper" width="180">
+  <img src="assets/logo.png" alt="IntentKeeper" width="180">
 </p>
 
 <h1 align="center">IntentKeeper</h1>
@@ -30,7 +30,7 @@ IntentKeeper doesn't fix the platforms. It gives you a lens to see the manipulat
 > "The content isn't the problem. The intent behind it is."
 
 <p align="center">
-  <img src="docs/Screenshot.png" alt="IntentKeeper classifying tweets with Genuine, Neutral, Ragebait, and Divisive labels" width="550">
+  <img src="assets/screenshot.png" alt="IntentKeeper classifying tweets with Genuine, Neutral, Ragebait, and Divisive labels" width="550">
 </p>
 
 A post about politics can be thoughtful analysis or manufactured outrage. A health tip can be genuine advice or fearmongering. Same topic, opposite effect on your wellbeing.
