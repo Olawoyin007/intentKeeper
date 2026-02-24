@@ -264,6 +264,12 @@ function applyTreatment(tweetElement, classification) {
 /**
  * Blur content with reveal option
  */
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
 function applyBlur(element, intent, reasoning) {
   // Create overlay with warning
   const overlay = document.createElement('div');
@@ -271,8 +277,8 @@ function applyBlur(element, intent, reasoning) {
   overlay.innerHTML = `
     <div class="intentkeeper-warning">
       <span class="intentkeeper-icon">&#x1f6e1;&#xfe0f;</span>
-      <span class="intentkeeper-label">${formatIntent(intent)}</span>
-      <span class="intentkeeper-reason">${reasoning}</span>
+      <span class="intentkeeper-label">${escapeHtml(formatIntent(intent))}</span>
+      <span class="intentkeeper-reason">${escapeHtml(reasoning)}</span>
       <button class="intentkeeper-reveal">Show anyway</button>
     </div>
   `;
@@ -307,7 +313,7 @@ function applyHide(element, intent) {
   const showBar = document.createElement('div');
   showBar.className = 'intentkeeper-hidden-bar';
   showBar.innerHTML = `
-    <span>&#x1f6e1;&#xfe0f; Hidden: ${formatIntent(intent)}</span>
+    <span>&#x1f6e1;&#xfe0f; Hidden: ${escapeHtml(formatIntent(intent))}</span>
     <button class="intentkeeper-show">Show</button>
   `;
 
@@ -325,7 +331,7 @@ function applyHide(element, intent) {
 function applyTag(element, intent, confidence) {
   const tag = document.createElement('div');
   tag.className = `intentkeeper-tag intentkeeper-tag-${intent}`;
-  tag.innerHTML = `&#x1f6e1;&#xfe0f; ${formatIntent(intent)}`;
+  tag.innerHTML = `&#x1f6e1;&#xfe0f; ${escapeHtml(formatIntent(intent))}`;
   tag.title = `Confidence: ${(confidence * 100).toFixed(0)}%`;
 
   // Insert at top of tweet

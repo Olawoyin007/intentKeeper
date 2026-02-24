@@ -32,9 +32,7 @@ False negatives (missing manipulation) are acceptable. False positives (blocking
 
 ### 4. Intent Over Topic
 
-We will never filter by subject matter. Political content is not inherently manipulative. Health content is not inherently fearmongering. Spiritual content is not inherently divisive.
-
-The same topic can be expressed with genuine intent or manipulative intent. We classify the framing, not the subject.
+A political post can be thoughtful analysis or manufactured outrage. A health tip can be genuine advice or fearmongering. We classify the framing, not the subject.
 
 ### 5. User Sovereignty
 
@@ -71,21 +69,9 @@ We don't hide behind "trust the algorithm." We show our work.
 - **Premium manipulation detection**: All features are free. We don't gate safety behind paywalls.
 - **Notification systems**: We don't interrupt you. We're there when you're already browsing.
 
-## The Attention Economy Problem
-
-Every major platform optimizes for engagement. Engagement is driven by emotion. The strongest emotions — outrage, fear, tribal identity — are the easiest to manufacture.
-
-The result: your feed is optimized to make you angry, afraid, and divided. Not because the platform is evil, but because that's what the algorithm rewards.
-
-IntentKeeper doesn't fix the platforms. It gives you a lens to see the manipulation before it affects you. Once you see the pattern, you can't unsee it.
-
 ## On Imperfection
 
-IntentKeeper will make mistakes. It will:
-- Flag genuine content as manipulative (false positive)
-- Miss actual manipulation (false negative)
-- Struggle with sarcasm, irony, and cultural context
-- Disagree with your judgment sometimes
+IntentKeeper will make mistakes. It will struggle with sarcasm, irony, and cultural context. It will sometimes disagree with your judgment.
 
 That's okay. IntentKeeper is a second opinion, not an authority. When it disagrees with you, trust yourself.
 

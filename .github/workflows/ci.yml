@@ -41,6 +41,25 @@ jobs:
       - name: Run tests
         run: pytest tests/ -v --cov=server --cov-report=term-missing
 
+  protect-manifesto:
+    name: Protect MANIFESTO.md
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check MANIFESTO.md is not modified
+        run: |
+          if git diff --name-only origin/${{ github.base_ref }}...HEAD | grep -q '^MANIFESTO.md$'; then
+            echo "::error::MANIFESTO.md is protected and cannot be modified via PR."
+            echo "The manifesto evolves only to tighten protections, never to weaken them."
+            echo "Changes to MANIFESTO.md require maintainer approval outside the normal PR process."
+            exit 1
+          fi
+          echo "MANIFESTO.md unchanged — check passed."
+
   extension-lint:
     runs-on: ubuntu-latest
     steps:
