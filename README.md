@@ -11,6 +11,7 @@
   <img src="https://img.shields.io/badge/version-0.2.0-green.svg" alt="Version: 0.2.0">
   <img src="https://img.shields.io/badge/python-3.10%2B-blue.svg" alt="Python: 3.10+">
   <img src="https://img.shields.io/badge/platform-Twitter%2FX-1DA1F2.svg" alt="Platform: Twitter/X">
+  <a href="https://buymeacoffee.com/olawoyin007"><img src="https://img.shields.io/badge/Buy%20Me%20a%20Coffee-support-yellow.svg" alt="Buy Me a Coffee"></a>
 </p>
 
 IntentKeeper is a local-first content filter that classifies online content by its underlying intent - ragebait, fearmongering, hype, or genuine insight. It sits between you and your feed, surfacing manipulation before it affects you.
