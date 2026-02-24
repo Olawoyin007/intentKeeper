@@ -80,7 +80,9 @@ class ClassifyRequest(BaseModel):
     """Request to classify content."""
 
     content: str = Field(
-        ..., min_length=1, max_length=MAX_CONTENT_LENGTH,
+        ...,
+        min_length=1,
+        max_length=MAX_CONTENT_LENGTH,
         description="Text content to classify",
     )
     source: Optional[str] = Field(None, description="Source platform (twitter, youtube, etc)")

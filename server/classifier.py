@@ -70,8 +70,10 @@ class IntentClassifier:
     ):
         self.ollama_host = ollama_host or os.getenv("OLLAMA_HOST", "http://localhost:11434")
         self.model = model or os.getenv("OLLAMA_MODEL", "llama3.2")
-        self.temperature = temperature if temperature is not None else float(
-            os.getenv("OLLAMA_TEMPERATURE", "0.1")
+        self.temperature = (
+            temperature
+            if temperature is not None
+            else float(os.getenv("OLLAMA_TEMPERATURE", "0.1"))
         )
         self.ollama_url = f"{self.ollama_host}/api/generate"
 
@@ -172,13 +174,17 @@ class IntentClassifier:
                 examples_text += f'Content: "{ex["content"]}"\nIntent: {ex["intent"]}\n\n'
 
         rules = self.intents.get("rules", [])
-        rules_text = "\n".join(f"- {rule}" for rule in rules) if rules else (
-            "- Focus on HOW the content is framed, not the topic itself\n"
-            "- Political content can be genuine discussion OR ragebait - analyze the framing\n"
-            "- Questions asking for opinions are usually engagement_bait\n"
-            "- Sensational language often indicates manipulation\n"
-            "- Personal stories and specific experiences tend to be genuine\n"
-            "- Content that triggers strong immediate emotional reaction is likely manipulative"
+        rules_text = (
+            "\n".join(f"- {rule}" for rule in rules)
+            if rules
+            else (
+                "- Focus on HOW the content is framed, not the topic itself\n"
+                "- Political content can be genuine discussion OR ragebait - analyze the framing\n"
+                "- Questions asking for opinions are usually engagement_bait\n"
+                "- Sensational language often indicates manipulation\n"
+                "- Personal stories and specific experiences tend to be genuine\n"
+                "- Content that triggers strong immediate emotional reaction is likely manipulative"
+            )
         )
 
         return f"""Classify the intent/energy of the following social media content.
@@ -283,6 +289,7 @@ JSON response:"""
                 if attempt < retries:
                     logger.warning(f"Ollama call failed (attempt {attempt + 1}), retrying: {e}")
                     import asyncio
+
                     await asyncio.sleep(RETRY_DELAY)
         raise last_error
 
@@ -355,6 +362,7 @@ JSON response:"""
     async def classify_batch(self, contents: List[str]) -> List[ClassificationResult]:
         """Classify multiple pieces of content in parallel."""
         import asyncio
+
         return await asyncio.gather(*[self.classify(content) for content in contents])
 
     async def check_health(self) -> bool:
