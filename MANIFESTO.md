@@ -2,7 +2,7 @@
 
 > "The content isn't the problem. The intent behind it is."
 
-## What This Is
+## What This Is 
 
 IntentKeeper is a digital bodyguard for your mind. It sits between you and the content designed to hijack your attention, your emotions, and your time.
 
