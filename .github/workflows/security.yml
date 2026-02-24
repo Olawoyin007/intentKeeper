@@ -32,7 +32,9 @@ jobs:
         run: pip install pip-audit
 
       - name: Audit dependencies for known vulnerabilities
-        run: pip-audit --strict --desc --exclude intentkeeper
+        run: |
+          pip freeze | grep -iv intentkeeper > /tmp/deps.txt
+          pip-audit --strict --desc -r /tmp/deps.txt
 
   codeql:
     name: CodeQL Analysis
