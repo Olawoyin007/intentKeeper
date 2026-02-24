@@ -25,11 +25,14 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Install dependencies (non-editable)
+        run: pip install ".[dev]"
+
       - name: Install pip-audit
         run: pip install pip-audit
 
       - name: Audit dependencies for known vulnerabilities
-        run: pip-audit --strict --desc -r requirements.txt
+        run: pip-audit --strict --desc --exclude intentkeeper
 
   codeql:
     name: CodeQL Analysis
