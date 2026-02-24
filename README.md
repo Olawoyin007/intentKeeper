@@ -13,15 +13,13 @@
   <img src="https://img.shields.io/badge/platform-Twitter%2FX-1DA1F2.svg" alt="Platform: Twitter/X">
 </p>
 
-IntentKeeper is a local-first content filter that classifies online content by its underlying intent — ragebait, fearmongering, hype, or genuine insight. It sits between you and your feed, surfacing manipulation before it affects you.
-
-> **Status**: v0.2.0 — Production-ready for Twitter/X with async pipeline, batch classification, caching, and 30+ tests.
+IntentKeeper is a local-first content filter that classifies online content by its underlying intent - ragebait, fearmongering, hype, or genuine insight. It sits between you and your feed, surfacing manipulation before it affects you.
 
 ---
 
 ## The Problem
 
-Every major platform optimizes for engagement. Engagement is driven by emotion. The strongest emotions — outrage, fear, tribal identity — are the easiest to manufacture.
+Every major platform optimizes for engagement. Engagement is driven by emotion. The strongest emotions - outrage, fear, tribal identity - are the easiest to manufacture.
 
 The result: your feed is optimized to make you angry, afraid, and divided. Not because the platform is evil, but because that's what the algorithm rewards.
 
@@ -37,7 +35,7 @@ IntentKeeper doesn't fix the platforms. It gives you a lens to see the manipulat
 
 A post about politics can be thoughtful analysis or manufactured outrage. A health tip can be genuine advice or fearmongering. Same topic, opposite effect on your wellbeing.
 
-IntentKeeper classifies the **energy** behind the words — not the words themselves. It doesn't censor topics. It surfaces manipulation.
+IntentKeeper classifies the **energy** behind the words - not the words themselves. It doesn't censor topics. It surfaces manipulation.
 
 ## Quick Start
 
@@ -107,18 +105,18 @@ See [MANIFESTO.md](MANIFESTO.md) for the full principles.
 
 ## Documentation
 
-- [docs/usage.md](docs/usage.md) — Setup guide and troubleshooting
-- [docs/architecture.md](docs/architecture.md) — System diagrams
-- [ROADMAP.md](ROADMAP.md) — Phased implementation plan
-- [CHANGELOG.md](CHANGELOG.md) — Release history
-- [CONTRIBUTING.md](CONTRIBUTING.md) — How to contribute
-- [MANIFESTO.md](MANIFESTO.md) — Core principles
+- [docs/usage.md](docs/usage.md) - Setup guide and troubleshooting
+- [docs/architecture.md](docs/architecture.md) - System diagrams
+- [ROADMAP.md](ROADMAP.md) - Phased implementation plan
+- [CHANGELOG.md](CHANGELOG.md) - Release history
+- [CONTRIBUTING.md](CONTRIBUTING.md) - How to contribute
+- [MANIFESTO.md](MANIFESTO.md) - Core principles
 
-Also built alongside [empathySync](https://github.com/Olawoyin007/empathySync) — a local-first AI wellness assistant sharing the same philosophy.
+Also built alongside [empathySync](https://github.com/Olawoyin007/empathySync) - a local-first AI wellness assistant sharing the same philosophy.
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT - see [LICENSE](LICENSE).
 
 ---
 
