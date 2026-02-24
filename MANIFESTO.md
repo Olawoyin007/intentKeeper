@@ -8,25 +8,25 @@ IntentKeeper is a digital bodyguard for your mind. It sits between you and the c
 
 It doesn't censor topics. It surfaces manipulation.
 
-A post about politics can be thoughtful analysis or manufactured outrage. A health tip can be genuine advice or fearmongering. IntentKeeper classifies the **energy** behind the words — not the words themselves.
+A post about politics can be thoughtful analysis or manufactured outrage. A health tip can be genuine advice or fearmongering. IntentKeeper classifies the **energy** behind the words - not the words themselves.
 
 ## Core Principles
 
 ### 1. Surface, Don't Censor
 
-IntentKeeper never decides what you can and cannot see. It **labels intent** and lets you decide. Blur, tag, and hide are suggestions — every piece of content can be revealed with a click.
+IntentKeeper never decides what you can and cannot see. It **labels intent** and lets you decide. Blur, tag, and hide are suggestions - every piece of content can be revealed with a click.
 
 Censorship is someone else deciding for you. Transparency is giving you information to decide for yourself.
 
 ### 2. Local-First, Always
 
-All classification happens on your device via Ollama. Your browsing patterns, the content you consume, your sensitivity settings — none of it leaves your machine. Ever.
+All classification happens on your device via Ollama. Your browsing patterns, the content you consume, your sensitivity settings - none of it leaves your machine. Ever.
 
 No cloud. No analytics. No "improving our models with your data." Your mind is yours.
 
 ### 3. Fail Open, Not Closed
 
-When classification fails — server down, model error, network issue — content passes through unchanged. IntentKeeper will never block you from seeing something because of a bug.
+When classification fails - server down, model error, network issue - content passes through unchanged. IntentKeeper will never block you from seeing something because of a bug.
 
 False negatives (missing manipulation) are acceptable. False positives (blocking genuine content) are not.
 
@@ -57,7 +57,7 @@ The best outcome is that you internalize the patterns and stop needing IntentKee
 
 ### 7. Transparency in Classification
 
-Every classification comes with a reasoning field. You can always see **why** content was flagged. If the reasoning doesn't make sense, the classification is wrong — and the content should be treated as genuine.
+Every classification comes with a reasoning field. You can always see **why** content was flagged. If the reasoning doesn't make sense, the classification is wrong - and the content should be treated as genuine.
 
 We don't hide behind "trust the algorithm." We show our work.
 
