@@ -6,7 +6,16 @@
 
 <p align="center"><strong>A digital bodyguard for your mind.</strong></p>
 
+<p align="center">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License: MIT"></a>
+  <img src="https://img.shields.io/badge/version-0.2.0-green.svg" alt="Version: 0.2.0">
+  <img src="https://img.shields.io/badge/python-3.10%2B-blue.svg" alt="Python: 3.10+">
+  <img src="https://img.shields.io/badge/platform-Twitter%2FX-1DA1F2.svg" alt="Platform: Twitter/X">
+</p>
+
 IntentKeeper is a local-first content filter that classifies online content by its underlying intent — ragebait, fearmongering, hype, or genuine insight. It sits between you and your feed, surfacing manipulation before it affects you.
+
+> **Status**: v0.2.0 — Production-ready for Twitter/X with async pipeline, batch classification, caching, and 30+ tests.
 
 ---
 
@@ -22,11 +31,45 @@ IntentKeeper doesn't fix the platforms. It gives you a lens to see the manipulat
 
 > "The content isn't the problem. The intent behind it is."
 
-<![intentKeeper interface showing the transparency panel](docs/Screenshot.png) -->
+<p align="center">
+  <img src="docs/Screenshot.png" alt="IntentKeeper classifying tweets with Genuine, Neutral, Ragebait, and Divisive labels" width="550">
+</p>
 
 A post about politics can be thoughtful analysis or manufactured outrage. A health tip can be genuine advice or fearmongering. Same topic, opposite effect on your wellbeing.
 
 IntentKeeper classifies the **energy** behind the words — not the words themselves. It doesn't censor topics. It surfaces manipulation.
+
+## Quick Start
+
+```bash
+# 1. Clone and install
+git clone https://github.com/Olawoyin007/intentKeeper.git
+cd intentKeeper
+pip install -e ".[dev]"
+
+# 2. Pull the model and start the server
+ollama pull mistral:7b-instruct
+intentkeeper-server
+
+# 3. Load the Chrome extension
+# Chrome > chrome://extensions > Developer mode > Load unpacked > select extension/
+```
+
+Then open [twitter.com](https://twitter.com) or [x.com](https://x.com) and scroll your feed. You'll see intent labels on every tweet.
+
+See [docs/usage.md](docs/usage.md) for the full setup guide and troubleshooting.
+
+## What It Detects
+
+| Intent | What It Looks Like | What Happens |
+|--------|-------------------|--------------|
+| **Ragebait** | "This is EXACTLY why I hate [group]. Every. Single. Time." | Blurred with reveal button |
+| **Fearmongering** | "Society is COLLAPSING. Get out while you still can." | Tagged with label |
+| **Hype** | "This AI tool changes EVERYTHING. You're missing out!" | Tagged with label |
+| **Engagement bait** | "Reply with your favorite X and I'll tell you Y!" | Hidden (expandable) |
+| **Divisive** | "People who don't do X are just lazy. Winners have discipline." | Tagged with label |
+| **Genuine** | "I've dealt with anxiety for 10 years. Here's what helped me." | Tagged (passes through) |
+| **Neutral** | "The new transit line opens March 15. Here's the schedule." | Tagged (passes through) |
 
 ## How It Works
 
@@ -48,81 +91,34 @@ You decide what to engage with
 
 All processing happens on your machine. No cloud. No data collection. No tracking.
 
-## What It Detects
-
-| Intent | What It Looks Like | What Happens |
-|--------|-------------------|--------------|
-| **Ragebait** | "This is EXACTLY why I hate [group]. Every. Single. Time." | Blurred with reveal button |
-| **Fearmongering** | "Society is COLLAPSING. Get out while you still can." | Tagged with label |
-| **Hype** | "This AI tool changes EVERYTHING. You're missing out!" | Tagged with label |
-| **Engagement bait** | "Reply with your favorite X and I'll tell you Y!" | Hidden (expandable) |
-| **Divisive** | "People who don't do X are just lazy. Winners have discipline." | Tagged with label |
-| **Genuine** | "I've dealt with anxiety for 10 years. Here's what helped me." | Passes through |
-| **Neutral** | "The new transit line opens March 15. Here's the schedule." | Passes through |
-
-## Architecture
-
-```
-┌──────────────────────────────────────────────────────────┐
-│  Your Machine (everything stays here)                     │
-│                                                           │
-│  Browser ──► Extension ──► Local API ──► Ollama (LLM)    │
-│                               :8420        :11434         │
-│                                                           │
-│  No external calls. No cloud. No telemetry.              │
-└──────────────────────────────────────────────────────────┘
-```
-
-| Component | Tech | Purpose |
-|-----------|------|---------|
-| Extension | Chrome Manifest V3 | Intercepts content, applies visual treatments |
-| Server | FastAPI (Python) | Classification API on localhost |
-| Classifier | Ollama + LLM | Intent detection via local model |
-| Config | YAML | Intent definitions, few-shot examples |
-
 ## Principles
 
-**Intent over topic.** We never filter by subject matter. Political content isn't inherently manipulative. The same topic can be genuine or manufactured — we classify the framing.
+**Intent over topic.** We classify the framing, not the subject matter.
 
-**Fail-open.** When classification fails, content passes through unchanged. We will never block content because of a bug. False negatives are acceptable; false positives are not.
+**Fail-open.** When classification fails, content passes through unchanged.
 
-**Local-first.** All classification on your device. Your browsing patterns never leave your machine.
+**Local-first.** All classification on your device. Nothing leaves your machine.
 
-**User sovereignty.** You control what gets filtered, how aggressively, and whether it runs at all. Every blurred or hidden post can be revealed with one click.
+**User sovereignty.** You control what gets filtered and how aggressively.
 
-**Transparency.** Every classification comes with a reasoning field. You can always see *why* content was flagged.
+**Transparency.** Every classification shows *why* content was flagged.
 
 See [MANIFESTO.md](MANIFESTO.md) for the full principles.
 
-## Project Structure
-
-```
-intentKeeper/
-├── server/              # Classification API (FastAPI)
-│   ├── api.py           # Endpoints: /classify, /health, /intents
-│   └── classifier.py    # IntentClassifier + Ollama integration
-├── extension/           # Chrome extension (Manifest V3)
-│   ├── content.js       # Intercepts tweets, applies treatments
-│   ├── background.js    # Service worker, settings, health checks
-│   ├── styles.css       # Blur, tag, hide visual treatments
-│   └── popup/           # Extension settings UI
-├── scenarios/
-│   └── intents.yaml     # Intent definitions + few-shot examples
-├── tests/               # Pytest test suite
-└── docs/                # Architecture, usage guide
-```
-
 ## Documentation
 
-- [MANIFESTO.md](MANIFESTO.md) — Core principles and ethical guidelines
+- [docs/usage.md](docs/usage.md) — Setup guide and troubleshooting
+- [docs/architecture.md](docs/architecture.md) — System diagrams
 - [ROADMAP.md](ROADMAP.md) — Phased implementation plan
-- [CLAUDE.md](CLAUDE.md) — Technical architecture reference
-- [docs/architecture.md](docs/architecture.md) — Visual system diagrams
-- [docs/usage.md](docs/usage.md) — User guide and troubleshooting
+- [CHANGELOG.md](CHANGELOG.md) — Release history
+- [CONTRIBUTING.md](CONTRIBUTING.md) — How to contribute
+- [MANIFESTO.md](MANIFESTO.md) — Core principles
+
+Also built alongside [empathySync](https://github.com/Olawoyin007/empathySync) — a local-first AI wellness assistant sharing the same philosophy.
 
 ## License
 
-MIT
+MIT — see [LICENSE](LICENSE).
 
 ---
 
