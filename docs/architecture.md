@@ -120,10 +120,10 @@ Visual Treatment Applied (content.js)
 │                    FastAPI Server (api.py)                      │
 │                                                                 │
 │   Endpoints:                                                    │
-│   POST /classify         — Single classification               │
-│   POST /classify/batch   — Batch (max 50)                      │
-│   GET  /health           — Server + Ollama status              │
-│   GET  /intents          — Current definitions                 │
+│   POST /classify         -Single classification               │
+│   POST /classify/batch   -Batch (max 50)                      │
+│   GET  /health           -Server + Ollama status              │
+│   GET  /intents          -Current definitions                 │
 └───────────────────────────┬────────────────────────────────────┘
                             │ uses
                             ▼
@@ -191,7 +191,7 @@ Visual Treatment Applied (content.js)
 │   ┌─────────────────────────────────────────────────┐           │
 │   │ ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ │           │
 │   │ ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ │           │
-│   │          ⚠ Ragebait detected — click to reveal   │           │
+│   │          ⚠ Ragebait detected -click to reveal   │           │
 │   └─────────────────────────────────────────────────┘           │
 │                                                                  │
 │   TAG (fearmongering, hype, divisive)                            │

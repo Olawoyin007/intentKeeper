@@ -98,7 +98,7 @@ Open an issue with:
 
 ### Suggesting Features
 
-Check the [ROADMAP.md](ROADMAP.md) first — your idea might already be planned. If not, open an issue describing:
+Check the [ROADMAP.md](ROADMAP.md) first -your idea might already be planned. If not, open an issue describing:
 - The problem you're trying to solve
 - Your proposed solution
 - Which platforms it affects (Twitter, YouTube, etc.)
@@ -108,7 +108,7 @@ Check the [ROADMAP.md](ROADMAP.md) first — your idea might already be planned.
 1. Fork the repo and create a branch from `main`
 2. Make your changes
 3. Add or update tests if applicable
-4. Run `pytest tests/` and `ruff check server/` — both must pass
+4. Run `pytest tests/` and `ruff check server/` -both must pass
 5. Write a clear commit message describing the change
 6. Open a pull request
 
@@ -116,26 +116,26 @@ Check the [ROADMAP.md](ROADMAP.md) first — your idea might already be planned.
 
 Check the [ROADMAP.md](ROADMAP.md) for planned work. High-impact areas:
 
-- **Platform adapters** (YouTube, Reddit) — see Phase 3 and 4
-- **Classification accuracy** — better few-shot examples, edge cases
-- **Test coverage** — more edge cases, integration tests
-- **Documentation** — usage guides, screenshots, video demos
+- **Platform adapters** (YouTube, Reddit) -see Phase 3 and 4
+- **Classification accuracy** -better few-shot examples, edge cases
+- **Test coverage** -more edge cases, integration tests
+- **Documentation** -usage guides, screenshots, video demos
 
 ## Code Style
 
 - Python: [Black](https://black.readthedocs.io/) formatting, [Ruff](https://docs.astral.sh/ruff/) linting
 - JavaScript: No build step, vanilla JS, consistent with existing extension code
-- Keep it simple — avoid over-engineering and unnecessary abstractions
+- Keep it simple -avoid over-engineering and unnecessary abstractions
 
 ## Design Principles
 
 Before contributing, understand these non-negotiable principles:
 
-1. **Local-first** — No cloud processing. Everything runs on the user's machine.
-2. **Fail-open** — If classification fails, content passes through. Never block content by mistake.
-3. **Intent over topic** — We classify manipulation patterns, not subject matter.
-4. **Privacy** — No telemetry, no tracking, no data collection. Ever.
-5. **User control** — Users decide what gets filtered and how aggressively.
+1. **Local-first** -No cloud processing. Everything runs on the user's machine.
+2. **Fail-open** -If classification fails, content passes through. Never block content by mistake.
+3. **Intent over topic** -We classify manipulation patterns, not subject matter.
+4. **Privacy** -No telemetry, no tracking, no data collection. Ever.
+5. **User control** -Users decide what gets filtered and how aggressively.
 
 See [MANIFESTO.md](MANIFESTO.md) for the full philosophy.
 

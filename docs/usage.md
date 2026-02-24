@@ -83,7 +83,7 @@ High-manipulation content appears blurred with an overlay:
 ┌─────────────────────────────────────────┐
 │ ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ │
 │ ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ │
-│    Ragebait detected — click to reveal   │
+│    Ragebait detected -click to reveal   │
 │              [Show anyway]               │
 └─────────────────────────────────────────┘
 ```

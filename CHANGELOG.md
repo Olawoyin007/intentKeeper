@@ -2,7 +2,7 @@
 
 All notable changes to IntentKeeper are documented here.
 
-## v0.2.0 (2026-02-23) — Hardening & Reliability
+## v0.2.0 (2026-02-23) -Hardening & Reliability
 
 **Phase 2 complete.** Production-grade classification pipeline with async processing, batch API, enriched content extraction, and comprehensive test coverage.
 
@@ -54,7 +54,7 @@ All notable changes to IntentKeeper are documented here.
 
 ---
 
-## v0.1.0 (2026-02-06) — Initial Release
+## v0.1.0 (2026-02-06) -Initial Release
 
 **"A digital bodyguard for the mind."**
 
@@ -80,10 +80,10 @@ Phase 1 complete. Core classification engine and Chrome extension for Twitter/X.
 - **Settings popup**: Toggle features on/off, check server status
 
 ### API Endpoints
-- `POST /classify` — Classify single content
-- `POST /classify/batch` — Classify multiple items
-- `GET /health` — Server and Ollama status
-- `GET /intents` — Current intent definitions
+- `POST /classify` -Classify single content
+- `POST /classify/batch` -Classify multiple items
+- `GET /health` -Server and Ollama status
+- `GET /intents` -Current intent definitions
 
 ### Stats
 - **12 tests passing**

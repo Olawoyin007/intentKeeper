@@ -4,9 +4,9 @@
 
 ## Project Goals
 
-1. **Protect attention without censoring content** — Surface manipulation patterns, let users decide what to engage with.
-2. **Local-first classification** — All processing on-device via Ollama. No cloud, no tracking.
-3. **Platform-agnostic design** — The classification engine should work across any platform with a content script adapter.
+1. **Protect attention without censoring content** -Surface manipulation patterns, let users decide what to engage with.
+2. **Local-first classification** -All processing on-device via Ollama. No cloud, no tracking.
+3. **Platform-agnostic design** -The classification engine should work across any platform with a content script adapter.
 
 ---
 
@@ -22,10 +22,10 @@
 - [x] Fail-open design (errors pass content through)
 
 ### 1.2 FastAPI Server ✅ DONE
-- [x] `POST /classify` — Single content classification
-- [x] `POST /classify/batch` — Batch classification (max 50 items)
-- [x] `GET /health` — Server and Ollama health check
-- [x] `GET /intents` — Current intent definitions
+- [x] `POST /classify` -Single content classification
+- [x] `POST /classify/batch` -Batch classification (max 50 items)
+- [x] `GET /health` -Server and Ollama health check
+- [x] `GET /intents` -Current intent definitions
 - [x] CORS middleware for browser extension
 
 ### 1.3 Chrome Extension ✅ DONE
@@ -46,15 +46,15 @@
 - [x] 12 tests covering classifier, API, and error handling
 
 **Files created:**
-- `server/classifier.py` — IntentClassifier class
-- `server/api.py` — FastAPI application
-- `extension/manifest.json` — Chrome extension manifest
-- `extension/content.js` — Content interception
-- `extension/background.js` — Service worker
-- `extension/styles.css` — Visual treatments
-- `extension/popup/` — Settings UI
-- `scenarios/intents.yaml` — Intent definitions
-- `tests/test_classifier.py` — Test suite
+- `server/classifier.py` -IntentClassifier class
+- `server/api.py` -FastAPI application
+- `extension/manifest.json` -Chrome extension manifest
+- `extension/content.js` -Content interception
+- `extension/background.js` -Service worker
+- `extension/styles.css` -Visual treatments
+- `extension/popup/` -Settings UI
+- `scenarios/intents.yaml` -Intent definitions
+- `tests/test_classifier.py` -Test suite
 
 ---
 
@@ -69,7 +69,7 @@
 - [x] Make batch endpoint truly parallel with `asyncio.gather()`
 
 ### 2.2 Cache Improvements (Critical)
-- [x] Implement cache TTL — honor `CACHE_TTL` from `.env` (default 300s)
+- [x] Implement cache TTL -honor `CACHE_TTL` from `.env` (default 300s)
 - [x] Make `_max_cache_size` configurable via environment variable
 - [x] Wire up all `.env` config that's currently ignored (`OLLAMA_TEMPERATURE`, `MANIPULATION_THRESHOLD`)
 
@@ -86,7 +86,7 @@
 - [x] Add request timeout middleware (httpx client timeout)
 
 ### 2.5 Extension Stability (High)
-- [x] Fix cache key — use full content hash instead of first 100 characters
+- [x] Fix cache key -use full content hash instead of first 100 characters
 - [x] Add `chrome.storage.onChanged` listener so settings are reactive without page reload
 - [x] Add error handling for `chrome.runtime.sendMessage` when background worker is dead
 - [x] Guard `processTweets()` against concurrent re-entry (processing lock)

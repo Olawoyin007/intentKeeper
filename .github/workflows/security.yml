@@ -25,14 +25,16 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install dependencies
+      - name: Install dependencies (non-editable)
         run: pip install ".[dev]"
 
       - name: Install pip-audit
         run: pip install pip-audit
 
       - name: Audit dependencies for known vulnerabilities
-        run: pip-audit --strict --desc
+        run: |
+          pip freeze | grep -iv intentkeeper > /tmp/deps.txt
+          pip-audit --strict --desc -r /tmp/deps.txt
 
   codeql:
     name: CodeQL Analysis
