@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-IntentKeeper is a local-first content filter that classifies online content by its underlying **intent** — ragebait, fearmongering, hype, or genuine insight. It runs entirely on local hardware via Ollama integration.
+IntentKeeper is a local-first content filter that classifies online content by its underlying **intent** -ragebait, fearmongering, hype, or genuine insight. It runs entirely on local hardware via Ollama integration.
 
 **Core Philosophy**: "The content isn't the problem. The intent behind it is."
 
@@ -79,10 +79,10 @@ intentKeeper/
 
 **Server** (`server/`):
 - [server/api.py](server/api.py) - FastAPI application with endpoints:
-  - `POST /classify` — Classify single content
-  - `POST /classify/batch` — Classify multiple items (max 50)
-  - `GET /health` — Server and Ollama health check
-  - `GET /intents` — Current intent definitions
+  - `POST /classify` -Classify single content
+  - `POST /classify/batch` -Classify multiple items (max 50)
+  - `GET /health` -Server and Ollama health check
+  - `GET /intents` -Current intent definitions
 - [server/classifier.py](server/classifier.py) - `IntentClassifier` class:
   - Loads intent definitions from YAML
   - Builds classification prompts with few-shot examples
