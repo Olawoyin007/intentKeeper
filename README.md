@@ -11,19 +11,26 @@
   <img src="https://img.shields.io/badge/version-0.2.0-green.svg" alt="Version: 0.2.0">
   <img src="https://img.shields.io/badge/python-3.10%2B-blue.svg" alt="Python: 3.10+">
   <img src="https://img.shields.io/badge/platform-Twitter%2FX-1DA1F2.svg" alt="Platform: Twitter/X">
+  <img src="https://img.shields.io/badge/local--first-Ollama-orange.svg" alt="Local-First: Ollama">
 </p>
 
-IntentKeeper is a local-first content filter that classifies online content by its underlying intent - ragebait, fearmongering, hype, or genuine insight. It sits between you and your feed, surfacing manipulation before it affects you.
+There are hundreds of tools that block, hide, or filter social media. IntentKeeper is the only one that tells you *why* content is designed to manipulate you - and lets you decide what to do with it.
+
+Ragebait, fearmongering, hype, divisive framing - classified by intent, not topic, before they affect you. Everything runs on your hardware via Ollama. No cloud. No tracking. No data leaving your machine.
 
 ---
 
-## The Problem
+<details>
+<summary><strong>Why this exists</strong></summary>
+<br>
 
 Every major platform optimizes for engagement. Engagement is driven by emotion. The strongest emotions - outrage, fear, tribal identity - are the easiest to manufacture.
 
 The result: your feed is optimized to make you angry, afraid, and divided. Not because the platform is evil, but because that's what the algorithm rewards.
 
 IntentKeeper doesn't fix the platforms. It gives you a lens to see the manipulation before it hooks you.
+
+</details>
 
 ## The Idea
 
@@ -39,21 +46,34 @@ IntentKeeper classifies the **energy** behind the words - not the words themselv
 
 ## Quick Start
 
+### Part 1 - Server
+
 ```bash
-# 1. Clone and install
+# Clone and install
 git clone https://github.com/Olawoyin007/intentKeeper.git
 cd intentKeeper
 pip install -e ".[dev]"
 
-# 2. Pull the model and start the server
-ollama pull mistral:7b-instruct
+# Configure your model and start the server
+cp .env.example .env
 intentkeeper-server
-
-# 3. Load the Chrome extension
-# Chrome > chrome://extensions > Developer mode > Load unpacked > select extension/
 ```
 
-Then open [twitter.com](https://twitter.com) or [x.com](https://x.com) and scroll your feed. You'll see intent labels on every tweet.
+**Ollama powers the classification.** Any model works - `mistral:7b-instruct`, `llama3.2`, `phi3`, whatever you already have pulled. Set it in `.env`:
+
+```bash
+OLLAMA_MODEL=your-model-name
+```
+
+Don't have Ollama yet? [Install it here](https://ollama.com) - it runs entirely on your hardware, no cloud required.
+
+### Part 2 - Extension
+
+1. Open Chrome and go to `chrome://extensions`
+2. Enable **Developer mode** (top right toggle)
+3. Click **Load unpacked** and select the `extension/` folder
+
+Then open [twitter.com](https://twitter.com) or [x.com](https://x.com) and scroll your feed. Intent labels appear on every tweet automatically.
 
 See [docs/usage.md](docs/usage.md) for the full setup guide and troubleshooting.
 
@@ -89,7 +109,9 @@ You decide what to engage with
 
 All processing happens on your machine. No cloud. No data collection. No tracking.
 
-## Principles
+<details>
+<summary><strong>Principles</strong></summary>
+<br>
 
 **Intent over topic.** We classify the framing, not the subject matter.
 
@@ -102,6 +124,8 @@ All processing happens on your machine. No cloud. No data collection. No trackin
 **Transparency.** Every classification shows *why* content was flagged.
 
 See [MANIFESTO.md](MANIFESTO.md) for the full principles.
+
+</details>
 
 ## Documentation
 
