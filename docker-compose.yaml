@@ -1,0 +1,34 @@
+services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: intentkeeper-ollama
+    entrypoint: ["/bin/sh", "/entrypoint.sh"]
+    environment:
+      - OLLAMA_MODEL=${OLLAMA_MODEL:-mistral:7b-instruct}
+    volumes:
+      - ollama_data:/root/.ollama
+      - ./scripts/entrypoint.sh:/entrypoint.sh:ro
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  server:
+    build: .
+    container_name: intentkeeper-server
+    ports:
+      - "8420:8420"
+    environment:
+      - OLLAMA_HOST=http://ollama:11434
+      - OLLAMA_MODEL=${OLLAMA_MODEL:-mistral:7b-instruct}
+      - INTENTKEEPER_HOST=0.0.0.0
+      - INTENTKEEPER_PORT=8420
+    depends_on:
+      ollama:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  ollama_data:
