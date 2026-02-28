@@ -48,18 +48,27 @@ IntentKeeper classifies the **energy** behind the words - not the words themselv
 
 ### Part 1 - Server
 
+**Option A: Docker (recommended)**
+
 ```bash
-# Clone and install
 git clone https://github.com/Olawoyin007/intentKeeper.git
 cd intentKeeper
-pip install -e ".[dev]"
+docker compose up
+```
 
-# Configure your model and start the server
+This starts Ollama and the classification server together. The model pulls automatically on first run.
+
+**Option B: Manual**
+
+```bash
+git clone https://github.com/Olawoyin007/intentKeeper.git
+cd intentKeeper
+pip install -e .
 cp .env.example .env
 intentkeeper-server
 ```
 
-**Ollama powers the classification.** Any model works - `mistral:7b-instruct`, `llama3.2`, `phi3`, whatever you already have pulled. Set it in `.env`:
+**Ollama powers the classification.** Any model works - `mistral:7b-instruct`, `llama3.2`, `phi3`, whatever you already have pulled. Set it in `.env` or as an environment variable:
 
 ```bash
 OLLAMA_MODEL=your-model-name
