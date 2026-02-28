@@ -10,6 +10,7 @@ Docker support, README rewrite, coverage baseline, and open community channels.
 
 ### Distribution
 - **Docker support**: `docker compose up` starts Ollama + classification server together - no manual setup
+- **Auto-pull (non-Docker)**: Server checks `/api/tags` on startup and pulls the configured model automatically if it is not present - no manual `ollama pull` needed
 - **Auto model pull**: Ollama container pulls the configured model automatically on first run
 - **Any Ollama model**: `OLLAMA_MODEL` env var accepts any model - `mistral:7b-instruct`, `llama3.2`, `phi3`, or whatever you have
 

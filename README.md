@@ -68,7 +68,7 @@ cp .env.example .env
 intentkeeper-server
 ```
 
-**Ollama powers the classification.** Any model works - `mistral:7b-instruct`, `llama3.2`, `phi3`, whatever you already have pulled. Set it in `.env` or as an environment variable:
+**Ollama powers the classification.** Any model works - `mistral:7b-instruct`, `llama3.2`, `phi3`, whatever you have. Set it in `.env` and the server pulls it automatically on first start if it is not already present:
 
 ```bash
 OLLAMA_MODEL=your-model-name

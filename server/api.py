@@ -46,6 +46,31 @@ async def lifespan(app: FastAPI):
         # Check Ollama health
         if await classifier.check_health():
             logger.info(f"Ollama connection OK ({classifier.ollama_host})")
+
+            # Check if the configured model is available; pull it if not
+            try:
+                tags_response = await client.get(f"{classifier.ollama_host}/api/tags", timeout=10)
+                tags_response.raise_for_status()
+                available = [m.get("name", "") for m in tags_response.json().get("models", [])]
+                model_present = any(
+                    name == classifier.model or name.startswith(f"{classifier.model}:")
+                    for name in available
+                )
+                if not model_present:
+                    logger.info(f"Model '{classifier.model}' not found - pulling...")
+                    async with client.stream(
+                        "POST",
+                        f"{classifier.ollama_host}/api/pull",
+                        json={"name": classifier.model},
+                        timeout=600,
+                    ) as pull_response:
+                        async for _ in pull_response.aiter_lines():
+                            pass  # consume stream; Ollama logs progress here
+                    logger.info(f"Model '{classifier.model}' ready")
+                else:
+                    logger.info(f"Model '{classifier.model}' already present")
+            except Exception as e:
+                logger.warning(f"Could not verify/pull model: {e}")
         else:
             logger.warning(f"Ollama not reachable at {classifier.ollama_host}")
 
