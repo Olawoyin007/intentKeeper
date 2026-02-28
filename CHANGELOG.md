@@ -2,7 +2,36 @@
 
 All notable changes to IntentKeeper are documented here.
 
-## v0.2.0 (2026-02-23) -Hardening & Reliability
+## v0.3.0 (2026-02-28) - Distribution & Discoverability
+
+**"Anyone can run it now."**
+
+Docker support, README rewrite, coverage baseline, and open community channels.
+
+### Distribution
+- **Docker support**: `docker compose up` starts Ollama + classification server together - no manual setup
+- **Auto model pull**: Ollama container pulls the configured model automatically on first run
+- **Any Ollama model**: `OLLAMA_MODEL` env var accepts any model - `mistral:7b-instruct`, `llama3.2`, `phi3`, or whatever you have
+
+### Documentation
+- **README rewrite**: Leads with what makes IntentKeeper unique - the only shipped, local-first, intent-classification tool for social media
+- **Ollama reframed**: Positioned as a capability, not a prerequisite
+- **Quick Start split**: Clear separation between Part 1 (server) and Part 2 (extension)
+- **Details blocks**: Philosophy sections collapsible - scannable for skimmers, readable for contributors
+
+### Quality
+- **pytest-cov configured**: Coverage reporting enabled, 88% baseline established (30 tests)
+- **GitHub topics added**: `ollama`, `local-first`, `humane-tech`, `privacy`, `anti-engagement`, `chrome-extension`, `content-moderation`, `twitter`
+- **GitHub Discussions enabled**: Community Q&A channel open
+
+### Stats
+- 30 tests passing
+- 88% test coverage
+- Docker: `docker compose up` - fully working end-to-end
+
+---
+
+## v0.2.0 (2026-02-23) - Hardening & Reliability
 
 **Phase 2 complete.** Production-grade classification pipeline with async processing, batch API, enriched content extraction, and comprehensive test coverage.
 
