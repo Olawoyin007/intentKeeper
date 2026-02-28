@@ -2,8 +2,6 @@ services:
   ollama:
     image: ollama/ollama:latest
     container_name: intentkeeper-ollama
-    ports:
-      - "11434:11434"
     entrypoint: ["/bin/sh", "/entrypoint.sh"]
     environment:
       - OLLAMA_MODEL=${OLLAMA_MODEL:-mistral:7b-instruct}
