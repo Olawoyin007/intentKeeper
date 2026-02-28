@@ -55,6 +55,16 @@ include = ["server*", "scenarios*"]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
+addopts = "--cov=server --cov-report=term-missing --cov-report=html"
+
+[tool.coverage.run]
+source = ["server"]
+omit = ["tests/*", "venv/*"]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = false
+fail_under = 60
 
 [tool.black]
 line-length = 100
