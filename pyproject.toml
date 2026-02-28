@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "intentkeeper"
-version = "0.2.0"
+version = "0.3.0"
 description = "A digital bodyguard for your mind - local content intent classification"
 readme = "README.md"
 license = {text = "MIT"}
