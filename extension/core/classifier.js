@@ -294,7 +294,12 @@ async function processItems(adapter) {
 
   isProcessing = true;
   try {
-    const selector = `${adapter.baseSelector}:not([${PROCESSED_ATTR}])`;
+    // Apply :not() to each part individually so multi-selector baseSelectors
+    // (e.g. YouTube's comma-separated list) are all filtered correctly.
+    const selector = adapter.baseSelector
+      .split(',')
+      .map(s => `${s.trim()}:not([${PROCESSED_ATTR}])`)
+      .join(', ');
     const items = Array.from(document.querySelectorAll(selector));
 
     const itemData = [];
