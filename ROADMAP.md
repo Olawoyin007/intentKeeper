@@ -130,10 +130,18 @@
 - [ ] Title badges for tagged content
 - [ ] Comment collapse for engagement bait
 
-### 3.4 Platform Abstraction
-- [ ] Refactor content.js into a platform adapter pattern
-- [ ] Create shared classification logic used by both Twitter and YouTube adapters
-- [ ] Ensure new platforms can be added by implementing a single adapter
+### 3.4 Intent Anchoring (Recommendation Shield)
+- [ ] On YouTube landing, prompt: "What did you come here for?" (one line, free text, unobtrusive)
+- [ ] Hold declared intent in session memory
+- [ ] Classify recommendations on a second axis: does this match why you came?
+- [ ] After declared content is consumed, surface a soft stop: "You came for X. You've seen it."
+- [ ] Not a hard block, just a pause before endless scrolling
+- [ ] Opt-in feature (connects to Phase 6 user-configurable sensitivity)
+
+### 3.5 Platform Abstraction ✅ DONE
+- [x] Refactor content.js into a platform adapter pattern
+- [x] Create shared classification logic used by both Twitter and YouTube adapters
+- [x] Ensure new platforms can be added by implementing a single adapter
 
 ---
 
@@ -156,6 +164,13 @@
 - [ ] Pass subreddit context to classifier
 - [ ] Adjust thresholds by subreddit type
 - [ ] r/politics vs r/science need different baselines
+
+### 4.4 Intent Anchoring for Reddit
+- [ ] On subreddit landing, prompt: "What are you looking for?" (free text, unobtrusive)
+- [ ] Hold declared intent in session memory (shared logic with YouTube, Phase 3.4)
+- [ ] Classify feed posts against declared intent: does this match why you came?
+- [ ] Soft stop after declared content consumed: "You found what you came for."
+- [ ] Opt-in feature (connects to Phase 6 user-configurable sensitivity)
 
 ---
 
@@ -264,9 +279,15 @@
 ### 10.1 Desktop App
 - [ ] System tray app for clipboard monitoring
 - [ ] Classify links before opening
-- [ ] Optional: intercept notification content
 
-### 10.2 Mobile Considerations
+### 10.2 Notification Interceptor
+- [ ] Use OS notification API (Windows/macOS/Linux all expose hooks) to intercept notifications before display
+- [ ] Route intercepted notifications through the existing FastAPI classification server
+- [ ] Batch non-urgent notifications into a single digest, delivered on a user-defined schedule
+- [ ] Hard-stop on notification volume: if an app sends more than N notifications per hour, auto-batch regardless of content
+- [ ] Per-app configuration: allow users to exempt specific apps from interception
+
+### 10.3 Mobile Considerations
 - [ ] Research iOS/Android integration options
 - [ ] Share sheet integration
 - [ ] Browser-based mobile solution
@@ -290,11 +311,11 @@
 
 ---
 
-## Current Status (2026-02-23)
+## Current Status (2026-03-11)
 
-**Completed**: Phase 1 (Core classifier + Chrome extension for Twitter/X), Phase 2 (Hardening & Reliability)
+**Completed**: Phase 1 (Core classifier + Chrome extension for Twitter/X), Phase 2 (Hardening & Reliability), Phase 3.5 (Platform abstraction - adapter pattern)
 
-**Next Up**: Phase 3 (YouTube Support)
+**Next Up**: Phase 3 (YouTube Support) - 3.1/3.2/3.3/3.4 remaining
 
 **Stats**:
 

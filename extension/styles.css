@@ -156,3 +156,13 @@
   background: rgba(128, 128, 128, 0.2);
   color: #808080;
 }
+
+.intentkeeper-tag-clickbait {
+  background: rgba(255, 69, 0, 0.2);
+  color: #ff4500;
+}
+
+.intentkeeper-tag-reaction_farming {
+  background: rgba(30, 144, 255, 0.2);
+  color: #1e90ff;
+}

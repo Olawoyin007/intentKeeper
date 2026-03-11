@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "IntentKeeper",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "A digital bodyguard for your mind - filters content by intent",
   "permissions": [
     "storage",
@@ -34,7 +34,7 @@
         "https://x.com/*",
         "https://mobile.twitter.com/*"
       ],
-      "js": ["content.js"],
+      "js": ["core/classifier.js", "platforms/twitter.js"],
       "css": ["styles.css"],
       "run_at": "document_idle"
     }
