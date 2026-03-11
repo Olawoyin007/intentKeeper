@@ -194,8 +194,13 @@ function applyTag(element, intent, confidence) {
 
 /**
  * Blur the content area within an element, with a reveal button.
- * Uses adapter.getContentElement() to find the blurrable sub-element;
- * if it returns null, the whole item element is blurred.
+ *
+ * Uses adapter.getContentElement() to find the sub-element to blur.
+ * Uses optional adapter.getBlurContainer() to find where to anchor the overlay.
+ * If getBlurContainer is not defined (or returns null), the overlay covers
+ * the whole item element (Twitter behaviour). When defined, the overlay is
+ * scoped to a sub-container - e.g. just the thumbnail on a YouTube card,
+ * leaving the title visible but the image obscured.
  */
 function applyBlur(element, intent, reasoning, adapter) {
   const overlay = document.createElement('div');
@@ -214,8 +219,15 @@ function applyBlur(element, intent, reasoning, adapter) {
     contentEl.classList.add('intentkeeper-blurred');
   }
 
-  element.style.position = 'relative';
-  element.appendChild(overlay);
+  // Overlay anchors to the blur container if the adapter provides one,
+  // otherwise falls back to the whole item element.
+  const blurContainer = adapter.getBlurContainer
+    ? (adapter.getBlurContainer(element) || element)
+    : element;
+
+  blurContainer.style.position = 'relative';
+  blurContainer.style.overflow = 'hidden';
+  blurContainer.appendChild(overlay);
 
   overlay.querySelector('.intentkeeper-reveal').addEventListener('click', (e) => {
     e.stopPropagation();

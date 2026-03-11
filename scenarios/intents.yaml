@@ -61,6 +61,28 @@ intents:
       - "Real [group] would never..."
       - "Which side are you on"
 
+  clickbait:
+    description: "Misleading title or thumbnail designed to deceive about actual content"
+    action: tag
+    weight: 0.7
+    indicators:
+      - "Title promises content the video does not deliver"
+      - "You won't believe... / Shocking... / This will change your life framing"
+      - "Exaggerated emotional reaction or face in thumbnail description"
+      - "Deliberately vague to force a click"
+      - "Number lists that exaggerate scope (top 100, every single...)"
+
+  reaction_farming:
+    description: "Content engineered to provoke high-volume emotional reactions in comments"
+    action: tag
+    weight: 0.6
+    indicators:
+      - "Poses a divisive question solely to inflame the comment section"
+      - "Makes a statement designed to be wrong on purpose"
+      - "Invites tribal conflict between fanbases or groups"
+      - "Hot take with no supporting substance, drops opinion then goes silent"
+      - "Asks audience to pick a side with no nuance offered"
+
   genuine:
     description: "Authentic insight, honest perspective, original thought"
     action: pass
@@ -115,6 +137,18 @@ few_shot_examples:
   - content: "🚨 ALERT: Society is COLLAPSING. Get out while you still can."
     intent: fearmongering
 
+  - content: "I Tried EVERY Fast Food Chain For 30 Days (The Results Will SHOCK You)"
+    intent: clickbait
+
+  - content: "We Bought The CHEAPEST Thing From 50 Different Countries (NOT What We Expected)"
+    intent: clickbait
+
+  - content: "Pineapple belongs on pizza. Change my mind. 🍕"
+    intent: reaction_farming
+
+  - content: "Marvel fans vs DC fans. Comment which side you're on. No switching allowed."
+    intent: reaction_farming
+
 # Classification rules (for the LLM prompt)
 rules:
   - "Focus on HOW content is framed, not the topic itself"
@@ -124,3 +158,5 @@ rules:
   - "Content triggering strong immediate emotional reaction is likely manipulative"
   - "Nuance and uncertainty are markers of genuine content"
   - "Questions seeking genuine answers are different from engagement bait"
+  - "Video titles using 'shocking', 'you won't believe', or deliberately vague hooks are clickbait"
+  - "Content that exists purely to generate comment section conflict is reaction_farming"

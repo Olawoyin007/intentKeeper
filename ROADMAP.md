@@ -114,21 +114,21 @@
 
 **Goal**: Extend classification to YouTube titles, descriptions, and comments.
 
-### 3.1 YouTube Content Script
-- [ ] Create `extension/platforms/youtube.js`
-- [ ] Intercept video titles in feed/search
-- [ ] Intercept video descriptions on watch page
-- [ ] Intercept top-level comments
+### 3.1 YouTube Content Script ✅ DONE
+- [x] Create `extension/platforms/youtube.js`
+- [x] Intercept video titles in feed/search
+- [x] Intercept video descriptions on watch page
+- [x] Intercept top-level comments
 
-### 3.2 YouTube-Specific Intents
-- [ ] Add `clickbait` intent (YouTube-specific)
-- [ ] Add `reaction_farming` intent for comment sections
-- [ ] Update few-shot examples with YouTube content
+### 3.2 YouTube-Specific Intents ✅ DONE
+- [x] Add `clickbait` intent (YouTube-specific)
+- [x] Add `reaction_farming` intent for comment sections
+- [x] Update few-shot examples with YouTube content
 
-### 3.3 Visual Treatments for YouTube
-- [ ] Thumbnail blur for high-manipulation videos
-- [ ] Title badges for tagged content
-- [ ] Comment collapse for engagement bait
+### 3.3 Visual Treatments for YouTube ✅ DONE
+- [x] Thumbnail blur for high-manipulation videos (overlay scoped to thumbnail)
+- [x] Title badges for tagged content
+- [x] Comment collapse for engagement bait
 
 ### 3.4 Intent Anchoring (Recommendation Shield)
 - [ ] On YouTube landing, prompt: "What did you come here for?" (one line, free text, unobtrusive)
@@ -313,9 +313,9 @@
 
 ## Current Status (2026-03-11)
 
-**Completed**: Phase 1 (Core classifier + Chrome extension for Twitter/X), Phase 2 (Hardening & Reliability), Phase 3.5 (Platform abstraction - adapter pattern)
+**Completed**: Phase 1 (Core classifier + Chrome extension for Twitter/X), Phase 2 (Hardening & Reliability), Phase 3.1-3.3 + 3.5 (YouTube support + platform abstraction)
 
-**Next Up**: Phase 3 (YouTube Support) - 3.1/3.2/3.3/3.4 remaining
+**Next Up**: Phase 3.4 (Intent Anchoring - "What did you come here for?")
 
 **Stats**:
 

@@ -37,6 +37,15 @@
       "js": ["core/classifier.js", "platforms/twitter.js"],
       "css": ["styles.css"],
       "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://www.youtube.com/*",
+        "https://youtube.com/*"
+      ],
+      "js": ["core/classifier.js", "platforms/youtube.js"],
+      "css": ["styles.css"],
+      "run_at": "document_idle"
     }
   ]
 }
