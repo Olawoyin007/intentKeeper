@@ -130,13 +130,16 @@
 - [x] Title badges for tagged content
 - [x] Comment collapse for engagement bait
 
-### 3.4 Intent Anchoring (Recommendation Shield)
+### 3.4 Intent Anchoring (Recommendation Shield) ⏸ DEFERRED
 - [ ] On YouTube landing, prompt: "What did you come here for?" (one line, free text, unobtrusive)
 - [ ] Hold declared intent in session memory
 - [ ] Classify recommendations on a second axis: does this match why you came?
 - [ ] After declared content is consumed, surface a soft stop: "You came for X. You've seen it."
 - [ ] Not a hard block, just a pause before endless scrolling
 - [ ] Opt-in feature (connects to Phase 6 user-configurable sensitivity)
+
+> Deferred: Requires user trust in classifications to be established first.
+> Revisit after Phase 5 eval passes.
 
 ### 3.5 Platform Abstraction ✅ DONE
 - [x] Refactor content.js into a platform adapter pattern
