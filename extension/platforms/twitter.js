@@ -29,16 +29,21 @@ const twitterAdapter = {
     const author = tweetElement.querySelector('[data-testid="User-Name"]');
     if (author) {
       const displayName = author.querySelector('span');
-      if (displayName) parts.push(`[Author: ${displayName.innerText.trim()}]`);
+      if (displayName) parts.push(`[Author: ${displayName.textContent.trim()}]`);
     }
 
     // Main tweet text
     const text = tweetElement.querySelector('[data-testid="tweetText"]');
-    if (text) parts.push(text.innerText.trim());
+    if (text) parts.push(text.textContent.trim());
 
-    // Quoted tweet text (nested tweet inside this tweet)
-    const quoted = tweetElement.querySelector('[data-testid="tweet"] [data-testid="tweetText"]');
-    if (quoted && quoted !== text) parts.push(quoted.innerText.trim());
+    // Quoted tweet text (nested tweet inside this tweet).
+    // Requires two levels of [data-testid="tweet"] nesting to avoid matching
+    // the main tweet's own tweetText, which is also a descendant of the outer
+    // tweet element and would be returned first by querySelector.
+    const quoted = tweetElement.querySelector(
+      '[data-testid="tweet"] [data-testid="tweet"] [data-testid="tweetText"]'
+    );
+    if (quoted) parts.push(quoted.textContent.trim());
 
     // Link card title/description
     const card = tweetElement.querySelector('[data-testid="card.wrapper"]');
@@ -46,7 +51,7 @@ const twitterAdapter = {
       const cardText = card.querySelector(
         '[data-testid="card.layoutLarge.detail"] span, a[role="link"] span'
       );
-      if (cardText) parts.push(cardText.innerText.trim());
+      if (cardText) parts.push(cardText.textContent.trim());
     }
 
     // Video context - grab accessible description/title near the video player
@@ -72,7 +77,7 @@ const twitterAdapter = {
     if (pollOptions.length > 0) {
       const pollTexts = [];
       pollOptions.forEach(opt => {
-        const t = opt.innerText?.trim();
+        const t = opt.textContent?.trim();
         if (t && t.length > 1) pollTexts.push(t);
       });
       if (pollTexts.length > 0) parts.push(`[Poll: ${pollTexts.join(' / ')}]`);
@@ -89,11 +94,17 @@ const twitterAdapter = {
     // Social context - "X liked" / "X retweeted" banners above the tweet
     const socialContext = tweetElement.querySelector('[data-testid="socialContext"]');
     if (socialContext) {
-      parts.push(`[Context: ${socialContext.innerText.trim()}]`);
+      parts.push(`[Context: ${socialContext.textContent.trim()}]`);
     }
 
     return parts.join(' | ');
   }
 };
 
-IntentKeeperCore.init(twitterAdapter);
+if (typeof IntentKeeperCore !== 'undefined') {
+  IntentKeeperCore.init(twitterAdapter);
+}
+
+if (typeof module !== 'undefined') {
+  module.exports = { twitterAdapter };
+}

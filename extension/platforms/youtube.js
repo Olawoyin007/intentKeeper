@@ -16,17 +16,20 @@ function extractVideoCardText(element) {
 
   // Title is the primary classification signal
   const title = element.querySelector('#video-title');
-  if (title) parts.push(title.innerText.trim());
+  if (title) parts.push(title.textContent.trim());
 
   // Channel name - helps detect known bait channels
   const channel = element.querySelector('ytd-channel-name #text, #channel-name #text');
-  if (channel) parts.push(`[Channel: ${channel.innerText.trim()}]`);
+  if (channel) {
+    const name = channel.textContent.trim();
+    if (name) parts.push(`[Channel: ${name}]`);
+  }
 
   // View count + upload date give context (e.g. viral bait vs organic growth)
   const metadata = element.querySelectorAll('#metadata-line span');
   if (metadata.length > 0) {
     const metaParts = Array.from(metadata)
-      .map(s => s.innerText.trim())
+      .map(s => s.textContent.trim())
       .filter(Boolean);
     if (metaParts.length > 0) parts.push(`[${metaParts.join(', ')}]`);
   }
@@ -39,21 +42,24 @@ function extractWatchMetadataText(element) {
 
   // Video title
   const title = element.querySelector('h1 yt-formatted-string, yt-formatted-string#title');
-  if (title) parts.push(title.innerText.trim());
+  if (title) parts.push(title.textContent.trim());
 
   // Description (truncated by YouTube until expanded, but grab what's visible)
   const description = element.querySelector(
     '#description-text, ytd-text-inline-expander #content'
   );
   if (description) {
-    const text = description.innerText.trim();
+    const text = description.textContent.trim();
     // Cap at 300 chars - description can be very long and LLM only needs the signal
     if (text.length > 0) parts.push(text.slice(0, 300));
   }
 
   // Channel name
   const channel = element.querySelector('#channel-name #text, ytd-channel-name #text');
-  if (channel) parts.push(`[Channel: ${channel.innerText.trim()}]`);
+  if (channel) {
+    const name = channel.textContent.trim();
+    if (name) parts.push(`[Channel: ${name}]`);
+  }
 
   return parts.join(' | ');
 }
@@ -63,11 +69,11 @@ function extractCommentText(element) {
 
   // Comment author
   const author = element.querySelector('#author-text');
-  if (author) parts.push(`[Author: ${author.innerText.trim()}]`);
+  if (author) parts.push(`[Author: ${author.textContent.trim()}]`);
 
   // Comment body
   const body = element.querySelector('#content-text');
-  if (body) parts.push(body.innerText.trim());
+  if (body) parts.push(body.textContent.trim());
 
   return parts.join(' | ');
 }
@@ -133,4 +139,10 @@ const youtubeAdapter = {
   }
 };
 
-IntentKeeperCore.init(youtubeAdapter);
+if (typeof IntentKeeperCore !== 'undefined') {
+  IntentKeeperCore.init(youtubeAdapter);
+}
+
+if (typeof module !== 'undefined') {
+  module.exports = { youtubeAdapter };
+}

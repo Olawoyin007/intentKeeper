@@ -278,6 +278,19 @@ function applyTreatment(element, classification, adapter) {
 // --- Processing Pipeline ---
 
 /**
+ * Build a querySelectorAll-compatible selector that excludes already-processed
+ * items. Applies :not() to each comma-separated part individually so that
+ * multi-selector baseSelectors (e.g. YouTube's five ytd-* types) are all
+ * filtered - not just the last one.
+ */
+function buildSelector(baseSelector, processedAttr) {
+  return baseSelector
+    .split(',')
+    .map(s => `${s.trim()}:not([${processedAttr}])`)
+    .join(', ');
+}
+
+/**
  * Find all unprocessed items on the page, extract their text via the adapter,
  * classify in batches of MAX_CONCURRENT, and apply visual treatments.
  *
@@ -294,12 +307,7 @@ async function processItems(adapter) {
 
   isProcessing = true;
   try {
-    // Apply :not() to each part individually so multi-selector baseSelectors
-    // (e.g. YouTube's comma-separated list) are all filtered correctly.
-    const selector = adapter.baseSelector
-      .split(',')
-      .map(s => `${s.trim()}:not([${PROCESSED_ATTR}])`)
-      .join(', ');
+    const selector = buildSelector(adapter.baseSelector, PROCESSED_ATTR);
     const items = Array.from(document.querySelectorAll(selector));
 
     const itemData = [];
@@ -352,6 +360,11 @@ function setupObserver(adapter) {
 }
 
 // --- Public API ---
+
+// Expose utility functions for testing in Node (Jest/jsdom)
+if (typeof module !== 'undefined') {
+  module.exports = { hashContent, formatIntent, escapeHtml, buildSelector };
+}
 
 window.IntentKeeperCore = {
   async init(adapter) {
