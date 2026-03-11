@@ -69,17 +69,18 @@ describe('youtubeAdapter metadata', () => {
     expect(youtubeAdapter.platform).toBe('youtube');
   });
 
-  test('baseSelector covers all five content types', () => {
-    const expected = [
+  test('baseSelector covers video cards and comments (watch metadata excluded pending eval)', () => {
+    const active = [
       'ytd-rich-item-renderer',
       'ytd-video-renderer',
       'ytd-compact-video-renderer',
-      'ytd-watch-metadata',
       'ytd-comment-thread-renderer',
     ];
-    expected.forEach(sel => {
+    active.forEach(sel => {
       expect(youtubeAdapter.baseSelector).toContain(sel);
     });
+    // ytd-watch-metadata is intentionally excluded until eval numbers justify it
+    expect(youtubeAdapter.baseSelector).not.toContain('ytd-watch-metadata');
   });
 });
 

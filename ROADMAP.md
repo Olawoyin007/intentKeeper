@@ -300,14 +300,21 @@
 |-------|--------|--------|----------|
 | 1. Core + Twitter | High | Medium | ✅ COMPLETE |
 | 2. Hardening & Reliability | Critical | Medium | ✅ COMPLETE |
-| 3. YouTube | High | Medium | 🔴 Next |
-| 4. Reddit | High | Medium | 🔵 After 3 |
-| 5. Classification Accuracy | High | Low | 🔵 After 3 |
+| 3. YouTube | High | Medium | 🟡 In Progress |
+| 5. Classification Accuracy | Critical | Low | 🔴 Next - gates platform expansion |
+| 4. Reddit | High | Medium | 🔵 After eval passes |
 | 6. User Sensitivity | Medium | Low | 🔵 After 5 |
 | 7. Statistics | Medium | Medium | 🔵 After 6 |
 | 8. Firefox | Medium | Low | 🔵 After 7 |
 | 9. Advanced Classification | High | High | 🔵 Long-term |
 | 10. Cross-Platform | Medium | High | 🔵 Long-term |
+
+> **Why Phase 5 before Phase 4**: The hardest part of this project is not
+> engineering - it's building user trust in the taxonomy. If ragebait/divisive/hype
+> labels feel wrong to users, the product feels moralizing regardless of how clean
+> the code is. The eval harness in `tests/eval/` measures per-intent precision and
+> recall. Platform expansion (Reddit) should not happen until the eval passes a
+> 70% macro F1 threshold.
 
 ---
 
@@ -315,7 +322,9 @@
 
 **Completed**: Phase 1 (Core classifier + Chrome extension for Twitter/X), Phase 2 (Hardening & Reliability), Phase 3.1-3.3 + 3.5 (YouTube support + platform abstraction)
 
-**Next Up**: Phase 3.4 (Intent Anchoring - "What did you come here for?")
+**Next Up**: Phase 5 (Classification accuracy - eval harness built, needs Ollama run to establish baseline)
+
+**Priority shift**: Phase 4 (Reddit) moved after Phase 5. Eval gates platform expansion.
 
 **Stats**:
 

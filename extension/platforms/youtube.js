@@ -83,12 +83,14 @@ function extractCommentText(element) {
 const youtubeAdapter = {
   platform: 'youtube',
 
-  // Covers all three content types in a single querySelectorAll pass
+  // Video card titles and top-level comments are the high-signal, low-noise
+  // targets. Watch-page metadata (ytd-watch-metadata) is excluded for now:
+  // descriptions are long and ambiguous, and one classification per page adds
+  // latency with unclear user value. Re-enable once eval numbers justify it.
   baseSelector: [
     'ytd-rich-item-renderer',       // Homepage feed cards
     'ytd-video-renderer',           // Search result cards
     'ytd-compact-video-renderer',   // Sidebar recommendations on watch page
-    'ytd-watch-metadata',           // Currently playing video (title + description)
     'ytd-comment-thread-renderer',  // Top-level comments
   ].join(', '),
 

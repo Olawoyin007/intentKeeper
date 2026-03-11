@@ -1,0 +1,190 @@
+# IntentKeeper Evaluation Ground Truth
+#
+# Labeled examples for measuring per-intent precision, recall, and F1.
+# Each example has:
+#   content: the text to classify
+#   intent:  expected label
+#   note:    (optional) why this is tricky or what it should test
+#
+# Principles for this dataset:
+# - Include easy cases to confirm the floor
+# - Include hard/tricky cases to reveal failure modes
+# - Flag the tricky ones with notes so results are interpretable
+# - Cover all 9 intents including YouTube-specific ones
+# - Aim for ~8-12 examples per intent
+
+examples:
+
+  # ── ragebait ──────────────────────────────────────────────────────────────
+
+  - content: "This is EXACTLY why I hate [political party]. They always do this. Every. Single. Time."
+    intent: ragebait
+
+  - content: "These people are destroying everything our grandparents built. I'm done being quiet about it."
+    intent: ragebait
+
+  - content: "People who disagree with me on this are either stupid or evil. No exceptions."
+    intent: ragebait
+
+  - content: "Can you believe this idiot actually said that? The audacity is breathtaking."
+    intent: ragebait
+
+  - content: "WAKE UP. They are LAUGHING at you. They think you're too dumb to notice."
+    intent: ragebait
+    note: "All caps + accusatory framing"
+
+  - content: "I genuinely feel angry when I see coverage like this. It feels deliberately one-sided and it's exhausting."
+    intent: genuine
+    note: "Hard case: expresses anger but is a personal reflection, not bait"
+
+  # ── fearmongering ──────────────────────────────────────────────────────────
+
+  - content: "By 2026, you won't recognize this country. They've already won. Prepare accordingly."
+    intent: fearmongering
+
+  - content: "🚨 ALERT: Society is COLLAPSING. Get out while you still can."
+    intent: fearmongering
+
+  - content: "Your children's future has already been decided, and no one is going to tell you the truth about it."
+    intent: fearmongering
+
+  - content: "The thing nobody wants to say out loud: this is just the beginning. What comes next will be much worse."
+    intent: fearmongering
+    note: "Vague but scary prediction without any specifics"
+
+  - content: "A new study shows increased flood risk in coastal areas by 2050 if emissions stay at current levels."
+    intent: neutral
+    note: "Hard case: genuinely scary content but is factual and specific, not fearmongering"
+
+  # ── hype ──────────────────────────────────────────────────────────────────
+
+  - content: "BREAKING: This new AI tool is going to change EVERYTHING. I can't believe more people aren't talking about this!"
+    intent: hype
+
+  - content: "This is the most important thing I've read all year. Everyone needs to see this. RT immediately."
+    intent: hype
+
+  - content: "Just dropped the alpha. It's live. Go now before it gets taken down."
+    intent: hype
+    note: "Artificial urgency without substance"
+
+  - content: "New framework dropped this week. First impressions: fast compiler, clean API surface, rough docs. Worth watching."
+    intent: genuine
+    note: "Hard case: positive and enthusiastic but grounded with specific observations"
+
+  # ── engagement_bait ───────────────────────────────────────────────────────
+
+  - content: "Reply with your favorite pizza topping and I'll tell you your personality type!"
+    intent: engagement_bait
+
+  - content: "Tag someone who needs to hear this 👇"
+    intent: engagement_bait
+
+  - content: "What's your unpopular opinion? Drop it below. No judgment."
+    intent: engagement_bait
+
+  - content: "Like if you agree. Retweet if you REALLY agree."
+    intent: engagement_bait
+
+  - content: "What do you think is the single biggest problem with how we teach programming to beginners?"
+    intent: genuine
+    note: "Hard case: asks for opinions but is a real question seeking insight, not just metrics"
+
+  # ── divisive ──────────────────────────────────────────────────────────────
+
+  - content: "People who don't wake up at 5am are just lazy. Winners have discipline."
+    intent: divisive
+
+  - content: "There are two kinds of people: those who get it and those who never will."
+    intent: divisive
+
+  - content: "The left/right always do this. They can't help themselves. It's just who they are."
+    intent: divisive
+
+  - content: "If you still support X at this point, I genuinely don't know what to tell you."
+    intent: divisive
+    note: "Tribal exclusion framing"
+
+  - content: "Interesting how the reaction to this split almost exactly along partisan lines. What does that tell us about how we process information?"
+    intent: genuine
+    note: "Hard case: observes division without exploiting it, uses it as a genuine question"
+
+  # ── genuine ───────────────────────────────────────────────────────────────
+
+  - content: "I've been dealing with anxiety for 10 years. Here's what actually helped me, though everyone's different."
+    intent: genuine
+
+  - content: "Tried this recipe last night. The garlic was perfect but I'd add more salt next time. 7/10."
+    intent: genuine
+
+  - content: "I was wrong about this. Here's what changed my mind and why I think the original position was flawed."
+    intent: genuine
+    note: "Admitting error is a strong genuine signal"
+
+  - content: "I don't have a clean take on this. Both sides seem to have legitimate points and I'm genuinely uncertain."
+    intent: genuine
+    note: "Expressed uncertainty is a genuine marker"
+
+  - content: "Three months into using Rust professionally. Memory safety is great but the borrow checker still surprises me weekly. Happy to share specifics."
+    intent: genuine
+
+  # ── neutral ───────────────────────────────────────────────────────────────
+
+  - content: "The new transit line opens March 15. Here's the schedule and route map."
+    intent: neutral
+
+  - content: "Python 3.13 released. Release notes linked below."
+    intent: neutral
+
+  - content: "Thread on the history of type systems in programming languages. Part 1 of 5."
+    intent: neutral
+
+  - content: "Conference talk recordings from last week are now up on YouTube."
+    intent: neutral
+
+  - content: "Q3 earnings call transcript is available on the investor relations page."
+    intent: neutral
+
+  # ── clickbait (YouTube-specific) ─────────────────────────────────────────
+
+  - content: "I Tried EVERY Fast Food Chain For 30 Days (The Results Will SHOCK You)"
+    intent: clickbait
+
+  - content: "We Bought The CHEAPEST Thing From 50 Different Countries (NOT What We Expected)"
+    intent: clickbait
+
+  - content: "I Let AI Run My Life For A Week And This Is What Happened..."
+    intent: clickbait
+    note: "Trailing ellipsis + vague promise is a classic clickbait pattern"
+
+  - content: "Scientists Have No Explanation For This"
+    intent: clickbait
+    note: "Deliberately vague, implies forbidden/hidden knowledge"
+
+  - content: "Why Most People Get Compound Interest Wrong (And How To Fix It)"
+    intent: genuine
+    note: "Hard case: educational title that uses common clickbait structure but delivers actual value"
+
+  - content: "I Quit My Job To Do This Full Time - Here's Everything I Learned In 6 Months"
+    intent: genuine
+    note: "Hard case: personal narrative that reads like clickbait but is likely substantive"
+
+  # ── reaction_farming (YouTube-specific) ──────────────────────────────────
+
+  - content: "Pineapple belongs on pizza. Change my mind. 🍕"
+    intent: reaction_farming
+
+  - content: "Marvel fans vs DC fans. Comment which side you're on. No switching allowed."
+    intent: reaction_farming
+
+  - content: "Hot take: tabs are better than spaces. Come at me."
+    intent: reaction_farming
+    note: "Classic low-stakes tribal conflict bait"
+
+  - content: "Nobody actually likes jazz. They just pretend to."
+    intent: reaction_farming
+    note: "Deliberately wrong statement to provoke corrections"
+
+  - content: "What's your preference: dark mode or light mode, and why? Genuinely curious what people's workflows look like."
+    intent: genuine
+    note: "Hard case: preference question but grounded in a real workflow question, not pure conflict bait"
