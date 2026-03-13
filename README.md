@@ -42,7 +42,7 @@ IntentKeeper doesn't fix the platforms. It gives you a lens to see the manipulat
 
 A post about politics can be thoughtful analysis or manufactured outrage. A health tip can be genuine advice or fearmongering. Same topic, opposite effect on your wellbeing.
 
-IntentKeeper classifies the **energy** behind the words - not the words themselves. It doesn't censor topics. It surfaces manipulation.
+IntentKeeper classifies the **intent** behind the words - not the words themselves. It doesn't censor topics. It surfaces manipulation.
 
 ## Quick Start
 
@@ -153,4 +153,4 @@ MIT - see [LICENSE](LICENSE).
 
 ---
 
-*"Protect your attention. Question the energy, not the topic."*
+*"Protect your attention. Ask what a post is trying to do, not just what it's about."*
