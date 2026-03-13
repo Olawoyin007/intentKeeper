@@ -114,26 +114,37 @@
 
 **Goal**: Extend classification to YouTube titles, descriptions, and comments.
 
-### 3.1 YouTube Content Script
-- [ ] Create `extension/platforms/youtube.js`
-- [ ] Intercept video titles in feed/search
-- [ ] Intercept video descriptions on watch page
-- [ ] Intercept top-level comments
+### 3.1 YouTube Content Script ✅ DONE
+- [x] Create `extension/platforms/youtube.js`
+- [x] Intercept video titles in feed/search
+- [x] Intercept video descriptions on watch page
+- [x] Intercept top-level comments
 
-### 3.2 YouTube-Specific Intents
-- [ ] Add `clickbait` intent (YouTube-specific)
-- [ ] Add `reaction_farming` intent for comment sections
-- [ ] Update few-shot examples with YouTube content
+### 3.2 YouTube-Specific Intents ✅ DONE
+- [x] Add `clickbait` intent (YouTube-specific)
+- [x] Add `reaction_farming` intent for comment sections
+- [x] Update few-shot examples with YouTube content
 
-### 3.3 Visual Treatments for YouTube
-- [ ] Thumbnail blur for high-manipulation videos
-- [ ] Title badges for tagged content
-- [ ] Comment collapse for engagement bait
+### 3.3 Visual Treatments for YouTube ✅ DONE
+- [x] Thumbnail blur for high-manipulation videos (overlay scoped to thumbnail)
+- [x] Title badges for tagged content
+- [x] Comment collapse for engagement bait
 
-### 3.4 Platform Abstraction
-- [ ] Refactor content.js into a platform adapter pattern
-- [ ] Create shared classification logic used by both Twitter and YouTube adapters
-- [ ] Ensure new platforms can be added by implementing a single adapter
+### 3.4 Intent Anchoring (Recommendation Shield) ⏸ DEFERRED
+- [ ] On YouTube landing, prompt: "What did you come here for?" (one line, free text, unobtrusive)
+- [ ] Hold declared intent in session memory
+- [ ] Classify recommendations on a second axis: does this match why you came?
+- [ ] After declared content is consumed, surface a soft stop: "You came for X. You've seen it."
+- [ ] Not a hard block, just a pause before endless scrolling
+- [ ] Opt-in feature (connects to Phase 6 user-configurable sensitivity)
+
+> Deferred: Requires user trust in classifications to be established first.
+> Revisit after Phase 5 eval passes.
+
+### 3.5 Platform Abstraction ✅ DONE
+- [x] Refactor content.js into a platform adapter pattern
+- [x] Create shared classification logic used by both Twitter and YouTube adapters
+- [x] Ensure new platforms can be added by implementing a single adapter
 
 ---
 
@@ -156,6 +167,13 @@
 - [ ] Pass subreddit context to classifier
 - [ ] Adjust thresholds by subreddit type
 - [ ] r/politics vs r/science need different baselines
+
+### 4.4 Intent Anchoring for Reddit
+- [ ] On subreddit landing, prompt: "What are you looking for?" (free text, unobtrusive)
+- [ ] Hold declared intent in session memory (shared logic with YouTube, Phase 3.4)
+- [ ] Classify feed posts against declared intent: does this match why you came?
+- [ ] Soft stop after declared content consumed: "You found what you came for."
+- [ ] Opt-in feature (connects to Phase 6 user-configurable sensitivity)
 
 ---
 
@@ -264,9 +282,15 @@
 ### 10.1 Desktop App
 - [ ] System tray app for clipboard monitoring
 - [ ] Classify links before opening
-- [ ] Optional: intercept notification content
 
-### 10.2 Mobile Considerations
+### 10.2 Notification Interceptor
+- [ ] Use OS notification API (Windows/macOS/Linux all expose hooks) to intercept notifications before display
+- [ ] Route intercepted notifications through the existing FastAPI classification server
+- [ ] Batch non-urgent notifications into a single digest, delivered on a user-defined schedule
+- [ ] Hard-stop on notification volume: if an app sends more than N notifications per hour, auto-batch regardless of content
+- [ ] Per-app configuration: allow users to exempt specific apps from interception
+
+### 10.3 Mobile Considerations
 - [ ] Research iOS/Android integration options
 - [ ] Share sheet integration
 - [ ] Browser-based mobile solution
@@ -279,22 +303,31 @@
 |-------|--------|--------|----------|
 | 1. Core + Twitter | High | Medium | ✅ COMPLETE |
 | 2. Hardening & Reliability | Critical | Medium | ✅ COMPLETE |
-| 3. YouTube | High | Medium | 🔴 Next |
-| 4. Reddit | High | Medium | 🔵 After 3 |
-| 5. Classification Accuracy | High | Low | 🔵 After 3 |
+| 3. YouTube | High | Medium | 🟡 In Progress |
+| 5. Classification Accuracy | Critical | Low | 🔴 Next - gates platform expansion |
+| 4. Reddit | High | Medium | 🔵 After eval passes |
 | 6. User Sensitivity | Medium | Low | 🔵 After 5 |
 | 7. Statistics | Medium | Medium | 🔵 After 6 |
 | 8. Firefox | Medium | Low | 🔵 After 7 |
 | 9. Advanced Classification | High | High | 🔵 Long-term |
 | 10. Cross-Platform | Medium | High | 🔵 Long-term |
 
+> **Why Phase 5 before Phase 4**: The hardest part of this project is not
+> engineering - it's building user trust in the taxonomy. If ragebait/divisive/hype
+> labels feel wrong to users, the product feels moralizing regardless of how clean
+> the code is. The eval harness in `tests/eval/` measures per-intent precision and
+> recall. Platform expansion (Reddit) should not happen until the eval passes a
+> 70% macro F1 threshold.
+
 ---
 
-## Current Status (2026-02-23)
+## Current Status (2026-03-11)
 
-**Completed**: Phase 1 (Core classifier + Chrome extension for Twitter/X), Phase 2 (Hardening & Reliability)
+**Completed**: Phase 1 (Core classifier + Chrome extension for Twitter/X), Phase 2 (Hardening & Reliability), Phase 3.1-3.3 + 3.5 (YouTube support + platform abstraction)
 
-**Next Up**: Phase 3 (YouTube Support)
+**Next Up**: Phase 5 (Classification accuracy - eval harness built, needs Ollama run to establish baseline)
+
+**Priority shift**: Phase 4 (Reddit) moved after Phase 5. Eval gates platform expansion.
 
 **Stats**:
 

@@ -44,6 +44,7 @@ dev = [
 
 [project.scripts]
 intentkeeper-server = "server.api:main"
+intentkeeper-eval = "tests.eval.run_eval:main"
 
 [project.urls]
 Homepage = "https://github.com/Olawoyin007/intentKeeper"
