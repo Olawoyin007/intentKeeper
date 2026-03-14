@@ -16,7 +16,7 @@
 
 There are hundreds of tools that block, hide, or filter social media. IntentKeeper is the only one that tells you *why* content is designed to manipulate you - and lets you decide what to do with it.
 
-Ragebait, fearmongering, hype, divisive framing - classified by intent, not topic, before they affect you. Everything runs on your hardware via Ollama. No cloud. No tracking. No data leaving your machine.
+Ragebait, fearmongering, hype, divisive framing - are all classified by intent, not topic, before they affect you. Everything runs on your hardware via Ollama. No cloud. No tracking. No data leaving your machine.
 
 ---
 
