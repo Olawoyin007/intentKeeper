@@ -11,7 +11,6 @@ Covers:
 """
 
 import asyncio
-import os
 from unittest.mock import AsyncMock, patch
 
 import pytest
@@ -706,17 +705,26 @@ class TestLifespan:
         api_module = lifespan_setup
         mock_client = AsyncMock()
 
-        # Use the actual configured model name so the match logic finds it
-        model_name = os.getenv("OLLAMA_MODEL", "mistral:7b-instruct")
-        tags_response = Mock()
-        tags_response.json.return_value = {"models": [{"name": model_name}]}
-        tags_response.raise_for_status = Mock()
-        mock_client.get = AsyncMock(return_value=tags_response)
+        # Build the tags response dynamically - we need the model name the
+        # classifier will actually use, which depends on env/defaults at init time.
+        # Use a side_effect so we can read classifier.model after lifespan creates it.
+        def make_tags_response(model_name):
+            resp = Mock()
+            resp.json.return_value = {"models": [{"name": model_name}]}
+            resp.raise_for_status = Mock()
+            return resp
+
+        # Defer: we'll set the return value once we know the model
+        mock_client.get = AsyncMock()
 
         with patch(
             "server.api.httpx.AsyncClient", return_value=self._make_lifespan_client(mock_client)
         ):
             with patch.object(IntentClassifier, "check_health", return_value=True):
+                # Set the tags response to match whatever model the classifier picked
+                classifier_model = IntentClassifier().model
+                mock_client.get.return_value = make_tags_response(classifier_model)
+
                 async with api_module.lifespan(app):
                     assert api_module.classifier is not None
                     mock_client.stream.assert_not_called()
