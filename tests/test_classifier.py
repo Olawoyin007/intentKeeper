@@ -11,22 +11,22 @@ Covers:
 """
 
 import asyncio
-import time
+import os
+from unittest.mock import AsyncMock, patch
 
 import pytest
 from httpx import ASGITransport, AsyncClient
-from unittest.mock import AsyncMock, patch
 
+from server.api import app
 from server.classifier import (
+    MAX_CONTENT_LENGTH,
+    MIN_CONTENT_LENGTH,
     ClassificationResult,
     IntentClassifier,
-    MIN_CONTENT_LENGTH,
-    MAX_CONTENT_LENGTH,
 )
-from server.api import app
-
 
 # --- Helpers ---
+
 
 def make_classifier(**kwargs) -> IntentClassifier:
     """Create a classifier with defaults suitable for testing."""
@@ -39,6 +39,7 @@ def mock_ollama_response(intent="neutral", confidence=0.5, reasoning="Test"):
 
 
 # --- ClassificationResult ---
+
 
 class TestClassificationResult:
     """Tests for ClassificationResult dataclass."""
@@ -57,6 +58,7 @@ class TestClassificationResult:
 
 
 # --- Classifier unit tests ---
+
 
 class TestIntentClassifier:
     """Tests for IntentClassifier."""
@@ -84,9 +86,7 @@ class TestIntentClassifier:
             return_value=mock_ollama_response("ragebait", 0.9, "Inflammatory")
         )
 
-        result = await classifier.classify(
-            "This is EXACTLY why I hate them. Every. Single. Time."
-        )
+        result = await classifier.classify("This is EXACTLY why I hate them. Every. Single. Time.")
         assert result.intent == "ragebait"
         assert result.action == "blur"
         assert result.confidence == 0.9
@@ -161,6 +161,7 @@ class TestIntentClassifier:
 
 # --- Manipulation score ---
 
+
 class TestManipulationScore:
     """Tests for manipulation score calculation."""
 
@@ -190,6 +191,7 @@ class TestManipulationScore:
 
 
 # --- Cache behavior ---
+
 
 class TestCache:
     """Tests for in-memory classification cache."""
@@ -257,6 +259,7 @@ class TestCache:
 
 # --- Edge cases ---
 
+
 class TestEdgeCases:
     """Tests for edge case handling."""
 
@@ -270,7 +273,7 @@ class TestEdgeCases:
 
         # Content with exactly MIN_CONTENT_LENGTH chars (after strip)
         content = "a" * MIN_CONTENT_LENGTH
-        result = await classifier.classify(content)
+        await classifier.classify(content)
         # Should NOT be skipped — it meets the minimum
         assert classifier._call_ollama.call_count == 1
 
@@ -370,6 +373,7 @@ class TestEdgeCases:
 
 
 # --- API integration tests ---
+
 
 class TestAPIEndpoints:
     """Integration tests for FastAPI endpoints."""
@@ -484,3 +488,249 @@ class TestAPIEndpoints:
         data = response.json()
         assert data["status"] == "degraded"
         assert data["ollama_connected"] is False
+
+    @pytest.mark.asyncio
+    async def test_classify_503_when_no_classifier(self):
+        """POST /classify should return 503 when classifier is None."""
+        with patch("server.api.classifier", None):
+            transport = ASGITransport(app=app)
+            async with AsyncClient(transport=transport, base_url="http://test") as ac:
+                response = await ac.post(
+                    "/classify",
+                    json={"content": "Some test content for classification"},
+                )
+        assert response.status_code == 503
+
+    @pytest.mark.asyncio
+    async def test_batch_503_when_no_classifier(self):
+        """POST /classify/batch should return 503 when classifier is None."""
+        with patch("server.api.classifier", None):
+            transport = ASGITransport(app=app)
+            async with AsyncClient(transport=transport, base_url="http://test") as ac:
+                response = await ac.post(
+                    "/classify/batch",
+                    json={"items": [{"content": "Some test content"}]},
+                )
+        assert response.status_code == 503
+
+    @pytest.mark.asyncio
+    async def test_intents_503_when_no_classifier(self):
+        """GET /intents should return 503 when classifier is None."""
+        with patch("server.api.classifier", None):
+            transport = ASGITransport(app=app)
+            async with AsyncClient(transport=transport, base_url="http://test") as ac:
+                response = await ac.get("/intents")
+        assert response.status_code == 503
+
+
+# --- Classifier internals ---
+
+
+class TestClassifierInternals:
+    """Tests for classifier internal methods (client lifecycle, _call_ollama)."""
+
+    @pytest.mark.asyncio
+    async def test_get_client_creates_client_when_none(self):
+        """_get_client should create a new client if none was injected."""
+        classifier = make_classifier()
+        assert classifier._http_client is None
+
+        client = await classifier._get_client()
+        assert client is not None
+        assert classifier._owns_client is True
+
+        # Clean up
+        await classifier.close()
+
+    @pytest.mark.asyncio
+    async def test_get_client_reuses_injected_client(self):
+        """_get_client should reuse an injected client."""
+        mock_client = AsyncMock()
+        classifier = make_classifier(http_client=mock_client)
+
+        client = await classifier._get_client()
+        assert client is mock_client
+        assert classifier._owns_client is False
+
+    @pytest.mark.asyncio
+    async def test_close_when_owns_client(self):
+        """close() should close client when classifier owns it."""
+        classifier = make_classifier()
+        # Force client creation
+        await classifier._get_client()
+        assert classifier._owns_client is True
+        assert classifier._http_client is not None
+
+        await classifier.close()
+        assert classifier._http_client is None
+
+    @pytest.mark.asyncio
+    async def test_close_when_not_owns_client(self):
+        """close() should not close an injected client."""
+        mock_client = AsyncMock()
+        classifier = make_classifier(http_client=mock_client)
+
+        await classifier.close()
+        # Should not have called aclose on the injected client
+        mock_client.aclose.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_call_ollama_sends_correct_payload(self):
+        """_call_ollama should POST to Ollama with the right payload."""
+        from unittest.mock import Mock
+
+        mock_client = AsyncMock()
+        mock_response = Mock()
+        mock_response.json.return_value = {"response": '{"intent": "neutral"}'}
+        mock_response.raise_for_status = Mock()
+        mock_client.post = AsyncMock(return_value=mock_response)
+
+        classifier = make_classifier(http_client=mock_client)
+
+        await classifier._call_ollama("test prompt")
+
+        mock_client.post.assert_called_once()
+        call_kwargs = mock_client.post.call_args
+        payload = call_kwargs.kwargs.get("json") or call_kwargs[1].get("json")
+        assert payload["model"] == classifier.model
+        assert payload["stream"] is False
+        assert payload["format"] == "json"
+
+    @pytest.mark.asyncio
+    async def test_call_ollama_returns_response_text(self):
+        """_call_ollama should return the 'response' field from Ollama."""
+        from unittest.mock import Mock
+
+        mock_client = AsyncMock()
+        mock_response = Mock()
+        mock_response.json.return_value = {"response": '  {"intent": "ragebait"}  '}
+        mock_response.raise_for_status = Mock()
+        mock_client.post = AsyncMock(return_value=mock_response)
+
+        classifier = make_classifier(http_client=mock_client)
+
+        result = await classifier._call_ollama("test prompt")
+        assert result == '{"intent": "ragebait"}'  # stripped
+
+
+# --- Lifespan ---
+
+
+class TestLifespan:
+    """Tests for the FastAPI lifespan (startup/shutdown)."""
+
+    @pytest.fixture
+    def lifespan_setup(self):
+        """Common setup for lifespan tests - saves/restores global classifier."""
+        import server.api as api_module
+
+        original = api_module.classifier
+        yield api_module
+        api_module.classifier = original
+
+    def _make_lifespan_client(self, mock_client):
+        """Wrap a mock client in the AsyncClient context manager pattern."""
+        mock_ctx = AsyncMock()
+        mock_ctx.__aenter__ = AsyncMock(return_value=mock_client)
+        mock_ctx.__aexit__ = AsyncMock(return_value=False)
+        return mock_ctx
+
+    @pytest.mark.asyncio
+    async def test_lifespan_initializes_classifier(self, lifespan_setup):
+        """Lifespan should initialize global classifier on startup."""
+        from unittest.mock import Mock
+
+        api_module = lifespan_setup
+        mock_client = AsyncMock()
+
+        tags_response = Mock()
+        tags_response.json.return_value = {"models": [{"name": "mistral:latest"}]}
+        tags_response.raise_for_status = Mock()
+        mock_client.get = AsyncMock(return_value=tags_response)
+
+        with patch(
+            "server.api.httpx.AsyncClient", return_value=self._make_lifespan_client(mock_client)
+        ):
+            with patch.object(IntentClassifier, "check_health", return_value=True):
+                async with api_module.lifespan(app):
+                    assert api_module.classifier is not None
+
+    @pytest.mark.asyncio
+    async def test_lifespan_handles_ollama_down(self, lifespan_setup):
+        """Lifespan should handle Ollama being unreachable gracefully."""
+        api_module = lifespan_setup
+        mock_client = AsyncMock()
+
+        with patch(
+            "server.api.httpx.AsyncClient", return_value=self._make_lifespan_client(mock_client)
+        ):
+            with patch.object(IntentClassifier, "check_health", return_value=False):
+                async with api_module.lifespan(app):
+                    assert api_module.classifier is not None
+
+    @pytest.mark.asyncio
+    async def test_lifespan_pulls_missing_model(self, lifespan_setup):
+        """Lifespan should pull model when it's not present locally."""
+        from unittest.mock import Mock
+
+        api_module = lifespan_setup
+        mock_client = AsyncMock()
+
+        # Tags response - model NOT present
+        tags_response = Mock()
+        tags_response.json.return_value = {"models": [{"name": "other-model:latest"}]}
+        tags_response.raise_for_status = Mock()
+        mock_client.get = AsyncMock(return_value=tags_response)
+
+        # Pull stream mock
+        mock_stream_ctx = AsyncMock()
+        mock_stream_response = AsyncMock()
+        mock_stream_response.aiter_lines = AsyncMock(return_value=iter([]))
+        mock_stream_ctx.__aenter__ = AsyncMock(return_value=mock_stream_response)
+        mock_stream_ctx.__aexit__ = AsyncMock(return_value=False)
+        mock_client.stream = Mock(return_value=mock_stream_ctx)
+
+        with patch(
+            "server.api.httpx.AsyncClient", return_value=self._make_lifespan_client(mock_client)
+        ):
+            with patch.object(IntentClassifier, "check_health", return_value=True):
+                async with api_module.lifespan(app):
+                    assert api_module.classifier is not None
+                    mock_client.stream.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_lifespan_skips_pull_when_model_present(self, lifespan_setup):
+        """Lifespan should skip pull when model is already available."""
+        from unittest.mock import Mock
+
+        api_module = lifespan_setup
+        mock_client = AsyncMock()
+
+        # Use the actual configured model name so the match logic finds it
+        model_name = os.getenv("OLLAMA_MODEL", "mistral:7b-instruct")
+        tags_response = Mock()
+        tags_response.json.return_value = {"models": [{"name": model_name}]}
+        tags_response.raise_for_status = Mock()
+        mock_client.get = AsyncMock(return_value=tags_response)
+
+        with patch(
+            "server.api.httpx.AsyncClient", return_value=self._make_lifespan_client(mock_client)
+        ):
+            with patch.object(IntentClassifier, "check_health", return_value=True):
+                async with api_module.lifespan(app):
+                    assert api_module.classifier is not None
+                    mock_client.stream.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_lifespan_handles_model_check_failure(self, lifespan_setup):
+        """Lifespan should handle model check failure gracefully."""
+        api_module = lifespan_setup
+        mock_client = AsyncMock()
+        mock_client.get = AsyncMock(side_effect=Exception("Tags endpoint failed"))
+
+        with patch(
+            "server.api.httpx.AsyncClient", return_value=self._make_lifespan_client(mock_client)
+        ):
+            with patch.object(IntentClassifier, "check_health", return_value=True):
+                async with api_module.lifespan(app):
+                    assert api_module.classifier is not None
