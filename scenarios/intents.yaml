@@ -149,6 +149,33 @@ few_shot_examples:
   - content: "Marvel fans vs DC fans. Comment which side you're on. No switching allowed."
     intent: reaction_farming
 
+  # Sarcasm edge cases - framing is key, not surface meaning
+  - content: "Oh sure, politicians definitely care about us regular people. I totally believe that."
+    intent: ragebait
+
+  - content: "Oh wow, another AI that will 'change everything'. Bold claim. Where have I heard that before."
+    intent: genuine
+
+  # Emoji-heavy content
+  - content: "🚨🚨 MUST READ 🚨🚨 Everything is falling apart RIGHT NOW and nobody is talking about it 😱😱"
+    intent: fearmongering
+
+  - content: "Just made pasta 🍝 added too much salt but still ate the whole bowl 😅 10/10 would repeat"
+    intent: genuine
+
+  - content: "💯 Like if you agree 👇 Drop a ❤️ if this is you"
+    intent: engagement_bait
+
+  # Mixed-intent - primary signal wins
+  - content: "I've been struggling with anxiety (genuine) but honestly the government is LITERALLY trying to destroy us all"
+    intent: fearmongering
+
+  - content: "Great analysis here - though I think people who disagree are just too dumb to get it"
+    intent: divisive
+
+  - content: "This study shows X might reduce Y - fascinating if replicated. I'd wait for peer review before changing anything."
+    intent: genuine
+
 # Classification rules (for the LLM prompt)
 rules:
   - "Focus on HOW content is framed, not the topic itself"
