@@ -8,7 +8,7 @@
 
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License: MIT"></a>
-  <img src="https://img.shields.io/badge/version-0.3.0-green.svg" alt="Version: 0.2.0">
+  <img src="https://img.shields.io/badge/version-0.4.0-green.svg" alt="Version: 0.4.0">
   <img src="https://img.shields.io/badge/python-3.10%2B-blue.svg" alt="Python: 3.10+">
   <img src="https://img.shields.io/badge/platform-Twitter%2FX-1DA1F2.svg" alt="Platform: Twitter/X">
   <img src="https://img.shields.io/badge/local--first-Ollama-orange.svg" alt="Local-First: Ollama">
@@ -95,6 +95,8 @@ See [docs/usage.md](docs/usage.md) for the full setup guide and troubleshooting.
 | **Hype** | "This AI tool changes EVERYTHING. You're missing out!" | Tagged with label |
 | **Engagement bait** | "Reply with your favorite X and I'll tell you Y!" | Hidden (expandable) |
 | **Divisive** | "People who don't do X are just lazy. Winners have discipline." | Tagged with label |
+| **Clickbait** | "She Said ONE Thing And Got Promoted Immediately (This Works)" | Tagged with label |
+| **Reaction farming** | "Hot take incoming. I know this will divide people." | Tagged with label |
 | **Genuine** | "I've dealt with anxiety for 10 years. Here's what helped me." | Tagged (passes through) |
 | **Neutral** | "The new transit line opens March 15. Here's the schedule." | Tagged (passes through) |
 

@@ -93,14 +93,24 @@ class IntentClassifier:
         self._owns_client = False
 
     async def _get_client(self) -> httpx.AsyncClient:
-        """Get or create the async HTTP client."""
+        """Get or create the async HTTP client.
+
+        Uses the injected client if one was provided at construction (e.g. from
+        the lifespan-managed shared client). Otherwise lazily creates a private
+        client and sets _owns_client so it gets closed in close().
+        """
         if self._http_client is None:
             self._http_client = httpx.AsyncClient(timeout=OLLAMA_TIMEOUT)
             self._owns_client = True
         return self._http_client
 
     async def close(self):
-        """Close the HTTP client if we own it."""
+        """Close the HTTP client if we own it.
+
+        Only closes the client when this instance created it (_owns_client=True).
+        Injected clients (from lifespan) are managed by their owner and must not
+        be closed here.
+        """
         if self._owns_client and self._http_client is not None:
             await self._http_client.aclose()
             self._http_client = None
@@ -279,7 +289,11 @@ JSON response:"""
             self._cache.popitem(last=False)
 
     async def _call_ollama_with_retry(self, prompt: str, retries: int = 1) -> str:
-        """Call Ollama with a single retry on failure."""
+        """Call Ollama with a single retry on transient failure.
+
+        Waits RETRY_DELAY seconds between attempts. Raises the last exception
+        if all attempts fail - callers should handle this and fail open.
+        """
         last_error = None
         for attempt in range(1 + retries):
             try:
@@ -294,7 +308,11 @@ JSON response:"""
         raise last_error
 
     async def _call_ollama(self, prompt: str) -> str:
-        """Call Ollama API for classification."""
+        """Send a classification prompt to Ollama and return the raw response string.
+
+        Uses `format: json` to nudge the model toward valid JSON output.
+        The response is not parsed here - see _parse_response().
+        """
         payload = {
             "model": self.model,
             "prompt": prompt,

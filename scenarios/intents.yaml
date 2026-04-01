@@ -149,6 +149,109 @@ few_shot_examples:
   - content: "Marvel fans vs DC fans. Comment which side you're on. No switching allowed."
     intent: reaction_farming
 
+  # Sarcasm edge cases - framing is key, not surface meaning
+  - content: "Oh sure, politicians definitely care about us regular people. I totally believe that."
+    intent: ragebait
+
+  - content: "Oh wow, another AI that will 'change everything'. Bold claim. Where have I heard that before."
+    intent: genuine
+
+  # ragebait - varied styles
+  - content: "Can you BELIEVE this is what passes for leadership these days? No wonder everything is falling apart."
+    intent: ragebait
+
+  - content: "If you still defend this after everything that's come out, there is genuinely no reasoning with you."
+    intent: ragebait
+
+  # Emoji-heavy content
+  - content: "🚨🚨 MUST READ 🚨🚨 Everything is falling apart RIGHT NOW and nobody is talking about it 😱😱"
+    intent: fearmongering
+
+  - content: "Just made pasta 🍝 added too much salt but still ate the whole bowl 😅 10/10 would repeat"
+    intent: genuine
+
+  - content: "💯 Like if you agree 👇 Drop a ❤️ if this is you"
+    intent: engagement_bait
+
+  # Mixed-intent - primary signal wins
+  - content: "Scientists WARN: your water supply may already be contaminated. Do you actually know what's in yours?"
+    intent: fearmongering
+
+  - content: "I've been struggling with anxiety (genuine) but honestly the government is LITERALLY trying to destroy us all"
+    intent: fearmongering
+
+  - content: "Great analysis here - though I think people who disagree are just too dumb to get it"
+    intent: divisive
+
+  # divisive - varied styles
+  - content: "There are two types of people in this world. You already know which one you are."
+    intent: divisive
+
+  - content: "Millennials did X. Gen Z is doing Y. And somehow the rest of us are supposed to just accept this."
+    intent: divisive
+
+  - content: "You either understand what's happening or you're part of the problem. No middle ground."
+    intent: divisive
+
+  # hype - manufactured urgency
+  - content: "Drop everything. This thread is the most important thing you will read this year."
+    intent: hype
+
+  - content: "I spent 6 months testing 47 productivity apps. This ONE changed everything. I should have found it sooner."
+    intent: hype
+
+  - content: "🔥 About to share something the industry doesn't want you to know. Save this before I delete it."
+    intent: hype
+
+  - content: "This is the skill that separates the 1% from everyone else. I'm giving it away for free. For now."
+    intent: hype
+
+  # engagement_bait - varied triggers
+  - content: "Name a song that defined your decade. I'll go first: ... Your turn 👇"
+    intent: engagement_bait
+
+  - content: "Pick one and defend your choice: remote work or office. No sitting on the fence."
+    intent: engagement_bait
+
+  - content: "What's your unpopular food opinion? The spicier the take the better 🌶️"
+    intent: engagement_bait
+
+  # clickbait - deceptive framing
+  - content: "She Said ONE Thing To Her Boss And Got Promoted The Next Day (This Actually Works)"
+    intent: clickbait
+
+  - content: "The Truth About Breakfast That Nutritionists Don't Want You To Know"
+    intent: clickbait
+
+  - content: "I Tried Living Like A Billionaire For 30 Days. What Happened Shocked Even Me."
+    intent: clickbait
+
+  # reaction_farming - manufactured conflict
+  - content: "Unpopular opinion incoming. I know this will divide people but I'm saying it anyway."
+    intent: reaction_farming
+
+  - content: "Hot take: [statement]. Come at me in the comments."
+    intent: reaction_farming
+
+  - content: "Name your most controversial opinion. The comment section is going to be 🔥"
+    intent: reaction_farming
+
+  # neutral - informational with no manipulation
+  - content: "The library will be closed on Monday for maintenance. Normal hours resume Tuesday at 9am."
+    intent: neutral
+
+  - content: "Python 3.12 released. Key changes: 25% faster interpreter, improved error messages, new typing features."
+    intent: neutral
+
+  - content: "Registration for the spring semester opens December 1st. See the academic calendar for deadlines."
+    intent: neutral
+
+  - content: "Weather this week: partly cloudy Tuesday through Thursday, rain expected Friday."
+    intent: neutral
+
+  - content: "This study shows X might reduce Y - fascinating if replicated. I'd wait for peer review before changing anything."
+    intent: genuine
+
 # Classification rules (for the LLM prompt)
 rules:
   - "Focus on HOW content is framed, not the topic itself"
