@@ -139,27 +139,32 @@ function getCached(content) {
 // --- API ---
 
 /**
- * Classify a batch of content strings via the background service worker.
+ * Classify a batch of items via the background service worker.
+ * Each item is { content: string, mediaUrls: string[] }.
  * Returns a Map of content -> ClassificationResult.
  * Cache hits are served immediately; only uncached items go to the API.
  */
-async function classifyBatch(contentItems, platform) {
+async function classifyBatch(batchItems, platform) {
   const results = new Map();
   const uncached = [];
 
-  for (const content of contentItems) {
-    const cached = getCached(content);
+  for (const item of batchItems) {
+    const cached = getCached(item.content);
     if (cached) {
-      results.set(content, cached);
+      results.set(item.content, cached);
     } else {
-      uncached.push(content);
+      uncached.push(item);
     }
   }
 
   if (uncached.length === 0) return results;
 
   try {
-    const items = uncached.map(c => ({ content: c, source: platform }));
+    const items = uncached.map(({ content, mediaUrls }) => ({
+      content,
+      source: platform,
+      ...(mediaUrls && mediaUrls.length > 0 ? { media_urls: mediaUrls } : {})
+    }));
     const batchResults = await chrome.runtime.sendMessage({
       type: 'CLASSIFY_BATCH',
       items
@@ -169,8 +174,8 @@ async function classifyBatch(contentItems, platform) {
       for (let i = 0; i < uncached.length; i++) {
         const result = batchResults[i];
         if (result) {
-          cacheResult(uncached[i], result);
-          results.set(uncached[i], result);
+          cacheResult(uncached[i].content, result);
+          results.set(uncached[i].content, result);
         }
       }
     }
@@ -313,18 +318,19 @@ async function processItems(adapter) {
     const itemData = [];
     for (const item of items) {
       const text = adapter.extractText(item);
+      const mediaUrls = adapter.extractMediaUrls ? adapter.extractMediaUrls(item) : [];
       if (text.length < MIN_CONTENT_LENGTH) {
         item.setAttribute(PROCESSED_ATTR, 'skipped');
       } else {
         item.classList.add('intentkeeper-classifying');
-        itemData.push({ item, text });
+        itemData.push({ item, text, mediaUrls });
       }
     }
 
     for (let i = 0; i < itemData.length; i += MAX_CONCURRENT) {
       const batch = itemData.slice(i, i + MAX_CONCURRENT);
-      const contents = batch.map(d => d.text);
-      const results = await classifyBatch(contents, adapter.platform);
+      const batchItems = batch.map(d => ({ content: d.text, mediaUrls: d.mediaUrls }));
+      const results = await classifyBatch(batchItems, adapter.platform);
 
       for (const { item, text } of batch) {
         item.classList.remove('intentkeeper-classifying');

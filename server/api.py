@@ -112,6 +112,11 @@ class ClassifyRequest(BaseModel):
     )
     source: Optional[str] = Field(None, description="Source platform (twitter, youtube, etc)")
     url: Optional[str] = Field(None, description="URL of the content")
+    media_urls: Optional[List[str]] = Field(
+        None,
+        max_length=4,
+        description="URLs of images or video thumbnails to analyze via vision model",
+    )
 
 
 class ClassifyResponse(BaseModel):
@@ -166,7 +171,7 @@ async def classify_content(request: ClassifyRequest):
     if not classifier:
         raise HTTPException(status_code=503, detail="Classifier not initialized")
 
-    result = await classifier.classify(request.content)
+    result = await classifier.classify(request.content, media_urls=request.media_urls)
 
     logger.debug(
         f"Classified: {request.content[:50]}... -> {result.intent} ({result.confidence:.2f})"
@@ -192,8 +197,9 @@ async def classify_batch(request: BatchClassifyRequest):
     if not classifier:
         raise HTTPException(status_code=503, detail="Classifier not initialized")
 
-    contents = [item.content for item in request.items]
-    classifications = await classifier.classify_batch(contents)
+    classifications = await classifier.classify_batch(
+        [{"content": item.content, "media_urls": item.media_urls} for item in request.items]
+    )
 
     results = [
         ClassifyResponse(
