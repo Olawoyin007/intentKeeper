@@ -21,17 +21,42 @@ intentkeeper-server
 # or
 uvicorn server.api:app --reload --port 8420
 
-# Run tests (30 tests)
+# Run unit tests (58 tests, Ollama not required - all mocked)
 pytest tests/
 
 # Run tests with coverage
 pytest tests/ --cov=server
+
+# Run the classification eval against the labeled test set (requires Ollama running)
+python eval/run_eval.py
+python eval/run_eval.py --verbose          # show every item
+python eval/run_eval.py --filter ragebait  # one intent only
 
 # Linting and formatting
 ruff check server/
 ruff check --fix server/
 black server/
 ```
+
+## Eval Harness - IMPORTANT
+
+`eval/test_set.yaml` is a labeled test set of 48 examples (8 per intent) used to measure classification accuracy. `eval/run_eval.py` runs them through the classifier and reports per-intent accuracy and wrong classifications.
+
+**Current baseline: 90% accuracy** (43/48 correct, measured 2026-04-05).
+
+**Rule: run the eval before AND after any change to `scenarios/intents.yaml`.**
+
+This includes changes to intent definitions, few-shot examples, or classification rules. Without this, you have no way to know if a change helped or hurt. The wrong classifications list tells you exactly what to fix next.
+
+```bash
+# Workflow for improving classification quality:
+python eval/run_eval.py           # get baseline
+# make changes to scenarios/intents.yaml
+python eval/run_eval.py           # measure improvement
+# only commit if accuracy is >= baseline
+```
+
+The 5 remaining wrong classifications (10%) are genuine hard cases at the ragebait/divisive and hype/genuine boundaries. Further prompt changes are likely to cause regressions. Expand the test set first if you want to improve further.
 
 ## Required Environment Variables
 
@@ -108,21 +133,26 @@ intentKeeper/
 
 **Scenarios** (`scenarios/`):
 - [scenarios/intents.yaml](scenarios/intents.yaml) - Intent configuration:
-  - 7 intent categories with descriptions, actions, weights
-  - Few-shot examples for improved accuracy
-  - Classification rules for the LLM prompt
+  - 6 intent categories with descriptions, actions, weights
+  - 19 few-shot examples with reasoning (not just labels - reasoning teaches decision logic)
+  - Classification rules including explicit boundary rules for hard cases
+
+**Eval** (`eval/`):
+- [eval/test_set.yaml](eval/test_set.yaml) - 48 labeled examples, 8 per intent, weighted toward boundary cases
+- [eval/run_eval.py](eval/run_eval.py) - Eval runner: per-intent accuracy, wrong classification list
 
 ### Intent Categories
 
+6 intents (consolidated from 9 in v2 - engagement_bait absorbed reaction_farming, hype absorbed clickbait, genuine absorbed neutral):
+
 | Intent | Description | Default Action | Weight |
 |--------|-------------|----------------|--------|
-| `ragebait` | Designed to provoke anger/outrage | Blur | 0.9 |
-| `fearmongering` | Exaggerated threats, doom content | Tag | 0.7 |
-| `hype` | Manufactured urgency, FOMO triggers | Tag | 0.5 |
-| `engagement_bait` | Empty interaction requests | Hide | 0.6 |
-| `divisive` | Us-vs-them framing, tribal triggers | Tag | 0.7 |
-| `genuine` | Authentic insight, honest perspective | Pass | 0.0 |
-| `neutral` | Informational, no manipulation | Pass | 0.0 |
+| `ragebait` | Engineered to provoke anger/outrage | Blur | 0.9 |
+| `fearmongering` | Exaggerated threats, vague doom without sources | Tag | 0.7 |
+| `hype` | Manufactured urgency, FOMO, clickbait titles | Tag | 0.5 |
+| `engagement_bait` | Engineered for metrics - likes, replies, comment warfare | Hide | 0.6 |
+| `divisive` | Us-vs-them framing, group sorting, tribal triggers | Tag | 0.7 |
+| `genuine` | Authentic content, honest perspective, factual info | Pass | 0.0 |
 
 ### Classification Flow
 
@@ -173,7 +203,7 @@ Apply Visual Treatment (content.js)
 ```python
 @dataclass
 class ClassificationResult:
-    intent: str           # ragebait, fearmongering, hype, engagement_bait, divisive, genuine, neutral
+    intent: str           # ragebait, fearmongering, hype, engagement_bait, divisive, genuine
     confidence: float     # 0.0 to 1.0
     reasoning: str        # Brief explanation from LLM
     action: str           # blur, tag, hide, pass
@@ -231,7 +261,7 @@ except Exception as e:
 
 ### Testing
 
-Tests are in [tests/test_classifier.py](tests/test_classifier.py) with 30 tests covering:
+Tests are in [tests/test_classifier.py](tests/test_classifier.py) with 58 tests covering:
 - Intent classification for each category
 - Short content handling and min-length boundary
 - Fallback behavior on errors (fail-open)
