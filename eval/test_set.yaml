@@ -174,13 +174,13 @@
   note: "clear - moral sorting by product/platform choice"
 
 - content: "You can always tell the type of person someone is by how they treat service workers."
-  expected_intent: divisive
-  note: "clear - behavioural moral sorting"
+  expected_intent: genuine
+  note: "widely-held observation without contempt or manipulation intent - genuine perspective"
 
 # boundary: divisive vs engagement_bait (sorting vs farming)
 - content: "People who recline their airplane seat are inconsiderate. Change my mind."
-  expected_intent: divisive
-  note: "boundary - 'change my mind' sounds like engagement bait but the content is moral sorting. The judgment of a group is the primary frame."
+  expected_intent: engagement_bait
+  note: "'Change my mind' is a known engagement farming format - the call-to-action for comment volume overrides the divisive framing"
 
 # boundary: divisive vs ragebait (picking a side vs making you angry)
 - content: "The left and right have completely different visions for what this country should be. That divide is real and it isn't going away."

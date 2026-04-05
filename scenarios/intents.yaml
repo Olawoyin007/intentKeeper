@@ -106,6 +106,14 @@ few_shot_examples:
     intent: fearmongering
     reasoning: "Vague insider framing creates fear without any verifiable claim. 'Can't say more' avoids accountability while maximising anxiety."
 
+  - content: "🚨 ALERT: Something is being quietly rolled out that will affect every household. Read before they delete this."
+    intent: fearmongering
+    reasoning: "The urgency here is about DANGER coming to the reader, not about missing something good. Vague threat + alarm signals = fearmongering. If the urgency is 'danger/threat', classify as fearmongering - not hype."
+
+  - content: "Your water, your food, your air. They've been poisoning it for decades and nobody talks about it."
+    intent: fearmongering
+    reasoning: "Vague 'they' as threat with no named source. 'Decades' and 'poisoning' sound specific but there is no name, study, organisation, or link. Unnamed authority ('they', 'doctors', 'experts') without specific citations is NOT a real source - this is fearmongering."
+
   - content: "🚨🚨 MUST READ 🚨🚨 Everything is falling apart RIGHT NOW and nobody is talking about it 😱😱"
     intent: fearmongering
     reasoning: "Apocalyptic claim with zero specifics. Alarm emoji clusters and urgency language trigger fear response. No facts, no source, no actionable information."
@@ -138,7 +146,17 @@ few_shot_examples:
     intent: engagement_bait
     reasoning: "The 'fight me' framing is the tell. No genuine position being defended - the goal is comment volume through a low-stakes divisive topic. Reaction farming is engagement_bait."
 
+  # --- engagement_bait ---
+
+  - content: "Marvel fans vs DC fans. Comment which side you're on. No switching allowed."
+    intent: engagement_bait
+    reasoning: "Despite the two-sides framing (which looks divisive), the explicit call to action ('Comment which side you're on') reveals the goal is comment volume. When a call-to-action is present, engagement_bait takes priority over divisive."
+
   # --- divisive ---
+
+  - content: "Millennials ruined the housing market. It's really that simple."
+    intent: divisive
+    reasoning: "Blames a demographic group, but without explicit contemptuous language or calls to feel angry. Group blame that sorts and accuses = divisive. Add expressions of contempt ('how can people be this stupid', 'absolute audacity') and it becomes ragebait."
 
   - content: "There are two types of people in this world. You already know which one you are."
     intent: divisive
@@ -162,12 +180,18 @@ few_shot_examples:
 # Classification rules
 rules:
   - "Focus on HOW content is framed, not what it's about - political content can be genuine OR ragebait"
-  - "ragebait makes you feel ANGER at someone; divisive makes you pick a SIDE - classify by the primary signal"
+  - "ragebait makes you feel ANGER (contempt, fury) at someone; divisive makes you SORT people into groups - classify by the primary signal"
+  - "Group blame without explicit contempt ('Millennials ruined X') = divisive. Add contemptuous language ('how can people be this stupid') = ragebait."
+  - "fearmongering urgency is about DANGER coming to the reader ('this will affect every household', 'protect yourself'); hype urgency is about MISSING something good ('this changes everything', 'the secret to X')"
+  - "When a call-to-action is present ('comment below', 'which side', 'your turn 👇') without a stated purpose, engagement_bait takes priority over divisive. Exception: a genuine question with a stated reason ('helps us prioritise', 'trying to understand') = genuine."
+  - "Vague appeal to unnamed authority ('doctors say', 'experts warn', 'they've been doing this for decades') with no specific name, study, or link is NOT a real source - classify as fearmongering, not genuine"
+  - "fearmongering includes questions designed to trigger anxiety ('Are you prepared?', 'Do you know what's in yours?') even when phrased as a question - the danger framing is what matters, not the sentence type"
+  - "Contempt and moral dismissal ('some people are just bad', 'they can't handle the truth', 'no reasoning with them') are forms of contemptuous language that push content from divisive into ragebait"
+  - "Conspiracy insinuation with contempt ('The media LOVES burying this. Wonder why?') is ragebait - the rhetorical question is a device to provoke anger and suspicion, not a genuine curiosity trigger"
+  - "Personal experience framing ('I spent 6 months testing...', 'I worked on this for 2 years') does NOT automatically make content genuine - check whether the payoff is substantive or vague hype"
   - "engagement_bait and reaction_farming are the same intent - hide both"
   - "hype and clickbait are the same intent - tag both"
   - "genuine covers both personal authentic content AND neutral factual information - no manipulation intent = genuine"
   - "Sarcasm can be ragebait even when surface words are polite - judge the emotional effect intended"
   - "Alarming content with specific facts and sources is genuine, not fearmongering"
-  - "Emoji clusters (🚨🚨, 😱😱) amplify the intent signal but don't define it alone - read the text"
-  - "If content has mixed signals, classify by the PRIMARY manipulative intent"
   - "If content starts with [Post: ...], that is the original tweet being replied to - use it to understand the reply's intent"
