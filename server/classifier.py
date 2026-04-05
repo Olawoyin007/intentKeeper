@@ -42,6 +42,11 @@ DEFAULT_CACHE_TTL = 300
 # but we allow headroom for longer reasoning strings.
 LLM_MAX_TOKENS = 150
 
+# Number of few-shot examples to include in the classification prompt.
+# All examples in intents.yaml are shown up to this cap, prioritising
+# boundary cases (which appear later in the file) by using the full set.
+MAX_FEW_SHOT_EXAMPLES = 16
+
 # Ollama call timeout in seconds.
 OLLAMA_TIMEOUT = 30
 
@@ -193,8 +198,11 @@ class IntentClassifier:
         examples_text = ""
         if few_shot:
             examples_text = "\n\nExamples:\n"
-            for ex in few_shot[:5]:
-                examples_text += f'Content: "{ex["content"]}"\nIntent: {ex["intent"]}\n\n'
+            for ex in few_shot[:MAX_FEW_SHOT_EXAMPLES]:
+                examples_text += f'Content: "{ex["content"]}"\nIntent: {ex["intent"]}\n'
+                if ex.get("reasoning"):
+                    examples_text += f'Reasoning: {ex["reasoning"]}\n'
+                examples_text += "\n"
 
         rules = self.intents.get("rules", [])
         rules_text = (

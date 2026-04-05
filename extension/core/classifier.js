@@ -88,9 +88,6 @@ function formatIntent(intent) {
     engagement_bait: 'Engagement Bait',
     divisive: 'Divisive',
     genuine: 'Genuine',
-    neutral: 'Neutral',
-    clickbait: 'Clickbait',
-    reaction_farming: 'Reaction Farming',
   };
   return labels[intent] || intent;
 }
