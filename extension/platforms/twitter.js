@@ -60,6 +60,29 @@ const twitterAdapter = {
   },
 
   /**
+   * Extract media URLs (photos, GIFs, video thumbnails) from a tweet.
+   *
+   * All Twitter media is served from pbs.twimg.com. We exclude avatar images
+   * (UserAvatar containers) to avoid sending profile pictures to the vision model.
+   * URLs are normalized to "medium" resolution - large enough for the vision model
+   * to read text overlays and assess emotional tone without over-fetching.
+   *
+   * These URLs are sent to the server which fetches and describes them using a
+   * vision model (OLLAMA_VISION_MODEL env var). If no vision model is configured,
+   * the server skips image analysis and classifies on text alone.
+   */
+  extractMediaUrls(tweetElement) {
+    const urls = [];
+    tweetElement.querySelectorAll('img[src*="pbs.twimg.com"]').forEach(img => {
+      if (img.closest('[data-testid="UserAvatar"]')) return;
+      if (!img.src) return;
+      const url = img.src.replace(/name=\w+/, 'name=medium');
+      if (!urls.includes(url)) urls.push(url);
+    });
+    return urls;
+  },
+
+  /**
    * Extract tweet text including author name, quoted tweets, link cards,
    * video context, poll options, image alt text, and social context banners.
    * Richer context improves classification accuracy.

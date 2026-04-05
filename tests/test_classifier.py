@@ -342,9 +342,9 @@ class TestEdgeCases:
         classifier._call_ollama = mock_ollama
 
         contents = [
-            "First batch item content here",
-            "Second batch item content here",
-            "Third batch item content here",
+            {"content": "First batch item content here"},
+            {"content": "Second batch item content here"},
+            {"content": "Third batch item content here"},
         ]
         results = await classifier.classify_batch(contents)
         assert len(results) == 3
