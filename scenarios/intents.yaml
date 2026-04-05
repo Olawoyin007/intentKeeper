@@ -263,3 +263,5 @@ rules:
   - "Questions seeking genuine answers are different from engagement bait"
   - "Video titles using 'shocking', 'you won't believe', or deliberately vague hooks are clickbait"
   - "Content that exists purely to generate comment section conflict is reaction_farming"
+  - "Emoji clusters amplify intent signals: 🚨🚨 or 😱😱 repeated together indicate fearmongering or ragebait; 🔥🔥 or 💯💯 indicate hype; ❤️👇 combos indicate engagement_bait; a single contextual emoji (🍝, 😅) is neutral"
+  - "If content starts with [Post: ...], that is the original tweet being replied to. Use it as context to better understand the reply's intent - a reply may only reveal its manipulation framing when read against the original post"

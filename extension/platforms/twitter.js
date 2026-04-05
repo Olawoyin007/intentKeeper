@@ -5,6 +5,48 @@
  * All classification logic lives in core/classifier.js.
  */
 
+/**
+ * Extract text from an element, preserving emoji characters.
+ *
+ * Twitter renders emoji as <img alt="😂"> rather than Unicode text nodes.
+ * A plain .textContent call skips <img> entirely, so emoji-heavy manipulation
+ * patterns (🚨🚨 BREAKING, 🔥🔥) would be invisible to the classifier.
+ * This function walks child nodes and splices in the alt text for any <img>.
+ */
+function getEmojiText(element) {
+  if (!element) return '';
+  let text = '';
+  element.childNodes.forEach(node => {
+    if (node.nodeType === Node.TEXT_NODE) {
+      text += node.textContent;
+    } else if (node.nodeName === 'IMG' && node.alt) {
+      text += node.alt;
+    } else if (node.nodeType === Node.ELEMENT_NODE) {
+      text += getEmojiText(node);
+    }
+  });
+  return text.trim();
+}
+
+/**
+ * On a thread/status page (/username/status/ID), return the text of the focal
+ * post - the tweet the page is anchored on.
+ *
+ * Twitter renders the focal tweet first in the DOM, followed by replies.
+ * Providing this as context lets the classifier understand what a reply is
+ * responding to - e.g. a sarcastic reply only reads as ragebait when you see
+ * the original post it's dunking on.
+ *
+ * Returns null on timeline pages where there is no single focal post.
+ */
+function getFocalPostText() {
+  if (!/\/status\/\d+/.test(window.location.pathname)) return null;
+  const firstTweet = document.querySelector('[data-testid="tweet"]');
+  if (!firstTweet) return null;
+  const textEl = firstTweet.querySelector('[data-testid="tweetText"]');
+  return textEl ? getEmojiText(textEl) : null;
+}
+
 const twitterAdapter = {
   platform: 'twitter',
   baseSelector: '[data-testid="tweet"]',
@@ -21,6 +63,10 @@ const twitterAdapter = {
    * Extract tweet text including author name, quoted tweets, link cards,
    * video context, poll options, image alt text, and social context banners.
    * Richer context improves classification accuracy.
+   *
+   * On thread/status pages, replies include the focal post as [Post: ...] so
+   * the classifier understands what is being replied to.
+   * Emoji are preserved via getEmojiText() rather than .textContent.
    */
   extractText(tweetElement) {
     const parts = [];
@@ -32,9 +78,9 @@ const twitterAdapter = {
       if (displayName) parts.push(`[Author: ${displayName.textContent.trim()}]`);
     }
 
-    // Main tweet text
+    // Main tweet text (emoji-aware: Twitter renders emoji as <img alt="😂">)
     const text = tweetElement.querySelector('[data-testid="tweetText"]');
-    if (text) parts.push(text.textContent.trim());
+    if (text) parts.push(getEmojiText(text));
 
     // Quoted tweet text (nested tweet inside this tweet).
     // Requires two levels of [data-testid="tweet"] nesting to avoid matching
@@ -43,7 +89,7 @@ const twitterAdapter = {
     const quoted = tweetElement.querySelector(
       '[data-testid="tweet"] [data-testid="tweet"] [data-testid="tweetText"]'
     );
-    if (quoted) parts.push(quoted.textContent.trim());
+    if (quoted) parts.push(getEmojiText(quoted));
 
     // Link card title/description
     const card = tweetElement.querySelector('[data-testid="card.wrapper"]');
@@ -95,6 +141,15 @@ const twitterAdapter = {
     const socialContext = tweetElement.querySelector('[data-testid="socialContext"]');
     if (socialContext) {
       parts.push(`[Context: ${socialContext.textContent.trim()}]`);
+    }
+
+    // Thread context: on status/thread pages, inject the focal post so the
+    // classifier knows what this reply/comment is responding to.
+    // Skip for the focal post itself (first tweet in DOM) to avoid redundancy.
+    const isFirstTweet = tweetElement === document.querySelector('[data-testid="tweet"]');
+    if (!isFirstTweet) {
+      const focalText = getFocalPostText();
+      if (focalText) parts.unshift(`[Post: ${focalText}]`);
     }
 
     return parts.join(' | ');
