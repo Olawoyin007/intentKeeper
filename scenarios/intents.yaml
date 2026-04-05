@@ -1,267 +1,173 @@
-# IntentKeeper Intent Definitions
+# IntentKeeper Intent Definitions - v2
 #
-# Each intent has:
-# - description: What this intent means
-# - action: Default action (blur, tag, hide, pass)
-# - weight: Base manipulation score (0.0 = benign, 1.0 = highly manipulative)
+# Streamlined from 9 to 6 intents for cleaner classification boundaries.
+#
+# Design principle: each intent must be meaningfully distinct in framing
+# AND drive a different user action. Intents that blurred into each other
+# have been merged:
+#   - engagement_bait + reaction_farming  -> engagement_bait (both: hide)
+#   - hype + clickbait                    -> hype            (both: tag)
+#   - genuine + neutral                   -> genuine         (both: pass)
 
 intents:
   ragebait:
-    description: "Content designed to provoke anger, outrage, or hostile reactions"
+    description: "Content engineered to provoke anger or outrage - inflammatory framing, mockery, strawmen designed to make you furious at a person or group"
     action: blur
     weight: 0.9
     indicators:
-      - "Inflammatory language targeting groups"
-      - "Strawman arguments presented as real positions"
-      - "Cherry-picked examples presented as universal"
-      - "Mocking tone toward perceived opponents"
-      - "Absolutist framing (always, never, all, none)"
+      - "Inflammatory language targeting groups or individuals"
+      - "Strawman arguments presented as the other side's real position"
+      - "Mocking or contemptuous tone designed to infuriate, not inform"
+      - "Absolutist framing (always, never, all, none, every single time)"
+      - "Cherry-picked examples presented as universal truth"
 
   fearmongering:
-    description: "Exaggerated threats, doom content, catastrophizing"
+    description: "Exaggerated or unverifiable threats - doom framing, vague catastrophizing, crisis claims without facts or sources"
     action: tag
     weight: 0.7
     indicators:
-      - "Apocalyptic framing of current events"
-      - "Vague but scary predictions"
+      - "Apocalyptic framing of current events without evidence"
+      - "Vague scary predictions with no verifiable grounding"
       - "They're coming for your X language"
       - "Everything is worse than ever claims"
-      - "Urgency without actionable information"
+      - "Urgency without actionable or verifiable information"
 
   hype:
-    description: "Manufactured urgency, FOMO triggers, artificial excitement"
+    description: "Manufactured urgency, FOMO, or deceptive framing designed to force a click or reaction before you can evaluate - includes clickbait titles"
     action: tag
     weight: 0.5
     indicators:
-      - "Limited time pressure"
-      - "Everyone is doing X"
-      - "You're missing out on..."
-      - "This changes everything"
-      - "BREAKING (for non-breaking content)"
+      - "Limited time pressure with no real deadline"
+      - "This changes everything / never been done before"
+      - "Deliberately vague payoff to force a click"
+      - "You won't believe / shocking / the truth about"
+      - "Save this before I delete it / algorithm is burying this"
 
   engagement_bait:
-    description: "Content designed solely to generate metrics, not value"
+    description: "Content engineered purely for metrics with no informational value - likes, replies, shares, or manufactured comment section conflict"
     action: hide
     weight: 0.6
     indicators:
-      - "Reply with your X"
-      - "Tag someone who..."
-      - "Retweet if you agree"
-      - "What's your unpopular opinion"
-      - "Questions with obvious answers"
+      - "Reply with your X / tag someone who..."
+      - "Retweet if you agree / like if this is you"
+      - "Poses a question solely to generate comment volume"
+      - "Makes a statement designed to be wrong on purpose to bait corrections"
+      - "Pick a side / no nuance allowed - engineered for maximum replies"
 
   divisive:
-    description: "Us-vs-them framing, tribal triggers, manufactured conflict"
+    description: "Us-vs-them framing that manufactures conflict between groups - moral sorting, tribal identity triggers, group generalizations"
     action: tag
     weight: 0.7
     indicators:
-      - "People who X are Y"
-      - "The left/right always..."
-      - "If you don't support X, you're Y"
+      - "People who X are Y (group generalizations)"
       - "Real [group] would never..."
-      - "Which side are you on"
-
-  clickbait:
-    description: "Misleading title or thumbnail designed to deceive about actual content"
-    action: tag
-    weight: 0.7
-    indicators:
-      - "Title promises content the video does not deliver"
-      - "You won't believe... / Shocking... / This will change your life framing"
-      - "Exaggerated emotional reaction or face in thumbnail description"
-      - "Deliberately vague to force a click"
-      - "Number lists that exaggerate scope (top 100, every single...)"
-
-  reaction_farming:
-    description: "Content engineered to provoke high-volume emotional reactions in comments"
-    action: tag
-    weight: 0.6
-    indicators:
-      - "Poses a divisive question solely to inflame the comment section"
-      - "Makes a statement designed to be wrong on purpose"
-      - "Invites tribal conflict between fanbases or groups"
-      - "Hot take with no supporting substance, drops opinion then goes silent"
-      - "Asks audience to pick a side with no nuance offered"
+      - "If you don't support X, you're Y"
+      - "The left/right always..."
+      - "Moral sorting of people by product choice, lifestyle, or affiliation"
 
   genuine:
-    description: "Authentic insight, honest perspective, original thought"
+    description: "Authentic content with no manipulation intent - personal experience, honest perspective, factual information, genuine questions, informational announcements"
     action: pass
     weight: 0.0
     indicators:
-      - "Personal experience with specifics"
-      - "Nuanced take acknowledging complexity"
-      - "Asks genuine questions seeking understanding"
-      - "Shares information without emotional manipulation"
+      - "Personal experience with specific details"
+      - "Nuanced take that acknowledges complexity or uncertainty"
+      - "Factual statements or informational announcements"
+      - "Genuine questions seeking understanding"
       - "Admits uncertainty or limitations"
 
-  neutral:
-    description: "Informational content without manipulation intent"
-    action: pass
-    weight: 0.0
-    indicators:
-      - "Factual statements"
-      - "News without editorializing"
-      - "Questions seeking information"
-      - "Announcements and updates"
-      - "Resource sharing"
 
-# Few-shot examples to improve classification accuracy
+# Few-shot examples with reasoning.
+# Reasoning teaches the model the decision logic, not just the label.
+# Weighted toward boundary cases where the model is most likely to err.
 few_shot_examples:
-  - content: "This is EXACTLY why I hate [political party]. They always do this. Every. Single. Time."
-    intent: ragebait
 
-  - content: "They're trying to take everything from us. By 2025, you won't recognize this country."
+  # --- ragebait ---
+
+  - content: "This is EXACTLY why I hate these people. They always do this. Every. Single. Time."
+    intent: ragebait
+    reasoning: "Inflammatory tribal language with absolutist framing (always, every single time). The goal is to provoke anger at a group, not discuss an issue."
+
+  - content: "Can you BELIEVE the absolute state of this? How are people still defending this?"
+    intent: ragebait
+    reasoning: "Mocking, contemptuous tone with no argument. Pure emotional provocation designed to generate outrage at unspecified defenders."
+
+  - content: "People on the other side don't just disagree - they actively want to destroy everything you care about."
+    intent: ragebait
+    reasoning: "Despite the us-vs-them language, the primary signal is threat and anger - trying to make you furious, not just choose a side. That makes it ragebait, not divisive."
+
+  - content: "Oh sure, politicians definitely care about regular people. I totally believe that."
+    intent: ragebait
+    reasoning: "Sarcasm designed to provoke contempt. Despite polite surface words, the intent is to make the reader feel angry at politicians."
+
+  # --- fearmongering ---
+
+  - content: "Something big is about to happen in the financial markets. I can't say more but protect yourself."
     intent: fearmongering
+    reasoning: "Vague insider framing creates fear without any verifiable claim. 'Can't say more' avoids accountability while maximising anxiety."
 
-  - content: "BREAKING: This new AI tool is going to change EVERYTHING. I can't believe more people aren't talking about this!"
-    intent: hype
-
-  - content: "Reply with your favorite pizza topping and I'll tell you your personality type!"
-    intent: engagement_bait
-
-  - content: "People who don't wake up at 5am are just lazy. Winners have discipline."
-    intent: divisive
-
-  - content: "I've been dealing with anxiety for 10 years. Here's what actually helped me, though everyone's different."
-    intent: genuine
-
-  - content: "The new transit line opens March 15. Here's the schedule and route map."
-    intent: neutral
-
-  - content: "So tired of people who can't see the OBVIOUS truth. If you don't get it by now, you never will."
-    intent: ragebait
-
-  - content: "Tried this recipe last night. The garlic was perfect but I'd add more salt next time. 7/10."
-    intent: genuine
-
-  - content: "🚨 ALERT: Society is COLLAPSING. Get out while you still can."
-    intent: fearmongering
-
-  - content: "I Tried EVERY Fast Food Chain For 30 Days (The Results Will SHOCK You)"
-    intent: clickbait
-
-  - content: "We Bought The CHEAPEST Thing From 50 Different Countries (NOT What We Expected)"
-    intent: clickbait
-
-  - content: "Pineapple belongs on pizza. Change my mind. 🍕"
-    intent: reaction_farming
-
-  - content: "Marvel fans vs DC fans. Comment which side you're on. No switching allowed."
-    intent: reaction_farming
-
-  # Sarcasm edge cases - framing is key, not surface meaning
-  - content: "Oh sure, politicians definitely care about us regular people. I totally believe that."
-    intent: ragebait
-
-  - content: "Oh wow, another AI that will 'change everything'. Bold claim. Where have I heard that before."
-    intent: genuine
-
-  # ragebait - varied styles
-  - content: "Can you BELIEVE this is what passes for leadership these days? No wonder everything is falling apart."
-    intent: ragebait
-
-  - content: "If you still defend this after everything that's come out, there is genuinely no reasoning with you."
-    intent: ragebait
-
-  # Emoji-heavy content
   - content: "🚨🚨 MUST READ 🚨🚨 Everything is falling apart RIGHT NOW and nobody is talking about it 😱😱"
     intent: fearmongering
+    reasoning: "Apocalyptic claim with zero specifics. Alarm emoji clusters and urgency language trigger fear response. No facts, no source, no actionable information."
 
-  - content: "Just made pasta 🍝 added too much salt but still ate the whole bowl 😅 10/10 would repeat"
+  - content: "New WHO report: antibiotic resistance could cause 10M deaths/year by 2050. Key finding: 70% of antibiotics now ineffective against common infections."
     intent: genuine
+    reasoning: "Alarming content, but cites a specific source (WHO), gives specific numbers (10M, 70%), implies policy action. Alarming facts with sources are genuine, not fearmongering."
 
-  - content: "💯 Like if you agree 👇 Drop a ❤️ if this is you"
-    intent: engagement_bait
-
-  # Mixed-intent - primary signal wins
-  - content: "Scientists WARN: your water supply may already be contaminated. Do you actually know what's in yours?"
-    intent: fearmongering
-
-  - content: "I've been struggling with anxiety (genuine) but honestly the government is LITERALLY trying to destroy us all"
-    intent: fearmongering
-
-  - content: "Great analysis here - though I think people who disagree are just too dumb to get it"
-    intent: divisive
-
-  # divisive - varied styles
-  - content: "There are two types of people in this world. You already know which one you are."
-    intent: divisive
-
-  - content: "Millennials did X. Gen Z is doing Y. And somehow the rest of us are supposed to just accept this."
-    intent: divisive
-
-  - content: "You either understand what's happening or you're part of the problem. No middle ground."
-    intent: divisive
-
-  # hype - manufactured urgency
-  - content: "Drop everything. This thread is the most important thing you will read this year."
-    intent: hype
-
-  - content: "I spent 6 months testing 47 productivity apps. This ONE changed everything. I should have found it sooner."
-    intent: hype
+  # --- hype ---
 
   - content: "🔥 About to share something the industry doesn't want you to know. Save this before I delete it."
     intent: hype
+    reasoning: "Manufactured urgency and false exclusivity. 'Save before I delete' is a fake scarcity trigger. No actual information is shared."
 
-  - content: "This is the skill that separates the 1% from everyone else. I'm giving it away for free. For now."
-    intent: hype
-
-  # engagement_bait - varied triggers
-  - content: "Name a song that defined your decade. I'll go first: ... Your turn 👇"
-    intent: engagement_bait
-
-  - content: "Pick one and defend your choice: remote work or office. No sitting on the fence."
-    intent: engagement_bait
-
-  - content: "What's your unpopular food opinion? The spicier the take the better 🌶️"
-    intent: engagement_bait
-
-  # clickbait - deceptive framing
   - content: "She Said ONE Thing To Her Boss And Got Promoted The Next Day (This Actually Works)"
-    intent: clickbait
+    intent: hype
+    reasoning: "Classic clickbait structure: specific-sounding but vague payoff, false credibility marker, forces a click to resolve the mystery. Hype and clickbait are the same intent."
 
-  - content: "The Truth About Breakfast That Nutritionists Don't Want You To Know"
-    intent: clickbait
-
-  - content: "I Tried Living Like A Billionaire For 30 Days. What Happened Shocked Even Me."
-    intent: clickbait
-
-  # reaction_farming - manufactured conflict
-  - content: "Unpopular opinion incoming. I know this will divide people but I'm saying it anyway."
-    intent: reaction_farming
-
-  - content: "Hot take: [statement]. Come at me in the comments."
-    intent: reaction_farming
-
-  - content: "Name your most controversial opinion. The comment section is going to be 🔥"
-    intent: reaction_farming
-
-  # neutral - informational with no manipulation
-  - content: "The library will be closed on Monday for maintenance. Normal hours resume Tuesday at 9am."
-    intent: neutral
-
-  - content: "Python 3.12 released. Key changes: 25% faster interpreter, improved error messages, new typing features."
-    intent: neutral
-
-  - content: "Registration for the spring semester opens December 1st. See the academic calendar for deadlines."
-    intent: neutral
-
-  - content: "Weather this week: partly cloudy Tuesday through Thursday, rain expected Friday."
-    intent: neutral
-
-  - content: "This study shows X might reduce Y - fascinating if replicated. I'd wait for peer review before changing anything."
+  - content: "Just read the new IPCC synthesis report. The ocean acidification data is alarming - pH has dropped 0.1 units since industrialisation, faster than any point in 300M years."
     intent: genuine
+    reasoning: "Enthusiastic but backs the claim with a specific source, specific measurement, and specific comparison period. Enthusiasm with substance is genuine."
 
-# Classification rules (for the LLM prompt)
+  # --- engagement_bait ---
+
+  - content: "💯 Like if you agree 👇 Drop a ❤️ if this is you"
+    intent: engagement_bait
+    reasoning: "No content whatsoever. Every element is engineered to generate metric reactions. Pure engagement farming."
+
+  - content: "Hot take: pineapple on pizza is good. Fight me in the comments. 🍕"
+    intent: engagement_bait
+    reasoning: "The 'fight me' framing is the tell. No genuine position being defended - the goal is comment volume through a low-stakes divisive topic. Reaction farming is engagement_bait."
+
+  # --- divisive ---
+
+  - content: "There are two types of people in this world. You already know which one you are."
+    intent: divisive
+    reasoning: "Explicit binary sorting without rage or metric farming. The goal is to make the reader self-assign to a tribe and judge the other half."
+
+  - content: "The kind of person who doesn't tip says everything about their character."
+    intent: divisive
+    reasoning: "Moral judgment that sorts people by behaviour. Not trying to get likes or generate outrage - trying to make the reader morally sort themselves and others."
+
+  # --- genuine ---
+
+  - content: "I've been dealing with anxiety for 10 years. Here's what actually helped me, though everyone's different."
+    intent: genuine
+    reasoning: "Personal experience with a qualifier showing honesty ('though everyone's different'). That caveat is a marker of authentic communication, not agenda."
+
+  - content: "The new transit line opens March 15. Here's the schedule and route map."
+    intent: genuine
+    reasoning: "Pure factual information. No emotional framing, urgency, or manipulation. Genuine covers informational announcements, not just personal stories."
+
+
+# Classification rules
 rules:
-  - "Focus on HOW content is framed, not the topic itself"
-  - "Political content can be genuine OR manipulative - analyze the framing"
-  - "Personal stories with specific details tend to be genuine"
-  - "Sensational language and ALL CAPS often indicate manipulation"
-  - "Content triggering strong immediate emotional reaction is likely manipulative"
-  - "Nuance and uncertainty are markers of genuine content"
-  - "Questions seeking genuine answers are different from engagement bait"
-  - "Video titles using 'shocking', 'you won't believe', or deliberately vague hooks are clickbait"
-  - "Content that exists purely to generate comment section conflict is reaction_farming"
-  - "Emoji clusters amplify intent signals: 🚨🚨 or 😱😱 repeated together indicate fearmongering or ragebait; 🔥🔥 or 💯💯 indicate hype; ❤️👇 combos indicate engagement_bait; a single contextual emoji (🍝, 😅) is neutral"
-  - "If content starts with [Post: ...], that is the original tweet being replied to. Use it as context to better understand the reply's intent - a reply may only reveal its manipulation framing when read against the original post"
+  - "Focus on HOW content is framed, not what it's about - political content can be genuine OR ragebait"
+  - "ragebait makes you feel ANGER at someone; divisive makes you pick a SIDE - classify by the primary signal"
+  - "engagement_bait and reaction_farming are the same intent - hide both"
+  - "hype and clickbait are the same intent - tag both"
+  - "genuine covers both personal authentic content AND neutral factual information - no manipulation intent = genuine"
+  - "Sarcasm can be ragebait even when surface words are polite - judge the emotional effect intended"
+  - "Alarming content with specific facts and sources is genuine, not fearmongering"
+  - "Emoji clusters (🚨🚨, 😱😱) amplify the intent signal but don't define it alone - read the text"
+  - "If content has mixed signals, classify by the PRIMARY manipulative intent"
+  - "If content starts with [Post: ...], that is the original tweet being replied to - use it to understand the reply's intent"
