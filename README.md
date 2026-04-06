@@ -36,9 +36,7 @@ IntentKeeper doesn't fix the platforms. It gives you a lens to see the manipulat
 
 > "The content isn't the problem. The intent behind it is."
 
-<p align="center">
-  <img src="assets/screenshot.png" alt="IntentKeeper classifying tweets with Genuine, Neutral, Ragebait, and Divisive labels" width="550">
-</p>
+https://github.com/user-attachments/assets/8982dc1c-227b-4695-97ef-4fdfd91cf45c
 
 A post about politics can be thoughtful analysis or manufactured outrage. A health tip can be genuine advice or fearmongering. Same topic, opposite effect on your wellbeing.
 
