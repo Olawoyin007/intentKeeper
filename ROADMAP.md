@@ -243,19 +243,40 @@
 
 ---
 
-## Phase 8: Firefox Extension 🔜 PLANNED
+## Phase 8: Multi-Browser Support 🔜 PLANNED
 
-**Goal**: Bring IntentKeeper to Firefox users.
+**Goal**: Bring IntentKeeper to all major browsers.
 
-### 8.1 Firefox Compatibility
-- [ ] Port Manifest V3 to Firefox format
-- [ ] Handle Firefox storage API differences
+### 8.1 Chromium Browsers (Brave, Edge, Opera)
+
+Brave, Edge, and Opera all run Chromium and support Manifest V3 natively - the extension works on them without code changes. Work here is testing and store submissions only.
+
+- [ ] Test full feature set on Brave (Private Network Access behavior may differ slightly)
+- [ ] Test on Microsoft Edge - verify `chrome.*` API aliases work as expected
+- [ ] Test on Opera
+- [ ] Submit to Microsoft Edge Add-ons store
+- [ ] Submit to Chrome Web Store (covers Brave and Opera users via CWS)
+- [ ] Document installation instructions for each browser
+
+### 8.2 Firefox
+
+Firefox uses a different extension format and has subtle WebExtensions API incompatibilities with Chrome MV3. This requires real porting work.
+
+- [ ] Port Manifest V3 to Firefox MV3 format (`browser_specific_settings`, `browser_action` vs `action`)
+- [ ] Audit and fix any `chrome.*` calls not covered by the WebExtensions polyfill
+- [ ] Handle Firefox's stricter Content Security Policy
 - [ ] Test on Firefox Developer Edition
-
-### 8.2 AMO Submission
-- [ ] Prepare for Firefox Add-ons submission
+- [ ] Prepare for Mozilla Add-ons (AMO) submission
 - [ ] Privacy policy document
 - [ ] Extension description and screenshots
+
+### 8.3 Safari (Optional - High Effort)
+
+Safari requires Apple developer account, Xcode, and wrapping the extension in a native macOS/iOS app. Significant effort for relatively low reach among target audience.
+
+- [ ] Evaluate if user demand justifies the effort
+- [ ] Wrap extension using Xcode's Safari Web Extension converter
+- [ ] Submit to Mac App Store
 
 ---
 
@@ -308,7 +329,7 @@
 | 4. Reddit | High | Medium | 🔵 After eval passes |
 | 6. User Sensitivity | Medium | Low | 🔵 After 5 |
 | 7. Statistics | Medium | Medium | 🔵 After 6 |
-| 8. Firefox | Medium | Low | 🔵 After 7 |
+| 8. Multi-Browser (Brave/Edge/Opera/Firefox) | Medium | Low-Medium | 🔵 After 7 |
 | 9. Advanced Classification | High | High | 🔵 Long-term |
 | 10. Cross-Platform | Medium | High | 🔵 Long-term |
 
@@ -365,7 +386,7 @@ IntentKeeper shares architectural DNA with [empathySync](https://github.com/Olaw
 **v0.5.0** (Phase 5): Classification accuracy improvements
 **v0.6.0** (Phase 6): User-configurable sensitivity
 **v0.7.0** (Phase 7): Statistics dashboard
-**v0.8.0** (Phase 8): Firefox extension
+**v0.8.0** (Phase 8): Multi-browser support (Brave, Edge, Opera, Firefox)
 **v1.0.0** (Phase 9): Advanced classification features
 
 ---

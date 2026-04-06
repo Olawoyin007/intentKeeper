@@ -290,4 +290,4 @@ See [ROADMAP.md](ROADMAP.md) for the phased implementation plan:
 - Phase 5: Classification accuracy
 - Phase 6: User-configurable sensitivity
 - Phase 7: Statistics dashboard
-- Phase 8: Firefox extension
+- Phase 8: Multi-browser support (Brave, Edge, Opera, Firefox)
