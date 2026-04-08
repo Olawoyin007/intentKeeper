@@ -177,16 +177,20 @@
 
 ---
 
-## Phase 5: Classification Accuracy 🔜 PLANNED
+## Phase 5: Classification Accuracy 🔧 IN PROGRESS
 
 **Goal**: Improve classification quality and handle edge cases.
 
 ### 5.1 Few-Shot Example Expansion
-- [ ] Add sarcasm/irony examples with explicit guidance
-- [ ] Add mixed-intent content examples (partly genuine, partly hype)
-- [ ] Add edge cases (very short, emoji-heavy, link-only)
+- [x] Expand eval test set from 48 to 80 examples with boundary cases across all 6 intents
+- [x] Add short-form examples (under 20 words)
+- [x] Add sarcasm/irony boundary cases
+- [x] New baseline: 79% on 80 examples (63/80) - measured 2026-04-08
+- [ ] Fix hype/genuine boundary: personal-experience framing without substance
+- [ ] Fix ragebait/divisive boundary: contempt without explicit anger trigger
+- [ ] Fix engagement_bait detection for short provocative statements
 - [ ] Add platform-specific examples for YouTube and Reddit
-- [ ] Target 5+ examples per intent category
+- [ ] Target 85%+ accuracy on the 80-example set
 
 ### 5.2 Context-Aware Classification
 - [ ] Include conversation thread context for replies
