@@ -40,9 +40,11 @@ black server/
 
 ## Eval Harness - IMPORTANT
 
-`eval/test_set.yaml` is a labeled test set of 48 examples (8 per intent) used to measure classification accuracy. `eval/run_eval.py` runs them through the classifier and reports per-intent accuracy and wrong classifications.
+`eval/test_set.yaml` is a labeled test set of 80 examples (~13 per intent) used to measure classification accuracy. `eval/run_eval.py` runs them through the classifier and reports per-intent accuracy and wrong classifications.
 
-**Current baseline: 90% accuracy** (43/48 correct, measured 2026-04-05).
+**Current baseline: 79% accuracy** (63/80 correct, measured 2026-04-08).
+
+Previous baseline on 48 examples: 90% (43/48 correct, measured 2026-04-05). The drop reflects 32 harder boundary cases added - not a regression in the classifier.
 
 **Rule: run the eval before AND after any change to `scenarios/intents.yaml`.**
 
@@ -56,7 +58,11 @@ python eval/run_eval.py           # measure improvement
 # only commit if accuracy is >= baseline
 ```
 
-The 5 remaining wrong classifications (10%) are genuine hard cases at the ragebait/divisive and hype/genuine boundaries. Further prompt changes are likely to cause regressions. Expand the test set first if you want to improve further.
+The 17 wrong classifications reveal clear patterns to fix next:
+- hype/genuine boundary: model reads personal-experience framing as genuine even when vague
+- ragebait/divisive: contempt without explicit anger trigger gets sorted as divisive
+- engagement_bait: short provocative statements get misread as ragebait or genuine
+Use these patterns to write targeted rules and examples in `scenarios/intents.yaml`.
 
 ## Required Environment Variables
 

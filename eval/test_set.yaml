@@ -1,6 +1,6 @@
 # IntentKeeper Eval Test Set
 #
-# 48 labeled examples, 8 per intent.
+# 80 labeled examples, ~13 per intent.
 # Each intent has 4-5 clear cases and 3-4 boundary/tricky cases.
 # Boundary cases are marked with a note explaining why they might be confused.
 #
@@ -44,6 +44,27 @@
   expected_intent: ragebait
   note: "boundary - polite sarcasm masking contempt designed to provoke class anger"
 
+# new boundary cases
+- content: "Name ONE time this has ever worked. Just one. I'll wait."
+  expected_intent: ragebait
+  note: "short form absolutist anger bait - contempt framing as a dare"
+
+- content: "They really thought we wouldn't notice. We noticed."
+  expected_intent: ragebait
+  note: "boundary ragebait/fearmongering - vague conspiracy contempt without specific fear trigger"
+
+- content: "Is it just me or has this person been wrong about literally everything for the past 5 years?"
+  expected_intent: ragebait
+  note: "boundary ragebait/genuine - sounds like a question but is designed to provoke contempt, not start a discussion"
+
+- content: "The fact that this is even a debate tells you everything you need to know about society."
+  expected_intent: ragebait
+  note: "boundary ragebait/divisive - contempt at society level with no specific target group; anger is the signal not group sorting"
+
+- content: "Reminder that these people actively chose this. Nobody forced them. Own it."
+  expected_intent: ragebait
+  note: "clear - moral accusation designed to trigger outrage with no context or nuance"
+
 # ─── fearmongering ───────────────────────────────────────────────────────────
 
 - content: "By the time most people realise what's happening it will be too late. The signs are already there."
@@ -80,6 +101,27 @@
 - content: "Honestly worried about job security with all the layoffs happening. Anyone else feeling this?"
   expected_intent: genuine
   note: "boundary - genuine expression of personal anxiety. Not manufacturing fear in others - sharing an honest feeling."
+
+# new boundary cases
+- content: "They're putting something in the food that's making everyone sick. Look it up before it's scrubbed."
+  expected_intent: fearmongering
+  note: "clear - vague 'they' conspiracy with unnamed threat and false urgency"
+
+- content: "Are you prepared for what's coming this winter? Most households aren't. Don't be one of them."
+  expected_intent: fearmongering
+  note: "boundary - anxiety trigger question with no specifics. Urgency without information = fearmongering"
+
+- content: "The study found a 34% increase in cardiac events among the 30-49 age group. Full paper linked."
+  expected_intent: genuine
+  note: "boundary fearmongering/genuine - alarming statistic but has specific number, specific demographic, and a source link"
+
+- content: "Something is happening to our children and nobody in power wants to talk about it. Please share."
+  expected_intent: fearmongering
+  note: "clear - vague threat to vulnerable group with suppressed-truth framing and share request"
+
+- content: "Financial experts are sounding the alarm. If you have savings, read this now."
+  expected_intent: fearmongering
+  note: "boundary - unnamed authority ('financial experts') with vague warning and urgency trigger"
 
 # ─── hype ────────────────────────────────────────────────────────────────────
 
@@ -118,6 +160,31 @@
   expected_intent: hype
   note: "boundary - vague teaser with no substance. Manufactured anticipation without any information = hype."
 
+# new boundary cases
+- content: "The thing nobody tells you about getting rich that I wish someone had told me at 22."
+  expected_intent: hype
+  note: "clear - 'nobody tells you' framing with vague payoff and youth nostalgia hook"
+
+- content: "Last 48 hours to get this. After that it's gone. Don't say I didn't warn you."
+  expected_intent: hype
+  note: "clear - scarcity trigger with vague content and mild threat"
+
+- content: "I tried this for 30 days and genuinely couldn't believe the difference. You have to experience it yourself."
+  expected_intent: hype
+  note: "boundary hype/genuine - personal experience framing but payoff is deliberately vague. 'You have to experience it' = no substance"
+
+- content: "Just shipped a feature that took 3 engineers 4 months. Reduces p99 latency by 40%. Blog post with full breakdown tomorrow."
+  expected_intent: genuine
+  note: "boundary hype/genuine - specific team size, specific timeframe, specific metric, specific next step. All substance = genuine"
+
+- content: "Nobody is talking about this shift that's quietly happening in tech right now. Thread incoming."
+  expected_intent: hype
+  note: "boundary hype/fearmongering - 'nobody talking about' framing with vague teaser. Missing-out urgency not danger urgency = hype"
+
+- content: "This is it. This is the one."
+  expected_intent: hype
+  note: "short form - maximally vague hype with zero content"
+
 # ─── engagement_bait ─────────────────────────────────────────────────────────
 
 - content: "Like if you agree. Retweet if you strongly agree."
@@ -154,6 +221,27 @@
 - content: "We're considering adding dark mode to the app. What would you actually use it for? Helps us prioritise."
   expected_intent: genuine
   note: "boundary - asking for input with a stated purpose ('helps us prioritise'). Informational intent makes it genuine, not engagement bait."
+
+# new boundary cases
+- content: "What year were you born? Drop it in the comments 👇"
+  expected_intent: engagement_bait
+  note: "clear - pure comment farming with no purpose stated"
+
+- content: "Tag someone who needs to hear this today 🙏"
+  expected_intent: engagement_bait
+  note: "clear - tag farming. The 'this' is unspecified which makes it pure metric bait"
+
+- content: "The Earth is flat. Fight me in the comments."
+  expected_intent: engagement_bait
+  note: "boundary engagement_bait/ragebait - deliberately wrong statement to bait corrections. Comment volume is the goal, not the opinion"
+
+- content: "Hot take: pineapple on pizza is actually fine and the people who hate it are just performative. Agree or disagree?"
+  expected_intent: engagement_bait
+  note: "boundary divisive/engagement_bait - low-stakes 'controversial' opinion with explicit reply prompt. Designed for comment volume not division"
+
+- content: "Drop your go-to comfort show below. Mine: The Office. Always The Office."
+  expected_intent: engagement_bait
+  note: "clear - reply farming. No purpose, no question being answered, just comment volume"
 
 # ─── divisive ────────────────────────────────────────────────────────────────
 
@@ -192,6 +280,31 @@
   expected_intent: genuine
   note: "boundary - strong opinion with a reasoned basis. Not sorting people into tribes - making an argument."
 
+# new boundary cases
+- content: "There are people who show up early and people who show up late. Those two groups will never fully understand each other."
+  expected_intent: divisive
+  note: "clear - behavioural binary sorting presented as an unbridgeable divide"
+
+- content: "If you eat meat you've decided your convenience matters more than an animal's life. That's your choice."
+  expected_intent: divisive
+  note: "boundary divisive/ragebait - moral sorting by lifestyle choice. Contempt is present but the primary move is sorting not anger-triggering"
+
+- content: "Coastal elites genuinely cannot understand why the rest of the country votes the way it does. The gap is real."
+  expected_intent: divisive
+  note: "boundary divisive/ragebait - geographic identity sorting with mild contempt. More sorting than anger-triggering"
+
+- content: "Public school parents and private school parents are raising children in completely different realities."
+  expected_intent: divisive
+  note: "boundary divisive/genuine - observational but the framing implies an unbridgeable gulf. No solution, no specifics = divisive"
+
+- content: "Real entrepreneurs don't take weekends. If you need a break you're not hungry enough."
+  expected_intent: divisive
+  note: "clear - identity sorting by work ethic with contempt for those who disagree"
+
+- content: "Americans and Europeans have fundamentally different ideas about what freedom means. Neither is fully right."
+  expected_intent: divisive
+  note: "boundary divisive/genuine - cultural binary but the 'neither is fully right' qualifier adds nuance. Still primarily divisive framing"
+
 # ─── genuine ─────────────────────────────────────────────────────────────────
 
 - content: "The library will be closed Monday for maintenance. Normal hours resume Tuesday at 9am."
@@ -228,3 +341,24 @@
 - content: "My friend was scammed last week through a fake job posting. Here's exactly how it worked so you can recognise it."
   expected_intent: genuine
   note: "boundary - alarming but specific, personal, and actionable. Teaching recognition = genuine."
+
+# new boundary cases
+- content: "Maintenance window scheduled for Saturday 2am-4am UTC. Services affected: auth, billing. No action required."
+  expected_intent: genuine
+  note: "clear - informational announcement with specific time, specific services, specific action guidance"
+
+- content: "Genuinely curious - do people who grew up bilingual dream in both languages? Or does one dominate?"
+  expected_intent: genuine
+  note: "boundary - touches on cultural identity but it's an authentic curious question with no manipulation intent"
+
+- content: "Didn't get the promotion. Disappointed but I understand the decision. Back to work."
+  expected_intent: genuine
+  note: "clear - personal setback with honest emotion and no manipulation. Short and authentic"
+
+- content: "I disagree with this policy but I understand why it was made. The tradeoffs are genuinely hard."
+  expected_intent: genuine
+  note: "boundary - political topic but the nuanced framing ('I understand why', 'genuinely hard') signals authentic reasoning not manipulation"
+
+- content: "The new transit line opens March 15. Fares are $2.50. Service runs 5am to midnight seven days a week."
+  expected_intent: genuine
+  note: "clear - public information with specific date, specific price, specific hours"
