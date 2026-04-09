@@ -156,6 +156,10 @@ few_shot_examples:
     intent: genuine
     reasoning: "Enthusiastic but backs the claim with a specific source, specific measurement, and specific comparison period. Enthusiasm with substance is genuine."
 
+  - content: "This is it. This is the one."
+    intent: hype
+    reasoning: "Ultra-short vague statement with no emotional target, no group, no anger. Pure manufactured excitement about something unspecified. Without a target to be angry at or afraid of, there is no ragebait or fearmongering - only vague hype. Short content with no context defaults to hype when the only signal is vague excitement."
+
   # --- engagement_bait ---
 
   - content: "💯 Like if you agree 👇 Drop a ❤️ if this is you"
@@ -182,6 +186,18 @@ few_shot_examples:
     intent: engagement_bait
     reasoning: "Deliberately wrong statement to bait corrections. 'Fight me in the comments' is an explicit engagement farming call-to-action. Despite the provocative claim, the goal is comment volume, not genuine provocation of anger. Engagement_bait beats ragebait when comment farming is the clear mechanism."
 
+  - content: "Drop your go-to comfort show below. Mine: The Office. Always The Office."
+    intent: engagement_bait
+    reasoning: "Pure reply farming. The post shares a preference to invite others to share theirs. No opinion being argued, no group being sorted, no anger being provoked - just comment volume. Do not classify as divisive because no conflict is being manufactured."
+
+  - content: "Unpopular opinion incoming. I know this will divide people but I'm saying it anyway:"
+    intent: engagement_bait
+    reasoning: "Setup post with no actual opinion delivered. 'Unpopular opinion incoming' and 'I know this will divide people' are manufactured controversy signals used to generate anticipation and replies BEFORE any content is shared. The post is a reaction-farming mechanism, not a divisive statement. No opinion = nothing to sort people by. Classify as engagement_bait, not divisive."
+
+  - content: "Marvel fans vs DC fans. Comment which side you're on. No switching allowed."
+    intent: engagement_bait
+    reasoning: "The explicit instruction 'Comment which side you're on' is a direct call-to-action for comment volume. When content contains an explicit reply instruction, engagement_bait takes priority over all other signals including divisive framing. The two-sides setup is the bait, not the point."
+
   # --- divisive ---
 
   - content: "Millennials ruined the housing market. It's really that simple."
@@ -196,6 +212,36 @@ few_shot_examples:
     intent: divisive
     reasoning: "Moral judgment that sorts people by behaviour. Not trying to get likes or generate outrage - trying to make the reader morally sort themselves and others."
 
+  - content: "Real men don't ask for help. That's just the truth and people can't handle it."
+    intent: divisive
+    reasoning: "Identity sorting by gender role ('Real men'). 'People can't handle it' is mild contempt but it does NOT dominate the message - the primary move is sorting men into real/fake. Stays divisive. Only becomes ragebait when contemptuous language (fury, mockery, absolutist outrage) is the main signal, not an afterthought."
+
+  - content: "If you're still using that platform after everything that's happened, that says a lot about you."
+    intent: divisive
+    reasoning: "Moral sorting by platform or product choice. 'That says a lot' is implicit judgment, not explicit anger. The goal is to make the reader sort themselves into a moral category, not to make them furious. Platform-choice sorting = divisive."
+
+  - content: "If you eat meat you've decided your convenience matters more than an animal's life."
+    intent: divisive
+    reasoning: "Moral sorting by lifestyle choice (diet). Despite the pointed framing ('your convenience matters more than animal life'), the primary move is sorting meat-eaters into a moral category - not provoking outrage. Lifestyle-choice sorting with implicit moral judgment = divisive. The contempt ('convenience matters more') is secondary to the sorting. Compare: ragebait would add explicit expressions of fury or mockery AT the meat-eater, not just a moral frame."
+
+  - content: "Americans and Europeans have fundamentally different ideas about what freedom means. Neither is fully right."
+    intent: divisive
+    reasoning: "Cultural binary framing that manufactures a contrast between two groups ('Americans' vs 'Europeans'). The 'neither is fully right' qualifier adds tone but does not remove the divisive structure - the post is still making the reader pick a cultural identity. Binary cultural framing = divisive even when the tone is measured."
+
+  # --- ragebait (additional) ---
+
+  - content: "Reminder that these people actively chose this. Nobody forced them. Own it."
+    intent: ragebait
+    reasoning: "Moral accusation with guilt-demand language ('Own it', 'Nobody forced them'). Despite the lack of an explicit group label, the contemptuous directive ('Own it') is designed to make readers furious at the unnamed group. Guilt-demand framing = ragebait, not divisive."
+
+  - content: "The fact that this is even a debate tells you everything you need to know about where we are as a society."
+    intent: ragebait
+    reasoning: "Contempt at society level. 'Tells you everything you need to know' is a dismissive, contemptuous phrase designed to provoke outrage - not to sort people into groups. Society-wide contempt without a CTA = ragebait. Contrast with divisive which targets a specific group."
+
+  - content: "Is it just me or has this person been wrong about literally everything for the past decade?"
+    intent: ragebait
+    reasoning: "Rhetorical question designed to provoke contempt for a named person. Despite the question form, this is not genuine curiosity - 'Is it just me or' is a sarcastic setup, and 'literally everything' is absolutist contempt framing. Sarcastic credibility attacks = ragebait."
+
   # --- genuine ---
 
   - content: "I've been dealing with anxiety for 10 years. Here's what actually helped me, though everyone's different."
@@ -205,6 +251,10 @@ few_shot_examples:
   - content: "The new transit line opens March 15. Here's the schedule and route map."
     intent: genuine
     reasoning: "Pure factual information. No emotional framing, urgency, or manipulation. Genuine covers informational announcements, not just personal stories."
+
+  - content: "You can always tell the type of person someone is by how they treat service workers."
+    intent: genuine
+    reasoning: "Widely-held social observation without contempt, outrage, or manipulation intent. No specific group is being mocked, no CTA, no urgency. Despite the implied moral judgment, it reads as a genuine perspective being shared. Wise observations about human character without an agenda = genuine. Do NOT classify as divisive just because it implies a hierarchy of character."
 
 
 # Classification rules
@@ -216,16 +266,28 @@ rules:
   - "When a call-to-action is present ('comment below', 'which side', 'your turn 👇') without a stated purpose, engagement_bait takes priority over divisive. Exception: a genuine question with a stated reason ('helps us prioritise', 'trying to understand') = genuine."
   - "Vague appeal to unnamed authority ('doctors say', 'experts warn', 'they've been doing this for decades') with no specific name, study, or link is NOT a real source - classify as fearmongering, not genuine"
   - "fearmongering includes questions designed to trigger anxiety ('Are you prepared?', 'Do you know what's in yours?') even when phrased as a question - the danger framing is what matters, not the sentence type"
-  - "Contempt and moral dismissal ('some people are just bad', 'they can't handle the truth', 'no reasoning with them') are forms of contemptuous language that push content from divisive into ragebait"
+  - "Strong contempt and moral dismissal ('some people are just bad', 'no reasoning with them', 'they're beyond hope') push content from divisive into ragebait. Mild dismissal in an identity-sorting context ('people can't handle it' after a 'Real X don't...' claim) does NOT - the sorting claim is still the primary signal."
   - "Conspiracy insinuation with contempt ('The media LOVES burying this. Wonder why?') is ragebait - the rhetorical question is a device to provoke anger and suspicion, not a genuine curiosity trigger"
   - "Personal experience framing ('I spent 6 months testing...', 'I worked on this for 2 years') does NOT automatically make content genuine - check whether the payoff is substantive or vague hype"
   - "Hype test: does the content give you something specific (a number, a name, a date, a link, an actionable fact)? If no, it is hype regardless of how personal the framing sounds"
   - "'Nobody tells you about X', 'The thing about X', 'What I wish I knew at [age]' are hype templates - vague payoff framing designed to force a click"
   - "Genuine technical/product announcements have specifics: version numbers, dates, component names, warnings. Urgency with real technical detail is genuine, not hype"
-  - "'Change my mind', 'Fight me in the comments', 'Agree or disagree?', 'Unpopular opinion:' are engagement farming formats - classify as engagement_bait even when the topic sounds divisive"
+  - "'Change my mind' and 'Fight me in the comments' are internet engagement phrases that mean 'argue with me in replies' - they are ALWAYS engagement_bait regardless of how provocative the statement sounds. Do not read 'Fight me' as genuine anger or 'Change my mind' as contempt - these are comment-farming formats."
+  - "'Unpopular opinion:', 'Hot take:', 'Controversial opinion:' are engagement farming setups. When paired with a blank or mild statement, they are engagement_bait - the label is the hook, not actual content."
+  - "'Drop your X below', 'Reply with your X', 'Share yours in comments', 'Comment which side you're on' = engagement_bait - reply farming. When an explicit reply CTA is present, it overrides all other classification signals."
+  - "Short vague content with no emotional target, no specific group, and no fear trigger ('This is it. This is the one.', 'Game changer.', 'Something big is coming.') = hype by default. There is no ragebait without a target to be angry at."
   - "Fearmongering with 'Please share' at the end is still fearmongering - the share request is secondary to the danger signal. Do not reclassify as engagement_bait because of a share prompt"
   - "Rhetorical dare framing ('Name ONE time this worked. I'll wait.') is ragebait - it uses the form of a question to express contempt, not to seek information"
-  - "Identity sorting ('Real [group] would never...', 'Real entrepreneurs don't...') = divisive even when mild contempt is present. It becomes ragebait only when contemptuous language dominates over the sorting signal"
+  - "Identity sorting ('Real [group] would never...', 'Real entrepreneurs don't...', 'Real men don't...') = divisive even when mild contempt is present ('people can't handle it', 'not hungry enough'). It becomes ragebait ONLY when contemptuous language is the DOMINANT signal, not an afterthought after the sorting claim."
+  - "Platform or lifestyle choice sorting ('If you're still using X...', 'People who still do Y...') = divisive - it's moral sorting by behaviour, not outrage provocation. Implicit judgment ('that says a lot') without explicit anger = divisive."
+  - "Moral accusation with guilt-demand language ('Own it', 'Nobody forced them', 'Admit it') = ragebait even without an explicit group label. The contemptuous directive is designed to make readers furious, not to sort them."
+  - "Society-level contempt ('tells you everything about where we are as a society', 'this is why we can't have nice things') = ragebait. The target is diffuse contempt/frustration, not group sorting."
+  - "Sarcastic credibility attack ('Is it just me or has [person] been wrong about everything?', 'How is [person] still taken seriously?') = ragebait. Despite the question form, the intent is contempt, not genuine inquiry."
+  - "Widely-shared social wisdom ('You can always tell a person by how they treat service workers') without contempt, CTA, or manipulation intent = genuine. Do not classify as divisive just because it implies character judgment."
+  - "Lifestyle or diet choice sorting ('If you eat meat...', 'People who drive SUVs...') = divisive when the contempt is secondary to the moral sorting. Only becomes ragebait when explicit expressions of fury or mockery at the group dominate the message."
+  - "Binary cultural comparison ('Americans vs Europeans', 'East vs West') = divisive even when the tone is measured or 'both sides' framing is used. The binary structure creates group sorting regardless of tone."
+  - "Valid classifications are ONLY: ragebait, fearmongering, hype, engagement_bait, divisive, genuine. Never output 'neutral'. If content does not trigger any manipulation signal, classify as genuine."
+  - "Society-level contempt ('tells you everything about where we are as a society', 'this is why we can't have nice things') without a specific group target = ragebait. The diffuse target is society itself. Do not classify as neutral - output ragebait."
   - "engagement_bait and reaction_farming are the same intent - hide both"
   - "hype and clickbait are the same intent - tag both"
   - "genuine covers both personal authentic content AND neutral factual information - no manipulation intent = genuine"
