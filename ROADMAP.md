@@ -186,11 +186,13 @@
 - [x] Add short-form examples (under 20 words)
 - [x] Add sarcasm/irony boundary cases
 - [x] New baseline: 79% on 80 examples (63/80) - measured 2026-04-08
-- [ ] Fix hype/genuine boundary: personal-experience framing without substance
-- [ ] Fix ragebait/divisive boundary: contempt without explicit anger trigger
-- [ ] Fix engagement_bait detection for short provocative statements
+- [x] Fix hype/genuine boundary: specificity test rule + 4 new examples - hype now 100% (11/11)
+- [x] Fix engagement_bait detection for short provocative formats: 'Change my mind', 'Fight me', 'Unpopular opinion:' - new examples + rules
+- [x] New baseline: 85% on 80 examples (68/80) - measured 2026-04-09
+- [ ] Fix ragebait/divisive boundary: contempt without explicit anger trigger (77%)
+- [ ] Fix engagement_bait recall further (58% - still weakest intent)
 - [ ] Add platform-specific examples for YouTube and Reddit
-- [ ] Target 85%+ accuracy on the 80-example set
+- [ ] Target 88%+ accuracy on the 80-example set
 
 ### 5.2 Context-Aware Classification
 - [ ] Include conversation thread context for replies
@@ -346,19 +348,20 @@ Safari requires Apple developer account, Xcode, and wrapping the extension in a 
 
 ---
 
-## Current Status (2026-03-11)
+## Current Status (2026-04-09)
 
-**Completed**: Phase 1 (Core classifier + Chrome extension for Twitter/X), Phase 2 (Hardening & Reliability), Phase 3.1-3.3 + 3.5 (YouTube support + platform abstraction)
+**Completed**: Phase 1 (Core classifier + Chrome extension for Twitter/X), Phase 2 (Hardening & Reliability), Phase 3.1-3.3 + 3.5 (YouTube support + platform abstraction), Phase 5.1 (prompt improvements, 79% -> 85% accuracy)
 
-**Next Up**: Phase 5 (Classification accuracy - eval harness built, needs Ollama run to establish baseline)
+**Next Up**: Phase 5 continued - ragebait/divisive boundary (77%) and engagement_bait recall (58%) still need work before 88%+ target
 
-**Priority shift**: Phase 4 (Reddit) moved after Phase 5. Eval gates platform expansion.
+**Priority shift**: Phase 4 (Reddit) remains after Phase 5. Eval gates platform expansion.
 
 **Stats**:
 
 - 30+ tests passing
-- 7 intent categories
-- 1 platform supported (Twitter/X)
+- 6 intent categories
+- 2 platforms supported (Twitter/X, YouTube)
+- 85% eval accuracy on 80-example test set
 - Async pipeline with batch classification
 - LRU cache with TTL expiration
 
