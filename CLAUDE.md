@@ -42,9 +42,13 @@ black server/
 
 `eval/test_set.yaml` is a labeled test set of 80 examples (~13 per intent) used to measure classification accuracy. `eval/run_eval.py` runs them through the classifier and reports per-intent accuracy and wrong classifications.
 
-**Current baseline: 79% accuracy** (63/80 correct, measured 2026-04-08).
+**Current baseline: 85% accuracy** (68/80 correct, measured 2026-04-09).
 
-Previous baseline on 48 examples: 90% (43/48 correct, measured 2026-04-05). The drop reflects 32 harder boundary cases added - not a regression in the classifier.
+Previous baselines:
+- 79% (63/80) after expanding to 80 examples, measured 2026-04-08
+- 90% (43/48) on the original 48-example set, measured 2026-04-05
+
+The 79% drop reflected 32 harder boundary cases added - not a regression. Phase 5.1 recovered and exceeded.
 
 **Rule: run the eval before AND after any change to `scenarios/intents.yaml`.**
 
@@ -58,10 +62,10 @@ python eval/run_eval.py           # measure improvement
 # only commit if accuracy is >= baseline
 ```
 
-The 17 wrong classifications reveal clear patterns to fix next:
-- hype/genuine boundary: model reads personal-experience framing as genuine even when vague
-- ragebait/divisive: contempt without explicit anger trigger gets sorted as divisive
-- engagement_bait: short provocative statements get misread as ragebait or genuine
+The 12 remaining wrong classifications (15%) show patterns to fix next:
+- ragebait/divisive: 77% (10/13) - contempt without explicit anger trigger still leaks to divisive
+- divisive: 73% (8/11) - mild contempt language pushes some divisive into ragebait
+- engagement_bait: 58% (7/12) - still the weakest intent, needs more boundary examples
 Use these patterns to write targeted rules and examples in `scenarios/intents.yaml`.
 
 ## Required Environment Variables
