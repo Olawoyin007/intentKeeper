@@ -100,6 +100,10 @@ few_shot_examples:
     intent: ragebait
     reasoning: "Sarcasm designed to provoke contempt. Despite polite surface words, the intent is to make the reader feel angry at politicians."
 
+  - content: "Name ONE time this has ever worked. Just one. I'll wait."
+    intent: ragebait
+    reasoning: "Uses the form of a question but the intent is contempt, not information-seeking. 'I'll wait' is a contemptuous dare. Absolutist framing ('ONE time', 'ever') designed to provoke anger. Classify as ragebait not engagement_bait - the goal is emotional provocation, not comment volume."
+
   # --- fearmongering ---
 
   - content: "Something big is about to happen in the financial markets. I can't say more but protect yourself."
@@ -132,6 +136,22 @@ few_shot_examples:
     intent: hype
     reasoning: "Classic clickbait structure: specific-sounding but vague payoff, false credibility marker, forces a click to resolve the mystery. Hype and clickbait are the same intent."
 
+  - content: "Something I've been working on for 2 years is finally ready. Can't wait to share it with you all soon."
+    intent: hype
+    reasoning: "Personal-experience framing does NOT make content genuine. The test is whether the payoff is substantive. 'Can't wait to share it soon' = deliberately vague. No version number, no feature, no date, no link. Manufactured anticipation = hype."
+
+  - content: "I tried this for 30 days and genuinely couldn't believe the difference. You have to experience it yourself."
+    intent: hype
+    reasoning: "Personal experience framing ('I tried this') with a completely vague payoff. 'You have to experience it yourself' withholds the substance on purpose to force engagement. No product name, no measurement, no specifics = hype."
+
+  - content: "The thing nobody tells you about getting rich that I wish someone had told me at 22."
+    intent: hype
+    reasoning: "'Nobody tells you about X' is a hype template. Combined with a vague payoff (no actual tip shared) and youth nostalgia framing, this is designed to force a click, not share genuine insight."
+
+  - content: "We're shipping v2.0 next Tuesday. Full changelog here. Breaking change in the auth module - read before upgrading."
+    intent: genuine
+    reasoning: "Specific version (v2.0), specific date (next Tuesday), specific component (auth module), specific action required (read before upgrading). Technical urgency with real substance is genuine, not hype."
+
   - content: "Just read the new IPCC synthesis report. The ocean acidification data is alarming - pH has dropped 0.1 units since industrialisation, faster than any point in 300M years."
     intent: genuine
     reasoning: "Enthusiastic but backs the claim with a specific source, specific measurement, and specific comparison period. Enthusiasm with substance is genuine."
@@ -146,11 +166,21 @@ few_shot_examples:
     intent: engagement_bait
     reasoning: "The 'fight me' framing is the tell. No genuine position being defended - the goal is comment volume through a low-stakes divisive topic. Reaction farming is engagement_bait."
 
-  # --- engagement_bait ---
-
   - content: "Marvel fans vs DC fans. Comment which side you're on. No switching allowed."
     intent: engagement_bait
     reasoning: "Despite the two-sides framing (which looks divisive), the explicit call to action ('Comment which side you're on') reveals the goal is comment volume. When a call-to-action is present, engagement_bait takes priority over divisive."
+
+  - content: "People who recline their airplane seat are inconsiderate. Change my mind."
+    intent: engagement_bait
+    reasoning: "'Change my mind' is a known engagement farming format. The mild opinion is bait - the actual goal is comment replies. Despite the divisive framing, the call-to-action signal wins."
+
+  - content: "Unpopular opinion incoming. I know this will divide people but I'm saying it anyway: [blank]"
+    intent: engagement_bait
+    reasoning: "The setup with no actual opinion delivered is pure reaction farming. 'I know this will divide people' is a manufactured controversy signal designed to generate replies before any content is shared."
+
+  - content: "The Earth is flat. Fight me in the comments."
+    intent: engagement_bait
+    reasoning: "Deliberately wrong statement to bait corrections. 'Fight me in the comments' is an explicit engagement farming call-to-action. Despite the provocative claim, the goal is comment volume, not genuine provocation of anger. Engagement_bait beats ragebait when comment farming is the clear mechanism."
 
   # --- divisive ---
 
@@ -189,6 +219,13 @@ rules:
   - "Contempt and moral dismissal ('some people are just bad', 'they can't handle the truth', 'no reasoning with them') are forms of contemptuous language that push content from divisive into ragebait"
   - "Conspiracy insinuation with contempt ('The media LOVES burying this. Wonder why?') is ragebait - the rhetorical question is a device to provoke anger and suspicion, not a genuine curiosity trigger"
   - "Personal experience framing ('I spent 6 months testing...', 'I worked on this for 2 years') does NOT automatically make content genuine - check whether the payoff is substantive or vague hype"
+  - "Hype test: does the content give you something specific (a number, a name, a date, a link, an actionable fact)? If no, it is hype regardless of how personal the framing sounds"
+  - "'Nobody tells you about X', 'The thing about X', 'What I wish I knew at [age]' are hype templates - vague payoff framing designed to force a click"
+  - "Genuine technical/product announcements have specifics: version numbers, dates, component names, warnings. Urgency with real technical detail is genuine, not hype"
+  - "'Change my mind', 'Fight me in the comments', 'Agree or disagree?', 'Unpopular opinion:' are engagement farming formats - classify as engagement_bait even when the topic sounds divisive"
+  - "Fearmongering with 'Please share' at the end is still fearmongering - the share request is secondary to the danger signal. Do not reclassify as engagement_bait because of a share prompt"
+  - "Rhetorical dare framing ('Name ONE time this worked. I'll wait.') is ragebait - it uses the form of a question to express contempt, not to seek information"
+  - "Identity sorting ('Real [group] would never...', 'Real entrepreneurs don't...') = divisive even when mild contempt is present. It becomes ragebait only when contemptuous language dominates over the sorting signal"
   - "engagement_bait and reaction_farming are the same intent - hide both"
   - "hype and clickbait are the same intent - tag both"
   - "genuine covers both personal authentic content AND neutral factual information - no manipulation intent = genuine"
