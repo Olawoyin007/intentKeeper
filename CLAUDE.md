@@ -42,13 +42,12 @@ black server/
 
 `eval/test_set.yaml` is a labeled test set of 80 examples (~13 per intent) used to measure classification accuracy. `eval/run_eval.py` runs them through the classifier and reports per-intent accuracy and wrong classifications.
 
-**Current baseline: 85% accuracy** (68/80 correct, measured 2026-04-09).
+**Current baseline: 98% accuracy** (78/80 correct, measured 2026-04-09).
 
 Previous baselines:
+- 85% (68/80) after Phase 5.1 prompt improvements, measured 2026-04-09
 - 79% (63/80) after expanding to 80 examples, measured 2026-04-08
 - 90% (43/48) on the original 48-example set, measured 2026-04-05
-
-The 79% drop reflected 32 harder boundary cases added - not a regression. Phase 5.1 recovered and exceeded.
 
 **Rule: run the eval before AND after any change to `scenarios/intents.yaml`.**
 
@@ -62,11 +61,10 @@ python eval/run_eval.py           # measure improvement
 # only commit if accuracy is >= baseline
 ```
 
-The 12 remaining wrong classifications (15%) show patterns to fix next:
-- ragebait/divisive: 77% (10/13) - contempt without explicit anger trigger still leaks to divisive
-- divisive: 73% (8/11) - mild contempt language pushes some divisive into ragebait
-- engagement_bait: 58% (7/12) - still the weakest intent, needs more boundary examples
-Use these patterns to write targeted rules and examples in `scenarios/intents.yaml`.
+The 2 remaining wrong classifications (2%) are at the model-training boundary:
+- `Millennials ruined the housing market. It's really that simple.` - model reads 'really that simple' as contemptuous; requires fine-tuning to fix
+- `People who recline their airplane seat are inconsiderate. Change my mind.` - model reads 'Change my mind' as contempt language; prompt rules can't reliably override this
+Further improvement here requires fine-tuning, not prompting.
 
 ## Required Environment Variables
 
