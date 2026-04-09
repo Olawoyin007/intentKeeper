@@ -189,10 +189,12 @@
 - [x] Fix hype/genuine boundary: specificity test rule + 4 new examples - hype now 100% (11/11)
 - [x] Fix engagement_bait detection for short provocative formats: 'Change my mind', 'Fight me', 'Unpopular opinion:' - new examples + rules
 - [x] New baseline: 85% on 80 examples (68/80) - measured 2026-04-09
-- [ ] Fix ragebait/divisive boundary: contempt without explicit anger trigger (77%)
-- [ ] Fix engagement_bait recall further (58% - still weakest intent)
+- [x] Fix ragebait/divisive boundary: guilt-demand framing, society-level contempt, sarcastic credibility attacks - ragebait now 92% (12/13)
+- [x] Fix engagement_bait recall: 'Fight me'/'Change my mind' always engagement_bait, CTA overrides divisive, reply-farming examples - engagement_bait now 92% (11/12)
+- [x] Fix lifestyle/cultural sorting staying divisive, short vague content = hype not ragebait
+- [x] New baseline: 98% on 80 examples (78/80) - measured 2026-04-09
+- [ ] 2 remaining cases require fine-tuning to resolve (prompt ceiling reached)
 - [ ] Add platform-specific examples for YouTube and Reddit
-- [ ] Target 88%+ accuracy on the 80-example set
 
 ### 5.2 Context-Aware Classification
 - [ ] Include conversation thread context for replies
@@ -350,9 +352,9 @@ Safari requires Apple developer account, Xcode, and wrapping the extension in a 
 
 ## Current Status (2026-04-09)
 
-**Completed**: Phase 1 (Core classifier + Chrome extension for Twitter/X), Phase 2 (Hardening & Reliability), Phase 3.1-3.3 + 3.5 (YouTube support + platform abstraction), Phase 5.1 (prompt improvements, 79% -> 85% accuracy)
+**Completed**: Phase 1 (Core classifier + Chrome extension for Twitter/X), Phase 2 (Hardening & Reliability), Phase 3.1-3.3 + 3.5 (YouTube support + platform abstraction), Phase 5.1 (85% accuracy), Phase 5.2 (98% accuracy - prompt ceiling)
 
-**Next Up**: Phase 5 continued - ragebait/divisive boundary (77%) and engagement_bait recall (58%) still need work before 88%+ target
+**Next Up**: Phase 5.3 (fine-tuning for the 2 remaining cases) or Phase 4 (Reddit) - 98% accuracy is well above the 85% gate
 
 **Priority shift**: Phase 4 (Reddit) remains after Phase 5. Eval gates platform expansion.
 
