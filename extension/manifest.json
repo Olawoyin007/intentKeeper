@@ -46,6 +46,16 @@
       "js": ["core/classifier.js", "platforms/youtube.js"],
       "css": ["styles.css"],
       "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://www.reddit.com/*",
+        "https://old.reddit.com/*",
+        "https://reddit.com/*"
+      ],
+      "js": ["core/classifier.js", "platforms/reddit.js"],
+      "css": ["styles.css"],
+      "run_at": "document_idle"
     }
   ]
 }

@@ -13,9 +13,10 @@ from typing import List, Optional
 import httpx
 import uvicorn
 from dotenv import load_dotenv
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
+from starlette.middleware.base import BaseHTTPMiddleware
 
 from .classifier import MAX_CONTENT_LENGTH, IntentClassifier
 
@@ -86,6 +87,21 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+
+# Private Network Access (PNA) middleware.
+# Brave (and Chrome 94+) enforce PNA: requests from extension contexts to
+# localhost must be acknowledged by the server with this response header.
+# Without it, Brave silently blocks the request before it reaches CORS.
+class PrivateNetworkAccessMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        response = await call_next(request)
+        if request.headers.get("Access-Control-Request-Private-Network") == "true":
+            response.headers["Access-Control-Allow-Private-Network"] = "true"
+        return response
+
+
+app.add_middleware(PrivateNetworkAccessMiddleware)
+
 # CORS — restrict to browser extension and localhost origins
 app.add_middleware(
     CORSMiddleware,
@@ -96,7 +112,7 @@ app.add_middleware(
     ],
     allow_credentials=True,
     allow_methods=["*"],
-    allow_headers=["*"],
+    allow_headers=["*", "Access-Control-Request-Private-Network"],
 )
 
 
