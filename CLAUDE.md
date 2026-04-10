@@ -294,8 +294,8 @@ See [ROADMAP.md](ROADMAP.md) for the phased implementation plan:
 - Phase 1: Core classifier + Chrome extension (Twitter/X) ✅
 - Phase 2: Hardening & reliability ✅
 - Phase 3: YouTube support
-- Phase 4: Reddit support
-- Phase 5: Classification accuracy
+- Phase 4: Reddit support ✅ (3-variant DOM adapter, 22 tests)
+- Phase 5: Classification accuracy ✅ (98%, 78/80, prompt ceiling reached)
 - Phase 6: User-configurable sensitivity
 - Phase 7: Statistics dashboard
-- Phase 8: Multi-browser support (Brave, Edge, Opera, Firefox)
+- Phase 8: Multi-browser support - Brave ✅ (PNA middleware); Edge/Opera/Firefox 🔜
