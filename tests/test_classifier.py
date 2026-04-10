@@ -522,6 +522,58 @@ class TestAPIEndpoints:
         assert response.status_code == 503
 
 
+# --- Private Network Access middleware ---
+
+
+class TestPrivateNetworkAccessMiddleware:
+    """Tests for the PNA middleware that enables Brave/Chrome localhost access."""
+
+    @pytest.mark.asyncio
+    async def test_pna_header_added_when_requested(self):
+        """Server should echo Access-Control-Allow-Private-Network when request header present."""
+        transport = ASGITransport(app=app)
+        async with AsyncClient(transport=transport, base_url="http://test") as ac:
+            response = await ac.get(
+                "/health",
+                headers={"Access-Control-Request-Private-Network": "true"},
+            )
+        assert response.headers.get("Access-Control-Allow-Private-Network") == "true"
+
+    @pytest.mark.asyncio
+    async def test_pna_header_not_added_without_request(self):
+        """Server should NOT add PNA header when request doesn't ask for it."""
+        transport = ASGITransport(app=app)
+        async with AsyncClient(transport=transport, base_url="http://test") as ac:
+            response = await ac.get("/health")
+        assert "Access-Control-Allow-Private-Network" not in response.headers
+
+    @pytest.mark.asyncio
+    async def test_pna_header_on_classify_endpoint(self):
+        """PNA header should work on POST endpoints too (classify is the hot path)."""
+        mock_classifier = AsyncMock()
+        mock_classifier.check_health.return_value = True
+        from server.classifier import ClassificationResult
+
+        mock_classifier.classify = AsyncMock(
+            return_value=ClassificationResult(
+                intent="genuine",
+                confidence=0.9,
+                reasoning="Test",
+                action="pass",
+                manipulation_score=0.0,
+            )
+        )
+        with patch("server.api.classifier", mock_classifier):
+            transport = ASGITransport(app=app)
+            async with AsyncClient(transport=transport, base_url="http://test") as ac:
+                response = await ac.post(
+                    "/classify",
+                    json={"content": "Just checking the header"},
+                    headers={"Access-Control-Request-Private-Network": "true"},
+                )
+        assert response.headers.get("Access-Control-Allow-Private-Network") == "true"
+
+
 # --- Classifier internals ---
 
 
