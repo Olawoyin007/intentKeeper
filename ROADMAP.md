@@ -148,15 +148,17 @@
 
 ---
 
-## Phase 4: Reddit Support 🔜 PLANNED
+## Phase 4: Reddit Support ✅ COMPLETE
 
 **Goal**: Extend classification to Reddit posts and comments.
 
-### 4.1 Reddit Content Script
-- [ ] Create `extension/platforms/reddit.js`
-- [ ] Handle old.reddit.com and new Reddit
-- [ ] Intercept post titles in feeds
-- [ ] Intercept comment content
+### 4.1 Reddit Content Script ✅
+- [x] Create `extension/platforms/reddit.js`
+- [x] Handle old.reddit.com, new Reddit (React), and Shreddit (web components) - all three DOM variants
+- [x] Intercept post titles in feeds
+- [x] Intercept comment content (capped at 400 chars to prevent long LLM prompts)
+- [x] Include subreddit context in extracted text
+- [x] 22 structural tests in `tests/test_reddit_adapter.py`
 
 ### 4.2 Reddit-Specific Intents
 - [ ] Add `karma_farming` intent
@@ -255,11 +257,11 @@
 
 **Goal**: Bring IntentKeeper to all major browsers.
 
-### 8.1 Chromium Browsers (Brave, Edge, Opera)
+### 8.1 Chromium Browsers (Brave, Edge, Opera) - Brave ✅
 
 Brave, Edge, and Opera all run Chromium and support Manifest V3 natively - the extension works on them without code changes. Work here is testing and store submissions only.
 
-- [ ] Test full feature set on Brave (Private Network Access behavior may differ slightly)
+- [x] Brave Private Network Access (PNA) support: `PrivateNetworkAccessMiddleware` added to API server - responds with `Access-Control-Allow-Private-Network: true` when Brave's PNA preflight fires. 3 tests in `TestPrivateNetworkAccessMiddleware`.
 - [ ] Test on Microsoft Edge - verify `chrome.*` API aliases work as expected
 - [ ] Test on Opera
 - [ ] Submit to Microsoft Edge Add-ons store
