@@ -9,9 +9,10 @@ This document provides a visual overview of IntentKeeper's architecture. For det
 │                         User's Machine                              │
 │                                                                      │
 │  ┌──────────────────────────────────────────────────────────────┐   │
-│  │                   Browser (Chrome)                            │   │
+│  │              Browser (Chrome / Brave)                        │   │
 │  │  ┌─────────────┐                                             │   │
-│  │  │  Extension   │ ◄── Intercepts content from Twitter/X       │   │
+│  │  │  Extension   │ ◄── Intercepts content from Twitter/X,      │   │
+│  │  │              │     Reddit (shreddit, new, old variants)    │   │
 │  │  │  content.js  │                                             │   │
 │  │  └──────┬──────┘                                              │   │
 │  │         │ POST /classify                                      │   │
@@ -105,13 +106,19 @@ Visual Treatment Applied (content.js)
 │                    Browser Extension                            │
 │                                                                 │
 │  ┌─────────────────┐  ┌──────────────┐  ┌──────────────────┐  │
-│  │   content.js     │  │ background.js│  │  popup/popup.js  │  │
-│  │                  │  │              │  │                  │  │
+│  │core/classifier.js│  │ background.js│  │  popup/popup.js  │  │
+│  │ (IntentKeeperCore│  │              │  │                  │  │
 │  │ - DOM observation│  │ - Settings   │  │ - Toggle UI      │  │
-│  │ - Tweet intercept│  │ - Health poll│  │ - Sliders        │  │
-│  │ - API calls      │  │ - Badge icon │  │ - Status display │  │
-│  │ - CSS treatments │  │              │  │                  │  │
+│  │ - API calls      │  │ - Health poll│  │ - Sliders        │  │
+│  │ - CSS treatments │  │ - Badge icon │  │ - Status display │  │
+│  │ - PNA middleware │  │ - PNA proxy  │  │                  │  │
 │  └────────┬─────────┘  └──────────────┘  └──────────────────┘  │
+│           │ uses platform adapters                               │
+│  ┌────────┴──────────────────────────────────────────────────┐  │
+│  │  Platform Adapters (extension/platforms/)                  │  │
+│  │  twitter.js - Twitter/X DOM (tweets)                       │  │
+│  │  reddit.js  - Reddit DOM (shreddit, new reddit, old reddit)│  │
+│  └────────┬──────────────────────────────────────────────────┘  │
 │           │                                                      │
 └───────────┼──────────────────────────────────────────────────────┘
             │ HTTP (localhost:8420)
@@ -141,7 +148,7 @@ Visual Treatment Applied (content.js)
 ┌────────────────────────────────────────────────────────────────┐
 │                   scenarios/intents.yaml                        │
 │                                                                 │
-│   - 7 intent categories with weights and actions               │
+│   - 6 intent categories with weights and actions               │
 │   - Few-shot examples for accuracy                             │
 │   - Classification rules for LLM prompt                        │
 │   - Indicator lists for each intent                            │
@@ -171,11 +178,12 @@ Visual Treatment Applied (content.js)
 │   │ → tag    │ │ → hide   │                                      │
 │   └──────────┘ └──────────┘                                      │
 │                                                                  │
-│                              ┌──────────┐ ┌──────────┐          │
-│                              │ genuine  │ │ neutral  │          │
-│                              │ wt: 0.0  │ │ wt: 0.0  │          │
-│                              │ → pass   │ │ → pass   │          │
-│                              └──────────┘ └──────────┘          │
+│                              ┌──────────┐                        │
+│                              │ genuine  │                        │
+│                              │ wt: 0.0  │                        │
+│                              │ → pass   │                        │
+│                              └──────────┘                        │
+│   (neutral is error fallback only, not a primary category)       │
 │                                                                  │
 └─────────────────────────────────────────────────────────────────┘
 ```
@@ -205,7 +213,7 @@ Visual Treatment Applied (content.js)
 │   │ ▶ Hidden: engagement bait (click to expand)      │           │
 │   └─────────────────────────────────────────────────┘           │
 │                                                                  │
-│   PASS (genuine, neutral)                                        │
+│   PASS (genuine)                                                 │
 │   ┌─────────────────────────────────────────────────┐           │
 │   │ Content displayed normally, no modification.     │           │
 │   └─────────────────────────────────────────────────┘           │
