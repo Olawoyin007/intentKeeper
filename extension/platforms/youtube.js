@@ -12,11 +12,13 @@
 // ---- Per-type text extraction helpers ----
 
 function extractVideoCardText(element) {
-  const parts = [];
-
-  // Title is the primary classification signal
+  // Title is the primary classification signal. If it isn't rendered yet
+  // (YouTube lazy-loads card content), return '' so the item stays unmarked
+  // and gets picked up again on the next observer pass.
   const title = element.querySelector('#video-title');
-  if (title) parts.push(title.textContent.trim());
+  if (!title || !title.textContent.trim()) return '';
+
+  const parts = [title.textContent.trim()];
 
   // Channel name - helps detect known bait channels
   const channel = element.querySelector('ytd-channel-name #text, #channel-name #text');
