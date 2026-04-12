@@ -28,16 +28,19 @@ function isShreddit() {
 // ---- Text extraction: Shreddit ----
 
 function extractShredditPostText(element) {
+  // If neither the title slot nor the post-title attribute is present yet,
+  // the element shell has appeared before content loaded - return '' so it
+  // stays unmarked and gets picked up on the next observer pass.
+  const titleSlot = element.querySelector('[slot="title"]');
+  const attrTitle = element.getAttribute('post-title');
+  if (!titleSlot && !attrTitle) return '';
+
   const parts = [];
 
-  // Title lives in the [slot="title"] or as a direct attribute
-  const titleSlot = element.querySelector('[slot="title"]');
   if (titleSlot) {
     parts.push(titleSlot.textContent.trim());
   } else {
-    // Fallback: read from the post-title attribute on the custom element
-    const attrTitle = element.getAttribute('post-title');
-    if (attrTitle) parts.push(attrTitle.trim());
+    parts.push(attrTitle.trim());
   }
 
   // Subreddit context helps with tone calibration
@@ -55,18 +58,18 @@ function extractShredditPostText(element) {
 }
 
 function extractShredditCommentText(element) {
+  // Comment body slot not yet rendered - return '' to stay unmarked
+  const body = element.querySelector('[slot="comment"]');
+  if (!body || !body.textContent.trim()) return '';
+
   const parts = [];
 
   const author = element.getAttribute('author');
   if (author) parts.push(`[u/${author}]`);
 
-  // Comment body is in [slot="comment"]
-  const body = element.querySelector('[slot="comment"]');
-  if (body) {
-    const text = body.textContent.trim();
-    // Cap at 400 chars - comments can be essays; first 400 captures the tone
-    if (text) parts.push(text.slice(0, 400));
-  }
+  const text = body.textContent.trim();
+  // Cap at 400 chars - comments can be essays; first 400 captures the tone
+  parts.push(text.slice(0, 400));
 
   return parts.join(' | ');
 }
@@ -74,10 +77,10 @@ function extractShredditCommentText(element) {
 // ---- Text extraction: Old new Reddit ----
 
 function extractNewRedditPostText(element) {
-  const parts = [];
-
   const title = element.querySelector('h3, [data-click-id="text"] h3, h1');
-  if (title) parts.push(title.textContent.trim());
+  if (!title || !title.textContent.trim()) return '';
+
+  const parts = [title.textContent.trim()];
 
   // Subreddit badge
   const sub = element.querySelector('[data-click-id="subreddit"], h3[id^="post-title"] ~ *');
@@ -97,17 +100,15 @@ function extractNewRedditPostText(element) {
 }
 
 function extractNewRedditCommentText(element) {
+  const body = element.querySelector('.RichTextJSON-root, [data-testid="comment"] > div p');
+  if (!body || !body.textContent.trim()) return '';
+
   const parts = [];
 
   const author = element.querySelector('[data-testid="comment_author_link"], a[href*="/user/"]');
   if (author) parts.push(`[${author.textContent.trim()}]`);
 
-  // Comment body - RichTextJSON or plain paragraph
-  const body = element.querySelector('.RichTextJSON-root, [data-testid="comment"] > div p');
-  if (body) {
-    const text = body.textContent.trim();
-    if (text) parts.push(text.slice(0, 400));
-  }
+  parts.push(body.textContent.trim().slice(0, 400));
 
   return parts.join(' | ');
 }
@@ -115,10 +116,10 @@ function extractNewRedditCommentText(element) {
 // ---- Text extraction: Old Reddit ----
 
 function extractOldRedditPostText(element) {
-  const parts = [];
-
   const title = element.querySelector('.title > a.title, p.title > a');
-  if (title) parts.push(title.textContent.trim());
+  if (!title || !title.textContent.trim()) return '';
+
+  const parts = [title.textContent.trim()];
 
   // Subreddit link visible in front page feeds
   const sub = element.querySelector('.subreddit');
@@ -138,17 +139,15 @@ function extractOldRedditPostText(element) {
 }
 
 function extractOldRedditCommentText(element) {
+  const body = element.querySelector('.md > p, .usertext-body .md');
+  if (!body || !body.textContent.trim()) return '';
+
   const parts = [];
 
   const author = element.querySelector('.author');
   if (author) parts.push(`[u/${author.textContent.trim()}]`);
 
-  // Comment markdown body
-  const body = element.querySelector('.md > p, .usertext-body .md');
-  if (body) {
-    const text = body.textContent.trim();
-    if (text) parts.push(text.slice(0, 400));
-  }
+  parts.push(body.textContent.trim().slice(0, 400));
 
   return parts.join(' | ');
 }

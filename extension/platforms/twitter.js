@@ -92,6 +92,16 @@ const twitterAdapter = {
    * Emoji are preserved via getEmojiText() rather than .textContent.
    */
   extractText(tweetElement) {
+    // If the tweet body hasn't rendered yet (Twitter lazy-loads card content),
+    // return '' so the element stays unmarked and gets picked up on the next
+    // observer pass. Video/poll tweets have no tweetText by design - only skip
+    // early if there's also no video player and no poll present.
+    const text = tweetElement.querySelector('[data-testid="tweetText"]');
+    const hasVideo = tweetElement.querySelector('[data-testid="videoPlayer"], video, [data-testid="videoComponent"]');
+    const hasPoll = tweetElement.querySelector('[data-testid="cardPoll"]');
+    const hasCard = tweetElement.querySelector('[data-testid="card.wrapper"]');
+    if (!text && !hasVideo && !hasPoll && !hasCard) return '';
+
     const parts = [];
 
     // Author display name - helps detect mockery and quote-tweet dunking
@@ -102,7 +112,6 @@ const twitterAdapter = {
     }
 
     // Main tweet text (emoji-aware: Twitter renders emoji as <img alt="😂">)
-    const text = tweetElement.querySelector('[data-testid="tweetText"]');
     if (text) parts.push(getEmojiText(text));
 
     // Quoted tweet text (nested tweet inside this tweet).
