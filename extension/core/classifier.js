@@ -39,6 +39,9 @@ let isProcessing = false;
 // Flag: new items arrived while a batch was in-flight
 let pendingReprocess = false;
 
+// Running count of classified items (shown in status badge)
+let classifiedCount = 0;
+
 // Debug logger - only logs when debug._enabled is true
 const debug = {
   _enabled: false,
@@ -263,6 +266,8 @@ function applyTreatment(element, classification, adapter) {
 
   element.setAttribute(PROCESSED_ATTR, 'true');
   element.setAttribute(INTENT_ATTR, intent);
+  classifiedCount++;
+  updateStatusBadge();
 
   if (settings.showTags) {
     applyTag(element, intent, confidence);
@@ -317,7 +322,12 @@ async function processItems(adapter) {
       const text = adapter.extractText(item);
       const mediaUrls = adapter.extractMediaUrls ? adapter.extractMediaUrls(item) : [];
       if (text.length < MIN_CONTENT_LENGTH) {
-        item.setAttribute(PROCESSED_ATTR, 'skipped');
+        // Only permanently skip items with SOME text (genuinely short content).
+        // Empty string means the element is still loading (lazy render) -
+        // leave it unmarked so the next observer pass can pick it up.
+        if (text.length > 0) {
+          item.setAttribute(PROCESSED_ATTR, 'skipped');
+        }
       } else {
         item.classList.add('intentkeeper-classifying');
         itemData.push({ item, text, mediaUrls });
@@ -347,6 +357,40 @@ async function processItems(adapter) {
       processItems(adapter);
     }
   }
+}
+
+// --- Status Badge ---
+
+function createStatusBadge(platform, connected) {
+  const existing = document.getElementById('intentkeeper-status-badge');
+  if (existing) existing.remove();
+
+  const badge = document.createElement('div');
+  badge.id = 'intentkeeper-status-badge';
+  if (!connected) badge.classList.add('ik-disconnected');
+
+  const label = platform.charAt(0).toUpperCase() + platform.slice(1);
+  badge.innerHTML = `
+    <span class="ik-dot"></span>
+    <span class="ik-label">&#x1f6e1;&#xfe0f; ${label}</span>
+    <span class="ik-count"></span>
+  `;
+  document.body.appendChild(badge);
+
+  if (connected) {
+    badge._hideTimer = setTimeout(() => badge.classList.add('ik-faded'), 4000);
+  }
+  return badge;
+}
+
+function updateStatusBadge() {
+  const badge = document.getElementById('intentkeeper-status-badge');
+  if (!badge) return;
+  const countEl = badge.querySelector('.ik-count');
+  if (countEl) countEl.textContent = `· ${classifiedCount} classified`;
+  badge.classList.remove('ik-faded');
+  clearTimeout(badge._hideTimer);
+  badge._hideTimer = setTimeout(() => badge.classList.add('ik-faded'), 3000);
 }
 
 function setupObserver(adapter) {
@@ -380,18 +424,23 @@ window.IntentKeeperCore = {
       return;
     }
 
+    let connected = false;
     try {
       const health = await chrome.runtime.sendMessage({ type: 'CHECK_HEALTH' });
       if (!health || health.status === 'disconnected') {
         debug.error('API not available');
+        createStatusBadge(adapter.platform, false);
         return;
       }
+      connected = true;
       debug.log(`API connected (model: ${health.model})`);
     } catch (e) {
       debug.error('Cannot connect to background worker', e.message || e);
+      createStatusBadge(adapter.platform, false);
       return;
     }
 
+    createStatusBadge(adapter.platform, connected);
     processItems(adapter);
     setupObserver(adapter);
 

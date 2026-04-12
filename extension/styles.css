@@ -166,3 +166,51 @@
   background: rgba(30, 144, 255, 0.2);
   color: #1e90ff;
 }
+
+/* On-page status badge */
+#intentkeeper-status-badge {
+  position: fixed;
+  bottom: 16px;
+  right: 16px;
+  background: rgba(15, 15, 15, 0.85);
+  color: #ccc;
+  font-size: 11px;
+  font-family: -apple-system, system-ui, BlinkMacSystemFont, sans-serif;
+  padding: 5px 10px;
+  border-radius: 20px;
+  z-index: 2147483647;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(6px);
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+  opacity: 1;
+  line-height: 1;
+}
+
+#intentkeeper-status-badge.ik-faded {
+  opacity: 0;
+}
+
+#intentkeeper-status-badge .ik-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #4caf50;
+  flex-shrink: 0;
+}
+
+#intentkeeper-status-badge.ik-disconnected .ik-dot {
+  background: #f44336;
+}
+
+#intentkeeper-status-badge.ik-disconnected {
+  opacity: 1 !important;
+  color: #f44336;
+}
+
+#intentkeeper-status-badge .ik-count {
+  color: #666;
+}
