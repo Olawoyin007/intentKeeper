@@ -179,7 +179,9 @@
 
 ---
 
-## Phase 5: Classification Accuracy 🔧 IN PROGRESS
+## Phase 5: Classification Accuracy ✅ COMPLETE
+
+**Prompt ceiling reached at 98% (78/80). The 2 remaining cases require fine-tuning, not prompt engineering.**
 
 **Goal**: Improve classification quality and handle edge cases.
 
@@ -335,11 +337,11 @@ Safari requires Apple developer account, Xcode, and wrapping the extension in a 
 | 1. Core + Twitter | High | Medium | ✅ COMPLETE |
 | 2. Hardening & Reliability | Critical | Medium | ✅ COMPLETE |
 | 3. YouTube | High | Medium | 🟡 In Progress |
-| 5. Classification Accuracy | Critical | Low | 🔴 Next - gates platform expansion |
-| 4. Reddit | High | Medium | 🔵 After eval passes |
+| 5. Classification Accuracy | Critical | Low | ✅ COMPLETE (98%, prompt ceiling) |
+| 4. Reddit | High | Medium | ✅ COMPLETE |
 | 6. User Sensitivity | Medium | Low | 🔵 After 5 |
 | 7. Statistics | Medium | Medium | 🔵 After 6 |
-| 8. Multi-Browser (Brave/Edge/Opera/Firefox) | Medium | Low-Medium | 🔵 After 7 |
+| 8. Multi-Browser (Brave/Edge/Opera/Firefox) | Medium | Low-Medium | 🟡 Brave ✅, Edge/Opera/Firefox 🔵 |
 | 9. Advanced Classification | High | High | 🔵 Long-term |
 | 10. Cross-Platform | Medium | High | 🔵 Long-term |
 
@@ -352,22 +354,21 @@ Safari requires Apple developer account, Xcode, and wrapping the extension in a 
 
 ---
 
-## Current Status (2026-04-09)
+## Current Status (2026-04-12)
 
-**Completed**: Phase 1 (Core classifier + Chrome extension for Twitter/X), Phase 2 (Hardening & Reliability), Phase 3.1-3.3 + 3.5 (YouTube support + platform abstraction), Phase 5.1 (85% accuracy), Phase 5.2 (98% accuracy - prompt ceiling)
+**Completed**: Phase 1 (Core + Twitter/X), Phase 2 (Hardening), Phase 3.1-3.3 + 3.5 (YouTube + platform abstraction), Phase 4 (Reddit - 3 DOM variants: Shreddit, new Reddit, old Reddit), Phase 5.1-5.2 (98% accuracy on 80-example eval, prompt ceiling reached), Phase 8.1 (Brave Private Network Access support)
 
-**Next Up**: Phase 5.3 (fine-tuning for the 2 remaining cases) or Phase 4 (Reddit) - 98% accuracy is well above the 85% gate
+**Prompt ceiling**: The 2 remaining misclassified cases are at the model's training boundary. Fine-tuning (Phase 5.3) would be needed to pass 98%. Prompting cannot resolve them without breaking other cases.
 
-**Priority shift**: Phase 4 (Reddit) remains after Phase 5. Eval gates platform expansion.
+**Next Up**: Phase 6 (User-Configurable Sensitivity) - now that accuracy and platform coverage are solid
 
 **Stats**:
 
-- 30+ tests passing
-- 6 intent categories
-- 2 platforms supported (Twitter/X, YouTube)
-- 85% eval accuracy on 80-example test set
-- Async pipeline with batch classification
-- LRU cache with TTL expiration
+- 98% eval accuracy (78/80, measured 2026-04-09)
+- 6 intent categories (ragebait, fearmongering, hype, engagement_bait, divisive, genuine)
+- 3 platforms (Twitter/X, YouTube, Reddit)
+- Brave browser supported (PNA middleware)
+- Async pipeline with batch classification and LRU cache
 
 ---
 
@@ -391,10 +392,10 @@ IntentKeeper shares architectural DNA with [empathySync](https://github.com/Olaw
 ## Version Targets
 
 **v0.1.0** (Phase 1): Core classifier + Twitter/X extension ✅ COMPLETE
-**v0.2.0** (Phase 2): Hardening & reliability improvements
-**v0.3.0** (Phase 3): YouTube support
-**v0.4.0** (Phase 4): Reddit support
-**v0.5.0** (Phase 5): Classification accuracy improvements
+**v0.2.0** (Phase 2): Hardening & reliability improvements ✅ COMPLETE
+**v0.3.0** (Phase 3): YouTube support ✅ COMPLETE (platform abstraction done, intent anchoring deferred)
+**v0.4.0** (Phase 4): Reddit support ✅ COMPLETE
+**v0.5.0** (Phase 5): Classification accuracy - 98% reached ✅ COMPLETE (prompt ceiling; fine-tuning needed for final 2%)
 **v0.6.0** (Phase 6): User-configurable sensitivity
 **v0.7.0** (Phase 7): Statistics dashboard
 **v0.8.0** (Phase 8): Multi-browser support (Brave, Edge, Opera, Firefox)

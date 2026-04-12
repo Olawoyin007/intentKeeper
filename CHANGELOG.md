@@ -2,6 +2,36 @@
 
 All notable changes to IntentKeeper are documented here.
 
+## v0.4.0 (2026-04-12) - Reddit, Brave & Classification Accuracy
+
+**"Three platforms. 98% accuracy. Works in Brave."**
+
+### Reddit Support (Phase 4)
+- **Three DOM variants**: Handles Shreddit (web components `<shreddit-post>`), new Reddit (React with `data-testid`), and old Reddit (classic `.thing.link` / `.thing.comment`) - all three are live simultaneously
+- **Dynamic selector**: `get baseSelector()` computed property detects variant at runtime rather than static selector string
+- **Subreddit context**: Subreddit name and flair extracted and included in classification text for better intent detection
+- **Comment truncation**: Comment body capped at 400 characters to keep LLM prompts lean
+- **22 structural tests**: `tests/test_reddit_adapter.py` validates interface contract and all three DOM variants
+
+### Brave Support (Phase 8.1)
+- **Private Network Access (PNA) middleware**: Brave's strict PNA enforcement requires the server to respond with `Access-Control-Allow-Private-Network: true` on preflight. `PrivateNetworkAccessMiddleware` in `server/api.py` handles this automatically - no user configuration needed
+- **3 tests**: `TestPrivateNetworkAccessMiddleware` validates header presence and absence
+
+### Classification Accuracy (Phase 5.1 + 5.2)
+- **98% accuracy** (78/80) on 80-example eval set - up from 79% at Phase 5 start
+- **Prompt ceiling reached**: 2 remaining cases are at the model's training boundary; fine-tuning (Phase 5.3) would be needed for 100%
+- Key improvements: ragebait/divisive boundary, engagement_bait short-form detection, guilt-demand framing, society-level contempt, CTA override rule
+
+### Security
+- **CodeQL alerts resolved**: Fixed 3 false-positive "Incomplete URL sanitization" alerts in test code by using exact URL pattern matching instead of substring checks
+
+### Stats
+- 98% eval accuracy (78/80)
+- 3 platforms supported
+- 60+ tests passing
+
+---
+
 ## v0.3.0 (2026-02-28) - Distribution & Discoverability
 
 **"Anyone can run it now."**
