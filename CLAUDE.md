@@ -61,6 +61,14 @@ python eval/run_eval.py           # measure improvement
 # only commit if accuracy is >= baseline
 ```
 
+**Workflow for real-world misclassifications (spotted during use):**
+1. Note the content and what it was classified as vs. what it should be
+2. Add it to `eval/test_set.yaml` with the correct label and a `reasoning` note explaining the boundary
+3. Run `python eval/run_eval.py` - this becomes the new baseline
+4. Adjust `scenarios/intents.yaml` (add a rule or example) to fix it
+5. Run eval again - only commit if accuracy >= baseline
+6. If fixing it breaks something else, you've hit a model boundary - document it in CLAUDE.md and leave it
+
 The 2 remaining wrong classifications (2%) are at the model-training boundary:
 - `Millennials ruined the housing market. It's really that simple.` - model reads 'really that simple' as contemptuous; requires fine-tuning to fix
 - `People who recline their airplane seat are inconsiderate. Change my mind.` - model reads 'Change my mind' as contempt language; prompt rules can't reliably override this
