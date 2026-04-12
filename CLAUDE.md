@@ -296,6 +296,37 @@ IntentKeeper shares patterns with [empathySync](https://github.com/Olawoyin007/e
 - Classification pipeline architecture
 - Local-first philosophy
 
+## Documentation Maintenance
+
+**Rule: docs must be updated before merging any PR that changes behavior, structure, or features. Never leave docs stale.**
+
+| Document | Update when |
+|----------|-------------|
+| `README.md` | New features shipped, browser support changes, accuracy baseline changes, new platform support |
+| `ROADMAP.md` | Phase completed - mark ✅; new phase planned - add entry |
+| `docs/architecture.md` | Intent categories change, new platform adapter added, browser support changes, component relationships change |
+| `CLAUDE.md` (this file) | Eval baseline changes, new intent categories, architecture changes, new environment variables |
+
+### Per-change checklist
+
+**New platform supported (Reddit, YouTube, etc.):**
+- [ ] docs/architecture.md: update High-Level Overview (browser line, Extension section), Component Relationships
+- [ ] ROADMAP.md: mark phase ✅
+- [ ] README.md: update supported platforms list
+- [ ] CLAUDE.md: update Architecture section if new files added
+
+**Intent categories changed (added, removed, renamed):**
+- [ ] docs/architecture.md: update Intent Categories section (count, spectrum diagram)
+- [ ] CLAUDE.md: update intent table
+- [ ] eval/test_set.yaml: add/update examples
+
+**Eval baseline changes:**
+- [ ] CLAUDE.md: update baseline percentage and date in Eval Harness section
+
+**New browser support:**
+- [ ] docs/architecture.md: update "Browser (Chrome)" in High-Level Overview to include new browser
+- [ ] README.md: update browser compatibility
+
 ## Roadmap
 
 See [ROADMAP.md](ROADMAP.md) for the phased implementation plan:
