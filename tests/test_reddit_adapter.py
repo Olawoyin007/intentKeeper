@@ -77,7 +77,8 @@ class TestRedditVariantCoverage:
 
     def test_old_reddit_handled(self):
         src = REDDIT_JS.read_text()
-        assert "old.reddit.com" in src
+        # Check for the JS string literal as used in the isOldReddit hostname comparison
+        assert "'old.reddit.com'" in src
         assert ".thing.link" in src
         assert ".thing.comment" in src
 
@@ -116,14 +117,14 @@ class TestManifestRedditMatches:
         all_matches = []
         for entry in manifest.get("content_scripts", []):
             all_matches.extend(entry.get("matches", []))
-        assert any("www.reddit.com" in m for m in all_matches)
+        assert "https://www.reddit.com/*" in all_matches
 
     def test_manifest_covers_old_reddit(self):
         manifest = json.loads(MANIFEST.read_text())
         all_matches = []
         for entry in manifest.get("content_scripts", []):
             all_matches.extend(entry.get("matches", []))
-        assert any("old.reddit.com" in m for m in all_matches)
+        assert "https://old.reddit.com/*" in all_matches
 
     def test_manifest_reddit_uses_classifier_core(self):
         manifest = json.loads(MANIFEST.read_text())
