@@ -14,6 +14,34 @@
  * All classification logic lives in core/classifier.js.
  */
 
+// ---- Page-level post title (for comment context) ----
+
+/**
+ * On a thread/comment page, return the post title so comment classifiers
+ * can include it as context - the same way Twitter includes the focal post
+ * for replies. Returns null on feed/listing pages where there's no single post.
+ */
+function getPagePostTitle() {
+  // Shreddit: post-title attribute on the <shreddit-post> custom element
+  const shredditPost = document.querySelector('shreddit-post');
+  if (shredditPost) {
+    const attr = shredditPost.getAttribute('post-title');
+    if (attr) return attr.trim();
+    const slot = shredditPost.querySelector('[slot="title"]');
+    if (slot) return slot.textContent.trim() || null;
+  }
+
+  // New Reddit thread page
+  const newH1 = document.querySelector('[data-test-id="post-content"] h1, h1[id^="post-title"]');
+  if (newH1) return newH1.textContent.trim() || null;
+
+  // Old Reddit thread page
+  const oldTitle = document.querySelector('.top-matter p.title a');
+  if (oldTitle) return oldTitle.textContent.trim() || null;
+
+  return null;
+}
+
 // ---- Reddit variant detection ----
 
 function isOldReddit() {
@@ -64,6 +92,11 @@ function extractShredditCommentText(element) {
 
   const parts = [];
 
+  // Include the post title as context so the classifier knows what is being
+  // commented on (same pattern as Twitter's focal post context for replies)
+  const postTitle = getPagePostTitle();
+  if (postTitle) parts.push(`[Post: ${postTitle}]`);
+
   const author = element.getAttribute('author');
   if (author) parts.push(`[u/${author}]`);
 
@@ -105,6 +138,9 @@ function extractNewRedditCommentText(element) {
 
   const parts = [];
 
+  const postTitle = getPagePostTitle();
+  if (postTitle) parts.push(`[Post: ${postTitle}]`);
+
   const author = element.querySelector('[data-testid="comment_author_link"], a[href*="/user/"]');
   if (author) parts.push(`[${author.textContent.trim()}]`);
 
@@ -143,6 +179,9 @@ function extractOldRedditCommentText(element) {
   if (!body || !body.textContent.trim()) return '';
 
   const parts = [];
+
+  const postTitle = getPagePostTitle();
+  if (postTitle) parts.push(`[Post: ${postTitle}]`);
 
   const author = element.querySelector('.author');
   if (author) parts.push(`[u/${author.textContent.trim()}]`);

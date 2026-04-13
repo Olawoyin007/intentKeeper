@@ -39,7 +39,8 @@ let isProcessing = false;
 // Flag: new items arrived while a batch was in-flight
 let pendingReprocess = false;
 
-// Running count of classified items (shown in status badge)
+// Counts for status badge diagnostics
+let foundCount = 0;
 let classifiedCount = 0;
 
 // Debug logger - only logs when debug._enabled is true
@@ -314,6 +315,7 @@ async function processItems(adapter) {
 
   isProcessing = true;
   try {
+    updateStatusBadge('scanning');
     const selector = buildSelector(adapter.baseSelector, PROCESSED_ATTR);
     const items = Array.from(document.querySelectorAll(selector));
 
@@ -330,6 +332,7 @@ async function processItems(adapter) {
         }
       } else {
         item.classList.add('intentkeeper-classifying');
+        foundCount++;
         itemData.push({ item, text, mediaUrls });
       }
     }
@@ -346,6 +349,7 @@ async function processItems(adapter) {
           applyTreatment(item, classification, adapter);
         } else {
           item.setAttribute(PROCESSED_ATTR, 'failed');
+          updateStatusBadge();
         }
       }
     }
@@ -383,14 +387,30 @@ function createStatusBadge(platform, connected) {
   return badge;
 }
 
-function updateStatusBadge() {
+function updateStatusBadge(state) {
   const badge = document.getElementById('intentkeeper-status-badge');
   if (!badge) return;
   const countEl = badge.querySelector('.ik-count');
-  if (countEl) countEl.textContent = `· ${classifiedCount} classified`;
+  if (countEl) {
+    if (state === 'scanning') {
+      countEl.textContent = '· scanning...';
+    } else if (foundCount > 0 && classifiedCount === 0) {
+      // Items found but nothing classified - likely API issue
+      countEl.textContent = `· ${foundCount} found, 0 classified`;
+      badge.classList.add('ik-warn');
+    } else if (classifiedCount > 0) {
+      countEl.textContent = `· ${classifiedCount} classified`;
+      badge.classList.remove('ik-warn');
+    } else {
+      countEl.textContent = '';
+    }
+  }
   badge.classList.remove('ik-faded');
   clearTimeout(badge._hideTimer);
-  badge._hideTimer = setTimeout(() => badge.classList.add('ik-faded'), 3000);
+  // Don't auto-hide if there's a warning
+  if (!badge.classList.contains('ik-warn')) {
+    badge._hideTimer = setTimeout(() => badge.classList.add('ik-faded'), 3000);
+  }
 }
 
 function setupObserver(adapter) {
@@ -402,8 +422,15 @@ function setupObserver(adapter) {
 
   observer.observe(document.body, {
     childList: true,
-    subtree: true
+    subtree: true,
+    // Also watch text node changes - catches platforms that update existing
+    // elements' text content (e.g. YouTube recycling card elements on scroll)
+    characterData: true
   });
+
+  // Periodic fallback scan every 3s. Catches any items the MutationObserver
+  // missed (e.g. content rendered via requestAnimationFrame after mutations).
+  setInterval(() => processItems(adapter), 3000);
 }
 
 // --- Public API ---
@@ -443,6 +470,16 @@ window.IntentKeeperCore = {
     createStatusBadge(adapter.platform, connected);
     processItems(adapter);
     setupObserver(adapter);
+
+    // Optional SPA navigation hook - platform adapters implement this
+    // to reset counts and re-scan after client-side navigation completes.
+    if (adapter.setupNavigation) {
+      adapter.setupNavigation(() => {
+        foundCount = 0;
+        classifiedCount = 0;
+        processItems(adapter);
+      });
+    }
 
     debug.log(`Active [${adapter.platform}]`);
   }

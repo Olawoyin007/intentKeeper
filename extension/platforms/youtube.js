@@ -140,6 +140,16 @@ const youtubeAdapter = {
     if (tag === 'ytd-comment-thread-renderer') return extractCommentText(element);
     if (tag === 'ytd-watch-metadata') return extractWatchMetadataText(element);
     return extractVideoCardText(element);
+  },
+
+  /**
+   * YouTube SPA navigation hook.
+   * YouTube fires 'yt-navigate-finish' when client-side navigation completes
+   * and the new page's content is in the DOM. Without this, the MutationObserver
+   * may fire on the navigation skeleton before content is ready.
+   */
+  setupNavigation(reprocess) {
+    document.addEventListener('yt-navigate-finish', reprocess);
   }
 };
 

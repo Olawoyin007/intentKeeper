@@ -214,3 +214,11 @@
 #intentkeeper-status-badge .ik-count {
   color: #666;
 }
+
+#intentkeeper-status-badge.ik-warn .ik-count {
+  color: #f4a336;
+}
+
+#intentkeeper-status-badge.ik-warn {
+  opacity: 1 !important;
+}
