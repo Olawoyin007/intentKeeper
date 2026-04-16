@@ -14,15 +14,15 @@ jobs:
         python-version: ["3.10", "3.11", "3.12"]
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
 
       - name: Cache pip dependencies
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('pyproject.toml') }}
@@ -46,7 +46,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -63,14 +63,17 @@ jobs:
   extension-lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Validate manifest.json
         run: python -c "import json; json.load(open('extension/manifest.json'))"
 
       - name: Check extension files exist
         run: |
-          test -f extension/content.js
+          test -f extension/core/classifier.js
+          test -f extension/platforms/twitter.js
+          test -f extension/platforms/reddit.js
+          test -f extension/platforms/youtube.js
           test -f extension/background.js
           test -f extension/styles.css
           test -f extension/popup/popup.html
