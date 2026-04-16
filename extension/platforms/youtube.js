@@ -12,31 +12,41 @@
 // ---- Per-type text extraction helpers ----
 
 function extractVideoCardText(element) {
-  // Title is the primary classification signal. If it isn't rendered yet
-  // (YouTube lazy-loads card content), return '' so the item stays unmarked
-  // and gets picked up again on the next observer pass.
-  const title = element.querySelector('#video-title');
-  if (!title || !title.textContent.trim()) return '';
+  // Try the legacy title element first. Still present on search results
+  // (ytd-video-renderer) and sidebar (ytd-compact-video-renderer), and on
+  // older YouTube layouts. If found, build a rich context string.
+  const titleEl = element.querySelector('#video-title');
+  if (titleEl) {
+    const text = titleEl.textContent.trim() || titleEl.getAttribute('title') || '';
+    if (text) {
+      const parts = [text];
 
-  const parts = [title.textContent.trim()];
+      const channel = element.querySelector('ytd-channel-name #text, #channel-name #text');
+      if (channel) {
+        const name = channel.textContent.trim();
+        if (name) parts.push(`[Channel: ${name}]`);
+      }
 
-  // Channel name - helps detect known bait channels
-  const channel = element.querySelector('ytd-channel-name #text, #channel-name #text');
-  if (channel) {
-    const name = channel.textContent.trim();
-    if (name) parts.push(`[Channel: ${name}]`);
+      const metadata = element.querySelectorAll('#metadata-line span');
+      if (metadata.length > 0) {
+        const metaParts = Array.from(metadata)
+          .map(s => s.textContent.trim())
+          .filter(Boolean);
+        if (metaParts.length > 0) parts.push(`[${metaParts.join(', ')}]`);
+      }
+
+      return parts.join(' | ');
+    }
   }
 
-  // View count + upload date give context (e.g. viral bait vs organic growth)
-  const metadata = element.querySelectorAll('#metadata-line span');
-  if (metadata.length > 0) {
-    const metaParts = Array.from(metadata)
-      .map(s => s.textContent.trim())
-      .filter(Boolean);
-    if (metaParts.length > 0) parts.push(`[${metaParts.join(', ')}]`);
-  }
-
-  return parts.join(' | ');
+  // New YouTube homepage structure (2025+): the internal component hierarchy
+  // (ytd-rich-grid-video-renderer, #video-title, #metadata-line) has been
+  // replaced by a plain #content div containing all card text concatenated.
+  // Noisy (title + hashtags + view count run together) but enough signal for
+  // intent classification.
+  const content = element.querySelector('#content');
+  if (!content) return '';
+  return content.textContent.trim();
 }
 
 function extractWatchMetadataText(element) {
