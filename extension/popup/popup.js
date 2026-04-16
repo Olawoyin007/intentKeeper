@@ -49,11 +49,19 @@ async function saveSettings() {
 }
 
 /**
- * Check API health via background worker
+ * Check API health via background worker.
+ * Wraps sendMessage in a 5s timeout - MV3 service workers can be dormant
+ * and Chrome sometimes fails to wake them, leaving sendMessage hanging forever.
  */
 async function checkHealth() {
   try {
-    const data = await chrome.runtime.sendMessage({ type: 'CHECK_HEALTH' });
+    const timeout = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('timeout')), 5000)
+    );
+    const data = await Promise.race([
+      chrome.runtime.sendMessage({ type: 'CHECK_HEALTH' }),
+      timeout
+    ]);
 
     if (data && data.status === 'ok') {
       elements.status.className = 'status connected';
