@@ -102,19 +102,34 @@ intentKeeper/
 │   └── classifier.py           # IntentClassifier class, Ollama integration
 ├── extension/                   # Chrome extension (Manifest V3)
 │   ├── manifest.json           # Extension manifest
-│   ├── content.js              # Content script (intercepts tweets)
-│   ├── background.js           # Service worker (health checks, settings)
+│   ├── background.js           # Service worker (health checks, settings, API proxy)
 │   ├── styles.css              # Visual treatments (blur, tag, hide)
-│   └── popup/                  # Extension popup UI
-│       ├── popup.html
-│       └── popup.js
+│   ├── core/
+│   │   └── classifier.js      # Shared engine: cache, API calls, treatments, MutationObserver
+│   ├── platforms/              # Platform adapters (one per site)
+│   │   ├── twitter.js         # Twitter/X selectors and text extraction
+│   │   ├── youtube.js         # YouTube selectors and text extraction (SPA nav)
+│   │   └── reddit.js          # Reddit selectors and text extraction (3-variant DOM)
+│   ├── popup/                  # Extension popup UI
+│   │   ├── popup.html
+│   │   └── popup.js
+│   ├── icons/                  # Extension icons (16, 48, 128px)
+│   └── tests/                  # Jest tests for extension JS
+│       ├── core.test.js
+│       ├── twitter.test.js
+│       └── youtube.test.js
 ├── scenarios/                   # Configuration (YAML)
 │   └── intents.yaml            # Intent definitions, few-shot examples, rules
-├── tests/                       # Pytest test suite (30 tests)
+├── tests/                       # Pytest test suite (58 tests)
+├── eval/                        # Classification eval harness
+│   ├── test_set.yaml           # 80 labeled examples
+│   └── run_eval.py             # Eval runner
 ├── docs/                        # Documentation
 ├── pyproject.toml              # Package metadata, dependencies, entry points
 └── .env.example                # Environment template
 ```
+
+> `extension/content.js` is a deprecated stub (11 lines). Not loaded by the extension. Left as documentation of the pre-Phase-3.5 architecture.
 
 ### Core Components
 
@@ -131,12 +146,20 @@ intentKeeper/
   - Parses LLM response into `ClassificationResult`
 
 **Extension** (`extension/`):
-- [extension/content.js](extension/content.js) - Content script that:
-  - Observes DOM for new tweets via MutationObserver (200ms debounce)
-  - Extracts tweet text, author, video context, polls, social context
-  - Sends batches to background worker for classification
-  - Applies visual treatments (tags on all tweets, blur/hide gated by threshold)
+
+The extension uses a two-layer architecture introduced in Phase 3.5:
+
+- [extension/core/classifier.js](extension/core/classifier.js) - Shared engine loaded on every platform:
+  - MutationObserver with 200ms debounce
   - Client-side LRU cache with content hash keys
+  - Sends batches to background worker for classification
+  - Applies visual treatments (tags, blur, hide)
+  - Calls `window.intentKeeperPlatform` adapter for DOM interaction
+- [extension/platforms/twitter.js](extension/platforms/twitter.js) - Twitter/X adapter
+- [extension/platforms/youtube.js](extension/platforms/youtube.js) - YouTube adapter
+  - Handles SPA navigation (yt-navigate-finish events)
+  - Falls back to `#content` for 2025+ homepage DOM (no `#video-title` in feed cards)
+- [extension/platforms/reddit.js](extension/platforms/reddit.js) - Reddit adapter (3-variant DOM)
 - [extension/background.js](extension/background.js) - Service worker:
   - Proxies API calls to localhost (avoids Private Network Access blocking)
   - Batch classification via `/classify/batch` endpoint
@@ -146,6 +169,7 @@ intentKeeper/
   - Enable/disable toggle
   - Show tags, blur ragebait, hide engagement bait toggles
   - Sensitivity slider (manipulation threshold)
+  - 5s timeout on health check (MV3 service worker can be dormant)
 
 **Scenarios** (`scenarios/`):
 - [scenarios/intents.yaml](scenarios/intents.yaml) - Intent configuration:
@@ -154,7 +178,7 @@ intentKeeper/
   - Classification rules including explicit boundary rules for hard cases
 
 **Eval** (`eval/`):
-- [eval/test_set.yaml](eval/test_set.yaml) - 48 labeled examples, 8 per intent, weighted toward boundary cases
+- [eval/test_set.yaml](eval/test_set.yaml) - 80 labeled examples (~13 per intent), weighted toward boundary cases
 - [eval/run_eval.py](eval/run_eval.py) - Eval runner: per-intent accuracy, wrong classification list
 
 ### Intent Categories
@@ -332,7 +356,7 @@ IntentKeeper shares patterns with [empathySync](https://github.com/Olawoyin007/e
 See [ROADMAP.md](ROADMAP.md) for the phased implementation plan:
 - Phase 1: Core classifier + Chrome extension (Twitter/X) ✅
 - Phase 2: Hardening & reliability ✅
-- Phase 3: YouTube support
+- Phase 3: YouTube support ✅ (SPA nav, #content fallback for 2025+ DOM)
 - Phase 4: Reddit support ✅ (3-variant DOM adapter, 22 tests)
 - Phase 5: Classification accuracy ✅ (98%, 78/80, prompt ceiling reached)
 - Phase 6: User-configurable sensitivity
