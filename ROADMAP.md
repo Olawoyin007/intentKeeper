@@ -160,15 +160,15 @@
 - [x] Include subreddit context in extracted text
 - [x] 22 structural tests in `tests/test_reddit_adapter.py`
 
-### 4.2 Reddit-Specific Intents
-- [ ] Add `karma_farming` intent
-- [ ] Add `brigading` intent (coordinated attacks)
-- [ ] Add `copypasta` detection
+### 4.2 Reddit-Specific Intents ↗ SUPERSEDED
+- Phase 5 reached the prompt ceiling at 98%. Adding new intent categories (karma_farming, brigading,
+  copypasta) would require fine-tuning the model, not prompt engineering. The existing 6 intents
+  cover Reddit content sufficiently; new intents are only worth adding if fine-tuning is planned.
 
-### 4.3 Subreddit Context
-- [ ] Pass subreddit context to classifier
-- [ ] Adjust thresholds by subreddit type
-- [ ] r/politics vs r/science need different baselines
+### 4.3 Subreddit Context ↗ SUPERSEDED
+- Per-subreddit threshold tuning is out of scope now that Phase 6.1 gives users per-intent toggles.
+  Users who want different sensitivity on r/politics vs r/science can use the global sensitivity
+  slider. Full subreddit-aware thresholds would require significant storage/UX work for marginal gain.
 
 ### 4.4 Intent Anchoring for Reddit
 - [ ] On subreddit landing, prompt: "What are you looking for?" (free text, unobtrusive)
@@ -213,14 +213,15 @@
 
 ---
 
-## Phase 6: User-Configurable Sensitivity 🔜 PLANNED
+## Phase 6: User-Configurable Sensitivity 🔧 IN PROGRESS
 
 **Goal**: Let users fine-tune what content is filtered.
 
-### 6.1 Per-Intent Thresholds
-- [ ] Individual sensitivity sliders per intent
-- [ ] "I want to see divisive content but not ragebait"
-- [ ] Save preferences in chrome.storage.sync
+### 6.1 Per-Intent Kill Switches ✅ DONE
+- [x] Per-intent on/off toggles in popup (ragebait, fearmongering, hype, engagement_bait, divisive)
+- [x] "I want to see divisive content but not ragebait" - achieved via toggle UI
+- [x] Kill switch sits between master enable and action settings; persisted in chrome.storage.local
+- [x] `intentEnabled` map in DEFAULT_SETTINGS; classifier reads it before applying any treatment
 
 ### 6.2 Allowlist/Blocklist
 - [ ] Allowlist specific accounts (never filter)

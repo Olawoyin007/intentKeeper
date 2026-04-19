@@ -167,6 +167,20 @@
       cursor: pointer;
     }
 
+    .intent-filters {
+      margin-top: 16px;
+      padding-top: 12px;
+      border-top: 1px solid #333;
+    }
+
+    .intent-filters-label {
+      font-size: 11px;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+
     .footer {
       margin-top: 16px;
       padding-top: 12px;
@@ -249,6 +263,30 @@
       <span class="slider-value" id="thresholdValue">60%</span>
     </div>
     <input type="range" id="threshold" min="30" max="90" value="60">
+  </div>
+
+  <div class="intent-filters">
+    <div class="intent-filters-label">Intent filters</div>
+    <div class="setting">
+      <div><div class="setting-label">Ragebait</div></div>
+      <label class="toggle"><input type="checkbox" id="intent-ragebait" checked><span class="toggle-slider"></span></label>
+    </div>
+    <div class="setting">
+      <div><div class="setting-label">Fearmongering</div></div>
+      <label class="toggle"><input type="checkbox" id="intent-fearmongering" checked><span class="toggle-slider"></span></label>
+    </div>
+    <div class="setting">
+      <div><div class="setting-label">Hype</div></div>
+      <label class="toggle"><input type="checkbox" id="intent-hype" checked><span class="toggle-slider"></span></label>
+    </div>
+    <div class="setting">
+      <div><div class="setting-label">Engagement Bait</div></div>
+      <label class="toggle"><input type="checkbox" id="intent-engagement_bait" checked><span class="toggle-slider"></span></label>
+    </div>
+    <div class="setting">
+      <div><div class="setting-label">Divisive</div></div>
+      <label class="toggle"><input type="checkbox" id="intent-divisive" checked><span class="toggle-slider"></span></label>
+    </div>
   </div>
 
   <div class="footer">
