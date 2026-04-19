@@ -16,7 +16,16 @@ const DEFAULT_SETTINGS = {
   showTags: true,
   blurRagebait: true,
   hideEngagementBait: true,
-  manipulationThreshold: 0.6
+  manipulationThreshold: 0.6,
+  // Phase 6.1: per-intent kill switches. When false, that intent passes through
+  // with no treatment at all (overrides blurRagebait / hideEngagementBait too).
+  intentEnabled: {
+    ragebait: true,
+    fearmongering: true,
+    hype: true,
+    engagement_bait: true,
+    divisive: true
+  }
 };
 
 /**

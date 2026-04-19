@@ -57,7 +57,14 @@ let settings = {
   showTags: true,
   blurRagebait: true,
   hideEngagementBait: true,
-  manipulationThreshold: 0.6
+  manipulationThreshold: 0.6,
+  intentEnabled: {
+    ragebait: true,
+    fearmongering: true,
+    hype: true,
+    engagement_bait: true,
+    divisive: true
+  }
 };
 
 // --- Utilities ---
@@ -269,6 +276,12 @@ function applyTreatment(element, classification, adapter) {
   element.setAttribute(INTENT_ATTR, intent);
   classifiedCount++;
   updateStatusBadge();
+
+  // Phase 6.1: per-intent kill switch - pass through with no treatment if disabled
+  const intentEnabled = settings.intentEnabled || {};
+  if (intentEnabled[intent] === false) {
+    return;
+  }
 
   if (settings.showTags) {
     applyTag(element, intent, confidence);

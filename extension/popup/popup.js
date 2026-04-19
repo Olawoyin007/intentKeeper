@@ -4,6 +4,9 @@
  * All API calls routed through background worker to avoid CORS/PNA issues.
  */
 
+// Intent keys that have per-intent toggles in the popup
+const INTENT_KEYS = ['ragebait', 'fearmongering', 'hype', 'engagement_bait', 'divisive'];
+
 // Settings elements
 const elements = {
   enabled: document.getElementById('enabled'),
@@ -31,18 +34,32 @@ async function loadSettings() {
   const threshold = Math.round((settings.manipulationThreshold || 0.6) * 100);
   elements.threshold.value = threshold;
   elements.thresholdValue.textContent = `${threshold}%`;
+
+  // Per-intent toggles (default all enabled)
+  const intentEnabled = settings.intentEnabled || {};
+  for (const key of INTENT_KEYS) {
+    const el = document.getElementById(`intent-${key}`);
+    if (el) el.checked = intentEnabled[key] !== false;
+  }
 }
 
 /**
  * Save settings to storage
  */
 async function saveSettings() {
+  const intentEnabled = {};
+  for (const key of INTENT_KEYS) {
+    const el = document.getElementById(`intent-${key}`);
+    if (el) intentEnabled[key] = el.checked;
+  }
+
   const settings = {
     enabled: elements.enabled.checked,
     showTags: elements.showTags.checked,
     blurRagebait: elements.blurRagebait.checked,
     hideEngagementBait: elements.hideEngagementBait.checked,
-    manipulationThreshold: parseInt(elements.threshold.value) / 100
+    manipulationThreshold: parseInt(elements.threshold.value) / 100,
+    intentEnabled
   };
 
   await chrome.storage.local.set({ intentkeeper_settings: settings });
@@ -84,6 +101,11 @@ elements.enabled.addEventListener('change', saveSettings);
 elements.showTags.addEventListener('change', saveSettings);
 elements.blurRagebait.addEventListener('change', saveSettings);
 elements.hideEngagementBait.addEventListener('change', saveSettings);
+
+for (const key of INTENT_KEYS) {
+  const el = document.getElementById(`intent-${key}`);
+  if (el) el.addEventListener('change', saveSettings);
+}
 
 elements.threshold.addEventListener('input', () => {
   elements.thresholdValue.textContent = `${elements.threshold.value}%`;
