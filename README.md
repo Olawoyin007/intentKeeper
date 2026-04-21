@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="assets/logo.png" alt="IntentKeeper" width="180">
+  <img src="assets/logo.png" alt="intentKeeper" width="180">
 </p>
 
-<h1 align="center">IntentKeeper</h1>
+<h1 align="center">intentKeeper</h1>
 
 <p align="center"><strong>A digital bodyguard for your mind.</strong></p>
 
@@ -14,6 +14,7 @@
   <img src="https://img.shields.io/badge/platform-Reddit-FF4500.svg" alt="Platform: Reddit">
   <img src="https://img.shields.io/badge/accuracy-98%25-brightgreen.svg" alt="Accuracy: 98%">
   <img src="https://img.shields.io/badge/local--first-Ollama-orange.svg" alt="Local-First: Ollama">
+  <img src="https://img.shields.io/badge/browser-Chrome%20%7C%20Brave%20%7C%20Edge%20%7C%20Opera-4285F4.svg" alt="Browser: Chrome, Brave, Edge, Opera">
 </p>
 
 There are hundreds of tools that block, hide, or filter social media. IntentKeeper is the only one that tells you *why* content is designed to manipulate you - and lets you decide what to do with it.
@@ -78,7 +79,11 @@ Don't have Ollama yet? [Install it here](https://ollama.com) - it runs entirely 
 
 ### Part 2 - Extension
 
-1. Open Chrome or Brave and go to `chrome://extensions` (Chrome) or `brave://extensions` (Brave)
+1. Open your browser and go to the extensions page:
+   - Chrome: `chrome://extensions`
+   - Brave: `brave://extensions`
+   - Edge: `edge://extensions`
+   - Opera: `opera://extensions`
 2. Enable **Developer mode** (top right toggle)
 3. Click **Load unpacked** and select the `extension/` folder
 
