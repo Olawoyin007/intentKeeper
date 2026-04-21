@@ -15,7 +15,7 @@ This guide explains how to use IntentKeeper day-to-day.
 
 2. **Python 3.10+** installed
 
-3. **Chrome** or Chromium-based browser
+3. **Chrome, Brave, Edge, or Opera** (any Chromium-based browser)
 
 ### Starting the Server
 
@@ -33,11 +33,15 @@ Ollama connection OK (http://localhost:11434)
 
 ### Installing the Extension
 
-1. Open Chrome and go to `chrome://extensions/`
+1. Open your browser and navigate to the extensions page:
+   - Chrome: `chrome://extensions`
+   - Brave: `brave://extensions`
+   - Edge: `edge://extensions`
+   - Opera: `opera://extensions`
 2. Enable **Developer mode** (toggle in top-right)
 3. Click **Load unpacked**
-4. Select the `extension/` folder from the IntentKeeper directory
-5. The IntentKeeper shield icon appears in your toolbar
+4. Select the `extension/` folder from the intentKeeper directory
+5. The intentKeeper icon appears in your toolbar
 
 ### Verify It Works
 
@@ -48,7 +52,7 @@ Ollama connection OK (http://localhost:11434)
 
 ## The Extension Popup
 
-Click the shield icon in your Chrome toolbar to access settings.
+Click the intentKeeper icon in your browser toolbar to access settings.
 
 ### Connection Status
 
