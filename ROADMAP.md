@@ -256,19 +256,19 @@
 
 ---
 
-## Phase 8: Multi-Browser Support 🔜 PLANNED
+## Phase 8: Multi-Browser Support 🔧 IN PROGRESS
 
 **Goal**: Bring IntentKeeper to all major browsers.
 
-### 8.1 Chromium Browsers (Brave, Edge, Opera) - Brave ✅
+### 8.1 Chromium Browsers (Chrome, Brave, Edge, Opera) ✅ WORKING
 
-Brave, Edge, and Opera all run Chromium and support Manifest V3 natively - the extension works on them without code changes. Work here is testing and store submissions only.
+Chrome, Brave, Edge, and Opera all run Chromium and support Manifest V3 natively - the extension works on all four without code changes. Store submissions are the remaining work.
 
 - [x] Brave Private Network Access (PNA) support: `PrivateNetworkAccessMiddleware` added to API server - responds with `Access-Control-Allow-Private-Network: true` when Brave's PNA preflight fires. 3 tests in `TestPrivateNetworkAccessMiddleware`.
-- [ ] Test on Microsoft Edge - verify `chrome.*` API aliases work as expected
-- [ ] Test on Opera
-- [ ] Submit to Microsoft Edge Add-ons store
+- [x] Tested on Microsoft Edge - `chrome.*` API aliases work as expected
+- [x] Tested on Opera - works without modification
 - [ ] Submit to Chrome Web Store (covers Brave and Opera users via CWS)
+- [ ] Submit to Microsoft Edge Add-ons store
 - [ ] Document installation instructions for each browser
 
 ### 8.2 Firefox
@@ -290,6 +290,57 @@ Safari requires Apple developer account, Xcode, and wrapping the extension in a 
 - [ ] Evaluate if user demand justifies the effort
 - [ ] Wrap extension using Xcode's Safari Web Extension converter
 - [ ] Submit to Mac App Store
+
+---
+
+## Phase 8.5: Non-Technical User Access ⏸ DEFERRED
+
+**Goal**: Make intentKeeper installable by people who do not know what a terminal is, on Windows and Mac as well as Linux.
+
+> **Deferred** - projects are still in active development. Distribution infrastructure adds maintenance overhead before APIs stabilise.
+
+### 8.5.1 Windows PowerShell Setup Script
+
+**Problem**: Windows users have no equivalent to `install.sh`. The only path to a working setup requires 4+ terminal commands.
+
+- [ ] Create `setup.ps1` using `winget` to install Python and Ollama automatically
+- [ ] Create `start-server.bat` - double-clickable launcher that activates the venv and starts `intentkeeper-server`
+- [ ] `setup.ps1` also: creates a desktop shortcut for the server, configures `.env` from `.env.example`, and pulls the configured model
+- [ ] Document in README under "Windows Setup (No Terminal Required)"
+
+### 8.5.2 PyInstaller Freeze - Standalone Binaries
+
+**Problem**: Even with a setup script, users need Python installed. A frozen binary eliminates this requirement entirely.
+
+- [ ] Freeze the FastAPI server into a single self-contained binary via PyInstaller
+- [ ] Targets: `intentkeeper-server.exe` (Windows), `intentkeeper-server` app bundle (Mac `.dmg`)
+- [ ] Set up GitHub Actions matrix build (`windows-latest`, `macos-latest`, `ubuntu-latest`) triggered on release tags
+- [ ] Publish binaries to GitHub Releases automatically
+- [ ] When combined with Ollama Desktop + Chrome Web Store extension: three "click to install" steps, zero terminal usage
+
+### 8.5.3 Code Signing
+
+**Problem**: Unsigned executables are blocked by Windows SmartScreen and Mac Gatekeeper. Users see "Windows protected your PC" and most will not override it.
+
+- [ ] Windows: EV certificate or Windows trusted developer account
+- [ ] Mac: Apple Developer Program membership, notarize `.dmg` via `notarytool`
+- [ ] Add signing steps to the GitHub Actions release workflow
+- [ ] Document signing setup in `CONTRIBUTING.md`
+
+### 8.5.4 Transformers.js Serverless Path (Long-Term)
+
+**Goal**: Eliminate the Python server and Ollama dependency entirely for intentKeeper.
+
+**Approach**: Train a fine-tuned DistilBERT-style ONNX model (~65MB) on expanded labeled data from the existing few-shot examples. Run classification entirely in the browser via Transformers.js. No Python, no Ollama, no server.
+
+- [ ] Expand labeled training data from existing `scenarios/intents.yaml` few-shot examples to ~1,000-5,000 labeled examples
+- [ ] Fine-tune a DistilBERT-style classifier (ONNX, int8 quantized, ~65MB)
+- [ ] Integrate via Transformers.js in the extension service worker
+- [ ] Keep Ollama-powered server as "advanced/accurate mode" for users who want higher accuracy with larger models
+- [ ] **Accuracy tradeoff**: ~85-92% vs current 98% with the LLM approach. Acceptable for the "zero setup" use case
+- [ ] Publish to Chrome Web Store and Firefox Add-ons as a fully self-contained extension
+
+> This sub-phase requires training data collection and ML infrastructure. It is the most transformative change for accessibility but also the highest effort. Revisit once APIs and intent taxonomy are stable.
 
 ---
 
@@ -342,7 +393,8 @@ Safari requires Apple developer account, Xcode, and wrapping the extension in a 
 | 4. Reddit | High | Medium | ✅ COMPLETE |
 | 6. User Sensitivity | Medium | Low | 🔵 After 5 |
 | 7. Statistics | Medium | Medium | 🔵 After 6 |
-| 8. Multi-Browser (Brave/Edge/Opera/Firefox) | Medium | Low-Medium | 🟡 Brave ✅, Edge/Opera/Firefox 🔵 |
+| 8. Multi-Browser (Chrome/Brave/Edge/Opera/Firefox) | Medium | Low-Medium | 🟡 Chrome/Brave/Edge/Opera ✅, Store submissions + Firefox 🔵 |
+| 8.5. Non-Technical User Access | High | Medium-High | ⏸ DEFERRED - infra overhead before APIs stabilise |
 | 9. Advanced Classification | High | High | 🔵 Long-term |
 | 10. Cross-Platform | Medium | High | 🔵 Long-term |
 
@@ -357,7 +409,7 @@ Safari requires Apple developer account, Xcode, and wrapping the extension in a 
 
 ## Current Status (2026-04-12)
 
-**Completed**: Phase 1 (Core + Twitter/X), Phase 2 (Hardening), Phase 3.1-3.3 + 3.5 (YouTube + platform abstraction), Phase 4 (Reddit - 3 DOM variants: Shreddit, new Reddit, old Reddit), Phase 5.1-5.2 (98% accuracy on 80-example eval, prompt ceiling reached), Phase 8.1 (Brave Private Network Access support)
+**Completed**: Phase 1 (Core + Twitter/X), Phase 2 (Hardening), Phase 3.1-3.3 + 3.5 (YouTube + platform abstraction), Phase 4 (Reddit - 3 DOM variants: Shreddit, new Reddit, old Reddit), Phase 5.1-5.2 (98% accuracy on 80-example eval, prompt ceiling reached), Phase 8.1 (Chrome, Brave, Edge, Opera all working - PNA middleware for Brave)
 
 **Prompt ceiling**: The 2 remaining misclassified cases are at the model's training boundary. Fine-tuning (Phase 5.3) would be needed to pass 98%. Prompting cannot resolve them without breaking other cases.
 
@@ -368,7 +420,7 @@ Safari requires Apple developer account, Xcode, and wrapping the extension in a 
 - 98% eval accuracy (78/80, measured 2026-04-09)
 - 6 intent categories (ragebait, fearmongering, hype, engagement_bait, divisive, genuine)
 - 3 platforms (Twitter/X, YouTube, Reddit)
-- Brave browser supported (PNA middleware)
+- Chrome, Brave, Edge, and Opera all supported (PNA middleware for Brave)
 - Async pipeline with batch classification and LRU cache
 
 ---
@@ -400,6 +452,7 @@ IntentKeeper shares architectural DNA with [empathySync](https://github.com/Olaw
 **v0.6.0** (Phase 6): User-configurable sensitivity
 **v0.7.0** (Phase 7): Statistics dashboard
 **v0.8.0** (Phase 8): Multi-browser support (Brave, Edge, Opera, Firefox)
+**v0.8.5** (Phase 8.5): Non-technical user access - DEFERRED
 **v1.0.0** (Phase 9): Advanced classification features
 
 ---
