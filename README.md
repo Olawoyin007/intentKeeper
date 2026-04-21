@@ -95,7 +95,7 @@ Don't have Ollama yet? [Install it here](https://ollama.com) - it runs entirely 
 2. Enable **Developer mode** (top right toggle)
 3. Click **Load unpacked** and select the `extension/` folder
 
-Then open [twitter.com](https://twitter.com) or [x.com](https://x.com) and scroll your feed. Intent labels appear on every tweet automatically.
+Then open [Twitter/X](https://twitter.com), [YouTube](https://youtube.com), or [Reddit](https://reddit.com) and scroll your feed. Intent labels appear on content automatically.
 
 See [docs/usage.md](docs/usage.md) for the full setup guide and troubleshooting.
 
@@ -113,7 +113,7 @@ See [docs/usage.md](docs/usage.md) for the full setup guide and troubleshooting.
 ## How It Works
 
 ```
-You open Twitter/X or Reddit
+You open Twitter/X, YouTube, or Reddit
         │
         ▼
 Extension intercepts content before you read it
