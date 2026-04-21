@@ -11,6 +11,7 @@
   <img src="https://img.shields.io/badge/version-0.4.0-green.svg" alt="Version: 0.4.0">
   <img src="https://img.shields.io/badge/python-3.10%2B-blue.svg" alt="Python: 3.10+">
   <img src="https://img.shields.io/badge/platform-Twitter%2FX-1DA1F2.svg" alt="Platform: Twitter/X">
+  <img src="https://img.shields.io/badge/platform-YouTube-FF0000.svg" alt="Platform: YouTube">
   <img src="https://img.shields.io/badge/platform-Reddit-FF4500.svg" alt="Platform: Reddit">
   <img src="https://img.shields.io/badge/accuracy-98%25-brightgreen.svg" alt="Accuracy: 98%">
   <img src="https://img.shields.io/badge/local--first-Ollama-orange.svg" alt="Local-First: Ollama">
