@@ -233,6 +233,30 @@
 - [ ] Custom indicators and examples
 - [ ] Community-shared intent packs
 
+### 6.4 Confidence Disclosure 🔜 PLANNED
+**Problem**: The extension silently applies labels with no indication of how confident the classifier is. Users have no way to distinguish "99% sure this is ragebait" from "51% sure" - both look identical. This erodes trust when the label feels wrong.
+
+**Implementation**:
+- [ ] Surface `confidence` score from `/classify` response in the visual treatment
+- [ ] Low confidence (<0.65): add a subtle "?" indicator or muted label color to signal uncertainty
+- [ ] High confidence (>0.85): standard treatment as now
+- [ ] Tooltip on hover: "Classified as ragebait (confidence: 72%)"
+- [ ] No server changes required - `confidence` is already in the API response
+
+### 6.5 User Override & Local Corrections 🔜 PLANNED
+**Problem**: When the classifier gets it wrong, users have no recourse. And "wrong" is personal - what feels like ragebait to one person is legitimate political speech to another. The only way to calibrate a local tool correctly is to let the user teach it.
+
+**Philosophy note**: Corrections are stored locally only, in `chrome.storage.local`. Nothing leaves the device. No upload mechanism, no opt-in telemetry. The data belongs to the user and improves only their experience.
+
+**Implementation**:
+- [ ] Add a one-click correction button on each labeled item ("Not [intent] - correct this")
+- [ ] Show a small dropdown: what was it actually? (ragebait / fearmongering / hype / genuine / other)
+- [ ] Store correction in `chrome.storage.local` as `corrections[]` with: original content hash, assigned intent, corrected intent, timestamp
+- [ ] At classification time, retrieve the 3-5 most recent corrections and inject them into the LLM prompt as additional few-shot examples: "Note: for content like this, you previously labeled it [correct] not [wrong]"
+- [ ] Cap corrections at 100 entries (LRU eviction - oldest dropped first)
+- [ ] Add "My Corrections" section in popup: count of corrections made, option to clear all
+- [ ] Note: IndexedDB (Phase 7) will eventually replace `chrome.storage.local` for corrections - design the storage key format with that migration in mind
+
 ---
 
 ## Phase 7: Statistics Dashboard 🔜 PLANNED

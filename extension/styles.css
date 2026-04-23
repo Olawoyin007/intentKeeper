@@ -110,6 +110,74 @@
   color: #aaa;
 }
 
+/* Correct button inside tag */
+.ik-correct-btn {
+  cursor: pointer;
+  opacity: 0;
+  font-size: 10px;
+  margin-left: 2px;
+  transition: opacity 0.15s;
+}
+
+.intentkeeper-tag:hover .ik-correct-btn {
+  opacity: 0.7;
+}
+
+.ik-correct-btn:hover {
+  opacity: 1 !important;
+}
+
+/* Corrected tag state */
+.intentkeeper-tag.ik-corrected {
+  opacity: 0.5;
+  text-decoration: line-through;
+}
+
+/* Correction picker dropdown */
+.ik-correction-picker {
+  position: absolute;
+  z-index: 999999;
+  background: #1a1a2e;
+  border: 1px solid #333350;
+  border-radius: 8px;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+  min-width: 140px;
+}
+
+.ik-cp-label {
+  font-size: 10px;
+  color: #666680;
+  padding: 2px 4px 4px;
+  font-family: -apple-system, sans-serif;
+}
+
+.ik-cp-btn {
+  background: #252538;
+  border: none;
+  border-radius: 5px;
+  color: #c0c0d8;
+  cursor: pointer;
+  font-size: 11px;
+  font-family: -apple-system, sans-serif;
+  padding: 5px 8px;
+  text-align: left;
+  transition: background 0.1s;
+}
+
+.ik-cp-btn:hover {
+  background: #2e2e48;
+  color: #eaeaf8;
+}
+
+.ik-cp-cancel {
+  color: #44445a;
+  margin-top: 2px;
+}
+
 /* Intent tags */
 .intentkeeper-tag {
   display: inline-flex;
@@ -165,6 +233,24 @@
 .intentkeeper-tag-reaction_farming {
   background: rgba(30, 144, 255, 0.2);
   color: #1e90ff;
+}
+
+/* Low-confidence modifier - muted appearance when classifier is uncertain (< 65%) */
+.intentkeeper-tag--uncertain {
+  opacity: 0.65;
+  font-style: italic;
+}
+
+/* Confidence note in blur overlay */
+.intentkeeper-confidence {
+  font-size: 10px;
+  margin-top: 2px;
+  display: block;
+}
+
+.intentkeeper-confidence--low {
+  color: #aaa;
+  font-style: italic;
 }
 
 /* On-page status badge */

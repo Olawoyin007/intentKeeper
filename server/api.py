@@ -117,6 +117,14 @@ app.add_middleware(
 
 
 # Request/Response models
+class UserCorrection(BaseModel):
+    """A single user-supplied correction for few-shot injection."""
+
+    snippet: str = Field(..., max_length=200, description="Short excerpt of the corrected content")
+    original_intent: str = Field(..., description="What the classifier said")
+    corrected_intent: str = Field(..., description="What the user said it actually was")
+
+
 class ClassifyRequest(BaseModel):
     """Request to classify content."""
 
@@ -132,6 +140,11 @@ class ClassifyRequest(BaseModel):
         None,
         max_length=4,
         description="URLs of images or video thumbnails to analyze via vision model",
+    )
+    user_corrections: Optional[List[UserCorrection]] = Field(
+        None,
+        max_length=10,
+        description="Recent user corrections injected as personalised few-shot examples",
     )
 
 
@@ -187,7 +200,21 @@ async def classify_content(request: ClassifyRequest):
     if not classifier:
         raise HTTPException(status_code=503, detail="Classifier not initialized")
 
-    result = await classifier.classify(request.content, media_urls=request.media_urls)
+    corrections = (
+        [
+            {
+                "snippet": c.snippet,
+                "original_intent": c.original_intent,
+                "corrected_intent": c.corrected_intent,
+            }
+            for c in request.user_corrections
+        ]
+        if request.user_corrections
+        else None
+    )
+    result = await classifier.classify(
+        request.content, media_urls=request.media_urls, user_corrections=corrections
+    )
 
     logger.debug(
         f"Classified: {request.content[:50]}... -> {result.intent} ({result.confidence:.2f})"

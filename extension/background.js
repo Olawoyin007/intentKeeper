@@ -75,15 +75,39 @@ async function classifyContent(content, source) {
 }
 
 /**
+ * Load the most recent user corrections from storage for prompt injection.
+ * Returns up to 5 corrections in the format expected by the server.
+ */
+async function loadCorrectionsForPrompt() {
+  try {
+    const stored = await chrome.storage.local.get('ik_corrections');
+    const corrections = stored.ik_corrections || [];
+    // Most recent 5, formatted for the server
+    return corrections.slice(-5).map(c => ({
+      snippet: c.snippet,
+      original_intent: c.originalIntent,
+      corrected_intent: c.correctedIntent,
+    }));
+  } catch (e) {
+    return [];
+  }
+}
+
+/**
  * Classify multiple content items via the batch API endpoint.
  * Returns an array of results in the same order as items.
  */
 async function classifyBatch(items) {
   try {
+    const userCorrections = await loadCorrectionsForPrompt();
+    const enrichedItems = items.map(item => ({
+      ...item,
+      ...(userCorrections.length > 0 ? { user_corrections: userCorrections } : {})
+    }));
     const response = await fetch(`${API_URL}/classify/batch`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ items })
+      body: JSON.stringify({ items: enrichedItems })
     });
 
     if (!response.ok) {

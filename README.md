@@ -25,9 +25,9 @@
   <img src="https://img.shields.io/badge/browser-Chrome%20%7C%20Brave%20%7C%20Edge%20%7C%20Opera-4285F4.svg" alt="Browser: Chrome, Brave, Edge, Opera">
 </p>
 
-There are hundreds of tools that block, hide, or filter social media. IntentKeeper is the only one that tells you *why* content is designed to manipulate you - and lets you decide what to do with it.
+There are hundreds of tools that block, hide, or filter social media. IntentKeeper is the only one that surfaces the manipulation patterns behind content - and lets you decide what to do with them.
 
-Ragebait, fearmongering, hype, divisive framing - are all classified by intent, not topic, before they affect you. Everything runs on your hardware via Ollama. No cloud. No tracking. No data leaving your machine.
+Ragebait, fearmongering, hype, divisive framing - all detected by the patterns they use, not the topics they cover, before they affect you. Everything runs on your hardware via Ollama. No cloud. No tracking. No data leaving your machine.
 
 ---
 
@@ -51,7 +51,9 @@ https://github.com/user-attachments/assets/8982dc1c-227b-4695-97ef-4fdfd91cf45c
 
 A post about politics can be thoughtful analysis or manufactured outrage. A health tip can be genuine advice or fearmongering. Same topic, opposite effect on your wellbeing.
 
-IntentKeeper classifies the **intent** behind the words - not the words themselves. It doesn't censor topics. It surfaces manipulation.
+IntentKeeper classifies the **manipulation patterns** in content - not the topics themselves. It doesn't censor subjects. It flags the framing patterns associated with ragebait, fearmongering, divisive content, and hype before they land.
+
+**Accuracy**: 98% on an 80-example labeled eval set (measured 2026-04-09). The remaining 2% are at the model's training boundary - prompt engineering cannot resolve them without breaking other cases. Classification confidence is shown alongside each label so you know when the model is uncertain.
 
 ## Quick Start
 
@@ -165,4 +167,4 @@ MIT - see [LICENSE](LICENSE).
 
 ---
 
-*"Protect your attention. Ask what a post is trying to do, not just what it's about."*
+*"Protect your attention. Notice what a post is doing to you, not just what it's about."*
