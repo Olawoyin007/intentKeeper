@@ -112,6 +112,27 @@ elements.threshold.addEventListener('input', () => {
 });
 elements.threshold.addEventListener('change', saveSettings);
 
+// --- Corrections (Phase 6.5) ---
+
+async function loadCorrectionsCount() {
+  const stored = await chrome.storage.local.get('ik_corrections');
+  const count = (stored.ik_corrections || []).length;
+  const countEl = document.getElementById('corrections-count');
+  const descEl = document.getElementById('corrections-desc');
+  if (countEl) countEl.textContent = count;
+  if (descEl) {
+    descEl.textContent = count === 0
+      ? 'Hover a tag and click ✏️ to correct it'
+      : `${count} correction${count === 1 ? '' : 's'} teaching your preferences`;
+  }
+}
+
+document.getElementById('clear-corrections').addEventListener('click', async () => {
+  await chrome.storage.local.remove('ik_corrections');
+  await loadCorrectionsCount();
+});
+
 // Initialize
 loadSettings();
 checkHealth();
+loadCorrectionsCount();

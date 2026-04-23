@@ -127,6 +127,95 @@ chrome.storage.onChanged.addListener((changes, area) => {
   }
 });
 
+// --- Corrections (Phase 6.5) ---
+
+const CORRECTIONS_KEY = 'ik_corrections';
+const MAX_CORRECTIONS = 100;
+const ALL_INTENTS = ['ragebait', 'fearmongering', 'hype', 'engagement_bait', 'divisive', 'genuine'];
+
+async function saveCorrection(snippet, originalIntent, correctedIntent) {
+  try {
+    const stored = await chrome.storage.local.get(CORRECTIONS_KEY);
+    const corrections = stored[CORRECTIONS_KEY] || [];
+    corrections.push({
+      snippet: snippet.slice(0, 200),
+      originalIntent,
+      correctedIntent,
+      timestamp: Date.now(),
+    });
+    // LRU: keep most recent MAX_CORRECTIONS
+    if (corrections.length > MAX_CORRECTIONS) corrections.splice(0, corrections.length - MAX_CORRECTIONS);
+    await chrome.storage.local.set({ [CORRECTIONS_KEY]: corrections });
+    debug.log(`Correction saved: ${originalIntent} -> ${correctedIntent}`);
+  } catch (e) {
+    debug.error('Failed to save correction', e);
+  }
+}
+
+async function getCorrectionsCount() {
+  try {
+    const stored = await chrome.storage.local.get(CORRECTIONS_KEY);
+    return (stored[CORRECTIONS_KEY] || []).length;
+  } catch (e) {
+    return 0;
+  }
+}
+
+async function clearCorrections() {
+  await chrome.storage.local.remove(CORRECTIONS_KEY);
+}
+
+/**
+ * Show a small correction picker dropdown below the given tag element.
+ * Dismisses if the user clicks outside or selects an intent.
+ */
+function showCorrectionPicker(tag, content, originalIntent) {
+  // Remove any existing picker
+  document.querySelectorAll('.ik-correction-picker').forEach(p => p.remove());
+
+  const picker = document.createElement('div');
+  picker.className = 'ik-correction-picker';
+  picker.innerHTML = `
+    <div class="ik-cp-label">This is actually:</div>
+    ${ALL_INTENTS.filter(i => i !== originalIntent).map(i =>
+      `<button class="ik-cp-btn" data-intent="${i}">${escapeHtml(formatIntent(i))}</button>`
+    ).join('')}
+    <button class="ik-cp-btn ik-cp-cancel">Cancel</button>
+  `;
+
+  // Position below the tag
+  const rect = tag.getBoundingClientRect();
+  picker.style.top = `${rect.bottom + window.scrollY + 4}px`;
+  picker.style.left = `${rect.left + window.scrollX}px`;
+  document.body.appendChild(picker);
+
+  picker.querySelectorAll('.ik-cp-btn[data-intent]').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      const correctedIntent = btn.dataset.intent;
+      await saveCorrection(content, originalIntent, correctedIntent);
+      // Update tag visually to confirmed state
+      tag.classList.add('ik-corrected');
+      tag.title = `You corrected this to: ${formatIntent(correctedIntent)}`;
+      picker.remove();
+    });
+  });
+
+  picker.querySelector('.ik-cp-cancel').addEventListener('click', (e) => {
+    e.stopPropagation();
+    picker.remove();
+  });
+
+  // Click outside closes picker
+  const dismiss = (e) => {
+    if (!picker.contains(e.target)) {
+      picker.remove();
+      document.removeEventListener('click', dismiss);
+    }
+  };
+  setTimeout(() => document.addEventListener('click', dismiss), 0);
+}
+
 // --- Cache ---
 
 function cacheResult(content, result) {
@@ -196,13 +285,24 @@ async function classifyBatch(batchItems, platform) {
 
 // --- Visual Treatments ---
 
-function applyTag(element, intent, confidence) {
+// Confidence thresholds matching Phase 6.4 spec
+const CONFIDENCE_LOW = 0.65;
+const CONFIDENCE_HIGH = 0.85;
+
+function applyTag(element, intent, confidence, content) {
   const tag = document.createElement('div');
-  tag.className = `intentkeeper-tag intentkeeper-tag-${intent}`;
-  tag.innerHTML = `&#x1f6e1;&#xfe0f; ${escapeHtml(formatIntent(intent))}`;
-  tag.title = `Confidence: ${(confidence * 100).toFixed(0)}%`;
+  const uncertain = confidence < CONFIDENCE_LOW;
+  tag.className = `intentkeeper-tag intentkeeper-tag-${intent}${uncertain ? ' intentkeeper-tag--uncertain' : ''}`;
+  const label = escapeHtml(formatIntent(intent));
+  tag.innerHTML = `&#x1f6e1;&#xfe0f; ${label}${uncertain ? ' ?' : ''}<span class="ik-correct-btn" title="Correct this label">&#x270F;&#xFE0F;</span>`;
+  tag.title = `Classified as ${label} (confidence: ${(confidence * 100).toFixed(0)}%)`;
   element.style.position = 'relative';
   element.insertBefore(tag, element.firstChild);
+
+  tag.querySelector('.ik-correct-btn').addEventListener('click', (e) => {
+    e.stopPropagation();
+    showCorrectionPicker(tag, content, intent);
+  });
 }
 
 /**
@@ -215,13 +315,19 @@ function applyTag(element, intent, confidence) {
  * scoped to a sub-container - e.g. just the thumbnail on a YouTube card,
  * leaving the title visible but the image obscured.
  */
-function applyBlur(element, intent, reasoning, adapter) {
+function applyBlur(element, intent, reasoning, confidence, adapter) {
   const overlay = document.createElement('div');
   overlay.className = 'intentkeeper-overlay';
+  const uncertain = confidence < CONFIDENCE_LOW;
+  const label = escapeHtml(formatIntent(intent));
+  const confidenceNote = uncertain
+    ? `<span class="intentkeeper-confidence intentkeeper-confidence--low">Low confidence (${(confidence * 100).toFixed(0)}%)</span>`
+    : '';
   overlay.innerHTML = `
     <div class="intentkeeper-warning">
       <span class="intentkeeper-icon">&#x1f6e1;&#xfe0f;</span>
-      <span class="intentkeeper-label">${escapeHtml(formatIntent(intent))}</span>
+      <span class="intentkeeper-label">${label}${uncertain ? ' ?' : ''}</span>
+      ${confidenceNote}
       <span class="intentkeeper-reason">${escapeHtml(reasoning)}</span>
       <button class="intentkeeper-reveal">Show anyway</button>
     </div>
@@ -267,7 +373,7 @@ function applyHide(element, intent) {
   });
 }
 
-function applyTreatment(element, classification, adapter) {
+function applyTreatment(element, classification, adapter, content) {
   if (!classification) return;
 
   const { intent, action, manipulation_score, confidence, reasoning } = classification;
@@ -284,12 +390,12 @@ function applyTreatment(element, classification, adapter) {
   }
 
   if (settings.showTags) {
-    applyTag(element, intent, confidence);
+    applyTag(element, intent, confidence, content || '');
   }
 
   if (manipulation_score >= settings.manipulationThreshold) {
     if (action === 'blur' && settings.blurRagebait) {
-      applyBlur(element, intent, reasoning, adapter);
+      applyBlur(element, intent, reasoning, confidence, adapter);
     } else if (action === 'hide' && settings.hideEngagementBait) {
       applyHide(element, intent);
     }
@@ -359,7 +465,7 @@ async function processItems(adapter) {
         item.classList.remove('intentkeeper-classifying');
         const classification = results.get(text) || null;
         if (classification) {
-          applyTreatment(item, classification, adapter);
+          applyTreatment(item, classification, adapter, text);
         } else {
           item.setAttribute(PROCESSED_ATTR, 'failed');
           updateStatusBadge();
