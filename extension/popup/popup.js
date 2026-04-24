@@ -132,7 +132,64 @@ document.getElementById('clear-corrections').addEventListener('click', async () 
   await loadCorrectionsCount();
 });
 
+// --- Allowlist (Phase 6.2) ---
+
+async function loadAllowlist() {
+  const stored = await chrome.storage.local.get('ik_allowlist');
+  const list = stored.ik_allowlist || [];
+  const listEl = document.getElementById('allowlist-list');
+  const emptyEl = document.getElementById('allowlist-empty');
+  listEl.innerHTML = '';
+
+  if (list.length === 0) {
+    emptyEl.style.display = '';
+    return;
+  }
+  emptyEl.style.display = 'none';
+
+  for (const handle of list) {
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;justify-content:space-between;align-items:center;padding:3px 0;';
+    row.innerHTML = `
+      <span style="font-size:11px;color:#9090b0;">${handle}</span>
+      <button data-handle="${handle}" style="
+        background:none;border:none;color:#555568;cursor:pointer;font-size:10px;padding:2px 4px;">
+        Remove
+      </button>`;
+    row.querySelector('button').addEventListener('click', async (e) => {
+      const h = e.currentTarget.dataset.handle;
+      const s = await chrome.storage.local.get('ik_allowlist');
+      const updated = (s.ik_allowlist || []).filter(x => x !== h);
+      await chrome.storage.local.set({ ik_allowlist: updated });
+      await loadAllowlist();
+    });
+    listEl.appendChild(row);
+  }
+}
+
+document.getElementById('allowlist-add').addEventListener('click', async () => {
+  const input = document.getElementById('allowlist-input');
+  const raw = input.value.trim().toLowerCase();
+  if (!raw) return;
+  // Normalize: strip leading @ or u/
+  const handle = raw.replace(/^@/, '').replace(/^u\//, '');
+  if (!handle) return;
+  const stored = await chrome.storage.local.get('ik_allowlist');
+  const list = stored.ik_allowlist || [];
+  if (!list.includes(handle)) {
+    list.push(handle);
+    await chrome.storage.local.set({ ik_allowlist: list });
+  }
+  input.value = '';
+  await loadAllowlist();
+});
+
+document.getElementById('allowlist-input').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') document.getElementById('allowlist-add').click();
+});
+
 // Initialize
 loadSettings();
 checkHealth();
 loadCorrectionsCount();
+loadAllowlist();

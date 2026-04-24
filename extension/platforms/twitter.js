@@ -185,6 +185,20 @@ const twitterAdapter = {
     }
 
     return parts.join(' | ');
+  },
+
+  /**
+   * Extract the @handle of the tweet author (Phase 6.2 allowlist/blocklist).
+   * Returns lowercase handle without @, e.g. "nytimes", or null if not found.
+   */
+  extractAuthor(tweetElement) {
+    const userNameEl = tweetElement.querySelector('[data-testid="User-Name"]');
+    if (!userNameEl) return null;
+    // The @handle appears as a link with href="/username" inside User-Name
+    const link = userNameEl.querySelector('a[href^="/"]');
+    if (!link) return null;
+    const handle = link.getAttribute('href').replace('/', '').split('/')[0].toLowerCase();
+    return handle || null;
   }
 };
 

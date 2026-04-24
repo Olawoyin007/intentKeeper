@@ -223,39 +223,39 @@
 - [x] Kill switch sits between master enable and action settings; persisted in chrome.storage.local
 - [x] `intentEnabled` map in DEFAULT_SETTINGS; classifier reads it before applying any treatment
 
-### 6.2 Allowlist/Blocklist
-- [ ] Allowlist specific accounts (never filter)
-- [ ] Blocklist specific accounts (always filter)
-- [ ] Import/export lists
+### 6.2 Allowlist ✅ DONE
+**Note**: Blocklist deferred - filtering by source not content conflicts with the "intent over topic" principle (classifying based on who said it, not what was said). Allowlist = user sovereignty; blocklist = editorial stance. Only allowlist implemented.
+
+- [x] Optional `extractAuthor()` method on platform adapters (Twitter, Reddit) - returns lowercase handle/username
+- [x] Allowlist stored in `chrome.storage.local` under `ik_allowlist` as array of bare handles
+- [x] In-memory `Set` in classifier.js for O(1) lookup per item in `processItems()`
+- [x] `onChanged` listener keeps in-memory Set hot when popup updates storage
+- [x] Items from allowlisted authors get `data-intentkeeper-processed="allowed"` - skipped silently
+- [x] Popup "Trusted Accounts" section: add by typing @handle or u/username (prefix stripped on save), remove per-entry
+- [x] YouTube skipped - channel handle format differs from Twitter/Reddit handle pattern; weaker use case
 
 ### 6.3 Custom Intents
 - [ ] User-defined intent categories
 - [ ] Custom indicators and examples
 - [ ] Community-shared intent packs
 
-### 6.4 Confidence Disclosure 🔜 PLANNED
-**Problem**: The extension silently applies labels with no indication of how confident the classifier is. Users have no way to distinguish "99% sure this is ragebait" from "51% sure" - both look identical. This erodes trust when the label feels wrong.
+### 6.4 Confidence Disclosure ✅ DONE
+- [x] Low confidence (<0.65): muted label + "?" suffix + `.intentkeeper-tag--uncertain` class
+- [x] High confidence (>0.85): standard treatment
+- [x] Tooltip: "Classified as ragebait (confidence: 72%)"
+- [x] Blur overlay: low-confidence note rendered inline
+- [x] `CONFIDENCE_LOW` / `CONFIDENCE_HIGH` constants in classifier.js
 
-**Implementation**:
-- [ ] Surface `confidence` score from `/classify` response in the visual treatment
-- [ ] Low confidence (<0.65): add a subtle "?" indicator or muted label color to signal uncertainty
-- [ ] High confidence (>0.85): standard treatment as now
-- [ ] Tooltip on hover: "Classified as ragebait (confidence: 72%)"
-- [ ] No server changes required - `confidence` is already in the API response
+### 6.5 User Override & Local Corrections ✅ DONE
+**Philosophy**: Corrections stored locally only in `chrome.storage.local`. Nothing leaves the device.
 
-### 6.5 User Override & Local Corrections 🔜 PLANNED
-**Problem**: When the classifier gets it wrong, users have no recourse. And "wrong" is personal - what feels like ragebait to one person is legitimate political speech to another. The only way to calibrate a local tool correctly is to let the user teach it.
-
-**Philosophy note**: Corrections are stored locally only, in `chrome.storage.local`. Nothing leaves the device. No upload mechanism, no opt-in telemetry. The data belongs to the user and improves only their experience.
-
-**Implementation**:
-- [ ] Add a one-click correction button on each labeled item ("Not [intent] - correct this")
-- [ ] Show a small dropdown: what was it actually? (ragebait / fearmongering / hype / genuine / other)
-- [ ] Store correction in `chrome.storage.local` as `corrections[]` with: original content hash, assigned intent, corrected intent, timestamp
-- [ ] At classification time, retrieve the 3-5 most recent corrections and inject them into the LLM prompt as additional few-shot examples: "Note: for content like this, you previously labeled it [correct] not [wrong]"
-- [ ] Cap corrections at 100 entries (LRU eviction - oldest dropped first)
-- [ ] Add "My Corrections" section in popup: count of corrections made, option to clear all
-- [ ] Note: IndexedDB (Phase 7) will eventually replace `chrome.storage.local` for corrections - design the storage key format with that migration in mind
+- [x] Pencil button (✏️) on each tag - hover to reveal, click to open correction picker
+- [x] Correction picker dropdown: all intents except the current one + Cancel
+- [x] `saveCorrection(snippet, originalIntent, correctedIntent)` - stores to `ik_corrections`, LRU cap at 100
+- [x] `loadCorrectionsForPrompt()` in background.js - loads 5 most recent corrections
+- [x] Corrections injected into LLM prompt as personalized few-shot examples per item in batch
+- [x] Tag updates to strikethrough state after correction
+- [x] Popup "My Corrections" section: count + Clear all button
 
 ---
 

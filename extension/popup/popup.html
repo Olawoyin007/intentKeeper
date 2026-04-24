@@ -331,6 +331,26 @@
     </div>
   </div>
 
+  <hr class="divider">
+
+  <div class="section-label">Trusted Accounts</div>
+  <div class="group">
+    <div class="setting" style="gap:6px;padding-bottom:8px;">
+      <input type="text" id="allowlist-input" placeholder="@handle or u/username" style="
+        flex:1;background:#1a1a2a;border:1px solid #2a2a3e;border-radius:5px;
+        color:#c0c0d8;font-size:11px;padding:4px 8px;outline:none;">
+      <button id="allowlist-add" style="
+        background:#1e1e30;border:1px solid #333350;border-radius:5px;
+        color:#4ade80;cursor:pointer;font-size:10px;padding:4px 10px;white-space:nowrap;">
+        Add
+      </button>
+    </div>
+    <div id="allowlist-list" style="display:flex;flex-direction:column;gap:2px;"></div>
+    <div id="allowlist-empty" style="font-size:10px;color:#444458;padding:2px 0 4px;">
+      Content from trusted accounts skips classification
+    </div>
+  </div>
+
   <div class="footer">
     <span>Local-first &mdash; no data leaves your device</span>
     <a href="https://github.com/Olawoyin007/intentKeeper" target="_blank">GitHub</a>

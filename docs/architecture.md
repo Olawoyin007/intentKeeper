@@ -11,9 +11,10 @@ This document provides a visual overview of IntentKeeper's architecture. For det
 │  ┌──────────────────────────────────────────────────────────────┐   │
 │  │              Browser (Chrome / Brave)                        │   │
 │  │  ┌─────────────┐                                             │   │
-│  │  │  Extension   │ ◄── Intercepts content from Twitter/X,      │   │
-│  │  │              │     Reddit (shreddit, new, old variants)    │   │
-│  │  │  content.js  │                                             │   │
+│  │  │  Extension   │ ◄── Intercepts content from:               │   │
+│  │  │              │     Twitter/X (tweets, replies)            │   │
+│  │  │  classifier  │     Reddit (shreddit, new, old variants)   │   │
+│  │  │  .js (core)  │     YouTube (feed cards, comments)         │   │
 │  │  └──────┬──────┘                                              │   │
 │  │         │ POST /classify                                      │   │
 │  └─────────┼────────────────────────────────────────────────────┘   │
@@ -47,26 +48,44 @@ This document provides a visual overview of IntentKeeper's architecture. For det
 ## Classification Flow
 
 ```
-Content Intercepted (tweet text)
+Content Intercepted (tweet / post / comment)
     │
     ▼
 ┌─────────────────────────────────────────────┐
 │  1. LENGTH CHECK                            │
-│     < 20 characters → neutral (skip LLM)    │
+│     < 20 characters → mark "skipped"       │
+│     empty string → leave unmarked          │
+│       (element still loading, retry next   │
+│        observer pass)                       │
 └─────────────────────────────────────────────┘
     │ Pass
     ▼
 ┌─────────────────────────────────────────────┐
-│  2. BUILD PROMPT                            │
+│  2. ALLOWLIST CHECK (Phase 6.2)             │
+│     adapter.extractAuthor() if defined      │
+│     → Twitter: @handle (bare, lowercase)    │
+│     → Reddit: u/username (bare, lowercase)  │
+│     If author in chrome.storage ik_allowlist│
+│     → mark "allowed", skip classification  │
+│     In-memory Set for O(1) lookup           │
+└─────────────────────────────────────────────┘
+    │ Not allowlisted
+    ▼
+┌─────────────────────────────────────────────┐
+│  3. BUILD PROMPT                            │
 │     Intent descriptions from YAML           │
-│     + Few-shot examples (up to 5)           │
+│     + User corrections (Phase 6.5):         │
+│       5 most recent corrections from        │
+│       chrome.storage ik_corrections,        │
+│       injected as personalised few-shot     │
+│       examples before the content block     │
 │     + Classification rules                  │
-│     + Content to classify                   │
+│     + Content to classify (truncated 5000c) │
 └─────────────────────────────────────────────┘
     │
     ▼
 ┌─────────────────────────────────────────────┐
-│  3. OLLAMA API CALL                         │
+│  4. OLLAMA API CALL                         │
 │     Temperature: 0.1 (deterministic)        │
 │     Max tokens: 150                         │
 │     Timeout: 30 seconds                     │
@@ -74,7 +93,7 @@ Content Intercepted (tweet text)
     │
     ▼
 ┌─────────────────────────────────────────────┐
-│  4. PARSE JSON RESPONSE                     │
+│  5. PARSE JSON RESPONSE                     │
 │     Extract: intent, confidence, reasoning  │
 │     Validate intent against known categories│
 │     Fallback to neutral on parse failure    │
@@ -82,7 +101,7 @@ Content Intercepted (tweet text)
     │
     ▼
 ┌─────────────────────────────────────────────┐
-│  5. CALCULATE ACTION                        │
+│  6. CALCULATE ACTION                        │
 │     Look up action from intents.yaml        │
 │     manipulation_score = weight × confidence│
 │     Apply user threshold                    │
@@ -90,13 +109,16 @@ Content Intercepted (tweet text)
     │
     ▼
 ┌─────────────────────────────────────────────┐
-│  6. RETURN ClassificationResult             │
+│  7. RETURN ClassificationResult             │
 │     {intent, confidence, reasoning,         │
 │      action, manipulation_score}            │
 └─────────────────────────────────────────────┘
     │
     ▼
-Visual Treatment Applied (content.js)
+Visual Treatment Applied (classifier.js)
+    - confidence < 0.65 → muted label + "?"  (Phase 6.4)
+    - confidence shown in tooltip + blur note (Phase 6.4)
+    - pencil button → correction picker      (Phase 6.5)
 ```
 
 ## Component Relationships
@@ -109,39 +131,57 @@ Visual Treatment Applied (content.js)
 │  │core/classifier.js│  │ background.js│  │  popup/popup.js  │  │
 │  │ (IntentKeeperCore│  │              │  │                  │  │
 │  │ - DOM observation│  │ - Settings   │  │ - Toggle UI      │  │
-│  │ - API calls      │  │ - Health poll│  │ - Sliders        │  │
+│  │ - Batch API calls│  │ - Health poll│  │ - Sliders        │  │
 │  │ - CSS treatments │  │ - Badge icon │  │ - Status display │  │
-│  │ - PNA middleware │  │ - PNA proxy  │  │                  │  │
+│  │ - Allowlist Set  │  │ - PNA proxy  │  │ - Trusted Accts  │  │
+│  │   (Phase 6.2)    │  │ - Corrections│  │   add/remove     │  │
+│  │ - Confidence UI  │  │   few-shot   │  │ - My Corrections │  │
+│  │   (Phase 6.4)    │  │   injection  │  │   count + clear  │  │
+│  │ - Correction     │  │   (6.5)      │  │                  │  │
+│  │   picker (6.5)   │  │              │  │                  │  │
 │  └────────┬─────────┘  └──────────────┘  └──────────────────┘  │
 │           │ uses platform adapters                               │
 │  ┌────────┴──────────────────────────────────────────────────┐  │
 │  │  Platform Adapters (extension/platforms/)                  │  │
-│  │  twitter.js - Twitter/X DOM (tweets)                       │  │
-│  │  reddit.js  - Reddit DOM (shreddit, new reddit, old reddit)│  │
+│  │  twitter.js - Twitter/X DOM; extractAuthor() → @handle    │  │
+│  │  reddit.js  - Reddit DOM (shreddit, new, old);            │  │
+│  │               extractAuthor() → u/username                 │  │
+│  │  youtube.js - YouTube DOM (no extractAuthor - not needed) │  │
 │  └────────┬──────────────────────────────────────────────────┘  │
 │           │                                                      │
-└───────────┼──────────────────────────────────────────────────────┘
-            │ HTTP (localhost:8420)
-            ▼
+│  ┌────────┴──────────────────────────────────────────────────┐  │
+│  │  chrome.storage.local                                      │  │
+│  │  intentkeeper_settings  - all user toggles/thresholds      │  │
+│  │  ik_allowlist[]         - trusted account handles (6.2)    │  │
+│  │  ik_corrections[]       - label corrections, LRU-100 (6.5) │  │
+│  └────────────────────────────────────────────────────────────┘  │
+│                                                                 │
+└───────────────────────────────────┬────────────────────────────┘
+                                    │ HTTP (localhost:8420)
+                                    ▼
 ┌────────────────────────────────────────────────────────────────┐
 │                    FastAPI Server (api.py)                      │
 │                                                                 │
 │   Endpoints:                                                    │
-│   POST /classify         -Single classification               │
-│   POST /classify/batch   -Batch (max 50)                      │
-│   GET  /health           -Server + Ollama status              │
-│   GET  /intents          -Current definitions                 │
+│   POST /classify         - Single classification               │
+│   POST /classify/batch   - Batch (max 50)                      │
+│   GET  /health           - Server + Ollama status              │
+│   GET  /intents          - Current definitions                 │
+│                                                                 │
+│   Request body includes user_corrections[] (Phase 6.5)         │
+│   Pydantic-validated before passing to classifier              │
 └───────────────────────────┬────────────────────────────────────┘
                             │ uses
                             ▼
 ┌────────────────────────────────────────────────────────────────┐
 │                  IntentClassifier (classifier.py)               │
 │                                                                 │
-│   - Loads intents from YAML                                    │
-│   - Builds classification prompts                              │
-│   - Calls Ollama API                                           │
-│   - Parses JSON responses                                      │
-│   - Fail-open error handling                                   │
+│   - Loads intents from YAML                                     │
+│   - Builds classification prompts with user corrections         │
+│     injected as personalised few-shot examples (Phase 6.5)     │
+│   - Calls Ollama API                                            │
+│   - Parses JSON responses                                       │
+│   - Fail-open error handling                                    │
 └───────────────────────────┬────────────────────────────────────┘
                             │ reads
                             ▼
@@ -199,13 +239,17 @@ Visual Treatment Applied (content.js)
 │   ┌─────────────────────────────────────────────────┐           │
 │   │ ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ │           │
 │   │ ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ │           │
-│   │          ⚠ Ragebait detected -click to reveal   │           │
+│   │   🛡️ Ragebait  [Low confidence (61%)]  ✏️       │           │
+│   │   Designed to provoke outrage response          │           │
+│   │          [Show anyway]                          │           │
 │   └─────────────────────────────────────────────────┘           │
 │                                                                  │
 │   TAG (fearmongering, hype, divisive)                            │
 │   ┌─────────────────────────────────────────────────┐           │
-│   │ [fearmongering] Original content visible here    │           │
-│   │ with a small label badge in the corner.          │           │
+│   │ 🛡️ Fearmongering ✏️  Original content visible   │           │
+│   │ tooltip: "Classified as fearmongering (87%)"    │           │
+│   │ low-confidence variant: 🛡️ Fearmongering ? ✏️   │           │
+│   │ (muted colour, italic, tooltip shows %)         │           │
 │   └─────────────────────────────────────────────────┘           │
 │                                                                  │
 │   HIDE (engagement_bait)                                         │
@@ -217,6 +261,17 @@ Visual Treatment Applied (content.js)
 │   ┌─────────────────────────────────────────────────┐           │
 │   │ Content displayed normally, no modification.     │           │
 │   └─────────────────────────────────────────────────┘           │
+│                                                                  │
+│   ALLOWED (Phase 6.2)                                            │
+│   ┌─────────────────────────────────────────────────┐           │
+│   │ Author in allowlist → classification skipped    │           │
+│   │ No tag, no blur. Marked allowed in DOM attr.    │           │
+│   └─────────────────────────────────────────────────┘           │
+│                                                                  │
+│   Confidence thresholds (Phase 6.4):                             │
+│   < 0.65 → muted label, italic, "?" suffix                       │
+│   0.65 - 0.85 → standard treatment                               │
+│   > 0.85 → standard treatment (no indicator needed)              │
 │                                                                  │
 └─────────────────────────────────────────────────────────────────┘
 ```

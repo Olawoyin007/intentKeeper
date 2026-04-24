@@ -280,6 +280,29 @@ const redditAdapter = {
     if (element.dataset.testid === 'comment') return extractNewRedditCommentText(element);
     return extractNewRedditPostText(element);
   },
+
+  /**
+   * Extract the Reddit username of the post/comment author (Phase 6.2).
+   * Returns lowercase username without u/, e.g. "spez", or null if not found.
+   */
+  extractAuthor(element) {
+    // Shreddit
+    const shredditAuthor = element.getAttribute('author');
+    if (shredditAuthor) return shredditAuthor.toLowerCase();
+
+    // New Reddit
+    const authorLink = element.querySelector('[data-testid="comment_author_link"], a[href*="/user/"]');
+    if (authorLink) {
+      const match = authorLink.getAttribute('href').match(/\/user\/([^/]+)/);
+      if (match) return match[1].toLowerCase();
+    }
+
+    // Old Reddit
+    const oldAuthor = element.querySelector('.author');
+    if (oldAuthor) return oldAuthor.textContent.trim().toLowerCase();
+
+    return null;
+  }
 };
 
 if (typeof IntentKeeperCore !== 'undefined') {
