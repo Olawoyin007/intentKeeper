@@ -116,16 +116,37 @@ async function loadSettings() {
   }
 }
 
-// React to settings changes without requiring a page reload
+// React to settings/allowlist changes without requiring a page reload
 chrome.storage.onChanged.addListener((changes, area) => {
-  if (area === 'local' && changes.intentkeeper_settings) {
+  if (area !== 'local') return;
+  if (changes.intentkeeper_settings) {
     const newSettings = changes.intentkeeper_settings.newValue;
     if (newSettings) {
       settings = { ...settings, ...newSettings };
       debug.log('Settings updated');
     }
   }
+  if (changes.ik_allowlist) {
+    allowlist = new Set(changes.ik_allowlist.newValue || []);
+    debug.log('Allowlist updated', allowlist.size, 'entries');
+  }
 });
+
+// --- Allowlist (Phase 6.2) ---
+
+const ALLOWLIST_KEY = 'ik_allowlist';
+
+// In-memory Set for O(1) lookup during processItems()
+let allowlist = new Set();
+
+async function loadAllowlist() {
+  try {
+    const stored = await chrome.storage.local.get(ALLOWLIST_KEY);
+    allowlist = new Set(stored[ALLOWLIST_KEY] || []);
+  } catch (e) {
+    debug.log('Failed to load allowlist');
+  }
+}
 
 // --- Corrections (Phase 6.5) ---
 
@@ -450,6 +471,14 @@ async function processItems(adapter) {
           item.setAttribute(PROCESSED_ATTR, 'skipped');
         }
       } else {
+        // Skip classification for allowlisted authors
+        if (adapter.extractAuthor) {
+          const author = adapter.extractAuthor(item);
+          if (author && allowlist.has(author)) {
+            item.setAttribute(PROCESSED_ATTR, 'allowed');
+            continue;
+          }
+        }
         item.classList.add('intentkeeper-classifying');
         foundCount++;
         itemData.push({ item, text, mediaUrls });
@@ -564,6 +593,7 @@ window.IntentKeeperCore = {
     debug.log(`Initializing [${adapter.platform}]...`);
 
     await loadSettings();
+    await loadAllowlist();
 
     if (!settings.enabled) {
       debug.log('Disabled');
