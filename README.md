@@ -25,7 +25,7 @@
   <img src="https://img.shields.io/badge/browser-Chrome%20%7C%20Brave%20%7C%20Edge%20%7C%20Opera-4285F4.svg" alt="Browser: Chrome, Brave, Edge, Opera">
 </p>
 
-There are hundreds of tools that block, hide, or filter social media. IntentKeeper is the only one that surfaces the manipulation patterns behind content - and lets you decide what to do with them.
+You open Twitter to check one thing. Forty minutes later you're exhausted and angry about something you don't even care about. IntentKeeper shows you what's doing that, before it lands.
 
 Ragebait, fearmongering, hype, divisive framing - all detected by the patterns they use, not the topics they cover, before they affect you. Everything runs on your hardware via Ollama. No cloud. No tracking. No data leaving your machine.
 
