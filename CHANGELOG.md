@@ -2,6 +2,56 @@
 
 All notable changes to IntentKeeper are documented here.
 
+## v0.5.0 (2026-04-26) - User Control & Platform Reliability
+
+**"You decide what stays. The extension gets out of the way."**
+
+### User-Configurable Sensitivity (Phase 6)
+
+**Per-Intent Kill Switches (Phase 6.1)**
+- Every intent (ragebait, engagement_bait, fearmongering, divisive, hype) now has its own toggle in the popup. Disable any intent you don't want filtered without touching the others. Settings persist via `chrome.storage.local`.
+
+**Trusted Accounts / Allowlist (Phase 6.2)**
+- Add accounts you trust to an allowlist in the popup. Their content bypasses classification entirely, regardless of what the model would have said. Handles `@username` and `u/username` prefix normalization. In-memory `Set` for O(1) per-item lookup.
+
+**Confidence Disclosure (Phase 6.4)**
+- Low-confidence classifications (below threshold) are now shown with a "?" indicator so you know when the model is uncertain. Confidence score exposed in the UI alongside the intent label.
+
+**User Corrections (Phase 6.5)**
+- Wrong classification? Click the pencil icon to correct it. Corrections are stored locally and injected as few-shot examples into subsequent classifier prompts, improving accuracy for your specific feed over time.
+
+### Platform Reliability
+
+**YouTube SPA Navigation**
+- YouTube's single-page app navigation (pushState/popstate) now correctly triggers re-classification when navigating between videos without a full page reload. Observer hardened against edge cases.
+
+**YouTube Lazy-Load Fix**
+- Feed items that load after initial page render (infinite scroll) are now correctly classified. Added lazy-load guard that watches for new DOM nodes.
+
+**Reddit SPA Navigation + Comment Context**
+- Reddit's React router navigation handled. Comment context (subreddit, flair) now included in classification text for better accuracy on community-specific content.
+
+**Twitter/Reddit Lazy-Load Guard**
+- Applied the same lazy-load guard to Twitter and Reddit adapters. Fixes missed classifications on scroll.
+
+### UI Rebrand
+- Extension renamed from working title to **intentKeeper** throughout popup, icons, and manifest. New logo. Popup redesigned with cleaner layout, real branding, and collapsible sections.
+
+### Multi-Browser Support
+- **Chrome, Brave, Edge, Opera** all confirmed working. Brave's strict Private Network Access enforcement handled automatically via `PrivateNetworkAccessMiddleware` - no user configuration needed.
+
+### Model Benchmark (new)
+- `scripts/benchmark.py` measures classification accuracy and latency across locally installed Ollama models using the 80-example labeled eval set. Results written to `docs/model-benchmark.md` organized by Min VRAM requirement.
+- Partial results saved after each model; `--resume` picks up from a crash.
+
+### Stats
+- 3 platforms: Twitter/X, YouTube, Reddit
+- 4 browsers: Chrome, Brave, Edge, Opera
+- 98% eval accuracy (78/80) on 80-example labeled set
+- Per-intent kill switches, allowlist, confidence disclosure, user corrections
+
+---
+
 ## v0.4.0 (2026-04-12) - Reddit, Brave & Classification Accuracy
 
 **"Three platforms. 98% accuracy. Works in Brave."**

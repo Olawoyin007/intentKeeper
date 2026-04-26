@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "intentKeeper",
-  "version": "0.3.0",
+  "version": "0.5.0",
   "description": "A digital bodyguard for your mind - filters content by intent",
   "permissions": [
     "storage",
