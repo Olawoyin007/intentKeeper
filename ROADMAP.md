@@ -213,7 +213,7 @@
 
 ---
 
-## Phase 6: User-Configurable Sensitivity 🔧 IN PROGRESS
+## Phase 6: User-Configurable Sensitivity ✅ COMPLETE
 
 **Goal**: Let users fine-tune what content is filtered.
 
@@ -431,21 +431,21 @@ Safari requires Apple developer account, Xcode, and wrapping the extension in a 
 
 ---
 
-## Current Status (2026-04-12)
+## Current Status (2026-04-26)
 
-**Completed**: Phase 1 (Core + Twitter/X), Phase 2 (Hardening), Phase 3.1-3.3 + 3.5 (YouTube + platform abstraction), Phase 4 (Reddit - 3 DOM variants: Shreddit, new Reddit, old Reddit), Phase 5.1-5.2 (98% accuracy on 80-example eval, prompt ceiling reached), Phase 8.1 (Chrome, Brave, Edge, Opera all working - PNA middleware for Brave)
+**Completed**: Phase 1 (Core + Twitter/X), Phase 2 (Hardening), Phase 3.1-3.3 + 3.5 (YouTube + platform abstraction), Phase 4 (Reddit - 3 DOM variants), Phase 5.1-5.2 (98% accuracy), Phase 6.1-6.5 (User-Configurable Sensitivity - all subphases complete), Phase 8.1 (Brave PNA middleware) - **v0.5.0 released**
 
-**Prompt ceiling**: The 2 remaining misclassified cases are at the model's training boundary. Fine-tuning (Phase 5.3) would be needed to pass 98%. Prompting cannot resolve them without breaking other cases.
+**Prompt ceiling**: The 2 remaining misclassified cases are at the model's training boundary. Fine-tuning (Phase 5.3) would be needed to pass 98%. Prompting cannot resolve them.
 
-**Next Up**: Phase 6 (User-Configurable Sensitivity) - now that accuracy and platform coverage are solid
+**Next Up**: Phase 7 (Statistics Dashboard) or Phase 8.2 (Firefox support)
 
 **Stats**:
 
-- 98% eval accuracy (78/80, measured 2026-04-09)
+- 98% eval accuracy (78/80)
 - 6 intent categories (ragebait, fearmongering, hype, engagement_bait, divisive, genuine)
 - 3 platforms (Twitter/X, YouTube, Reddit)
-- Chrome, Brave, Edge, and Opera all supported (PNA middleware for Brave)
-- Async pipeline with batch classification and LRU cache
+- 4 browsers: Chrome, Brave, Edge, Opera
+- Per-intent kill switches, allowlist, confidence disclosure, user corrections
 
 ---
 

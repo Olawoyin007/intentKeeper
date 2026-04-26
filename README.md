@@ -79,11 +79,21 @@ cp .env.example .env
 intentkeeper-server
 ```
 
-**Ollama powers the classification.** Any model works - `mistral:7b-instruct`, `llama3.2`, `phi3`, whatever you have. Set it in `.env` and the server pulls it automatically on first start if it is not already present:
+**Ollama powers the classification.** Set your model in `.env` and the server pulls it automatically on first start:
 
 ```bash
 OLLAMA_MODEL=your-model-name
 ```
+
+**Recommended models** (benchmarked on the 80-example eval set - see [`docs/model-benchmark.md`](docs/model-benchmark.md)):
+
+| Min VRAM | Model | Accuracy | Latency |
+|:--------:|-------|:--------:|:-------:|
+| 4 GB | `llama3.2:latest` | 98% | 1.5s |
+| 8 GB | `mistral:7b-instruct` | 96% | 0.9s |
+| 8 GB | `llama3.1:8b` | 98% | 1.8s |
+
+`llama3.2` (2 GB) hits the same 98% accuracy ceiling as models 4x its size - the best default for most hardware. `mistral:7b-instruct` is the fastest option if speed matters more than the 2% gap.
 
 Don't have Ollama yet? [Install it here](https://ollama.com) - it runs entirely on your hardware, no cloud required.
 

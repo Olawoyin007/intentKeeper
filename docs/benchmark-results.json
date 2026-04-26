@@ -1,0 +1,157 @@
+{
+  "qwen2.5:1.5b-instruct": {
+    "accuracy": 0.6125,
+    "correct": 49,
+    "total": 80,
+    "avg_latency_ms": 1979.8436064076668,
+    "per_intent": {
+      "ragebait": 0.3076923076923077,
+      "fearmongering": 0.7,
+      "genuine": 0.8260869565217391,
+      "hype": 0.2727272727272727,
+      "engagement_bait": 0.5,
+      "divisive": 0.9090909090909091
+    }
+  },
+  "gemma:2b-instruct": {
+    "accuracy": 0.4875,
+    "correct": 39,
+    "total": 80,
+    "avg_latency_ms": 1871.2495342755574,
+    "per_intent": {
+      "ragebait": 0.07692307692307693,
+      "fearmongering": 0.6,
+      "genuine": 0.5652173913043478,
+      "hype": 0.18181818181818182,
+      "engagement_bait": 0.6666666666666666,
+      "divisive": 0.8181818181818182
+    }
+  },
+  "qwen2.5:3b-instruct": {
+    "accuracy": 0.8375,
+    "correct": 67,
+    "total": 80,
+    "avg_latency_ms": 1849.2468334254227,
+    "per_intent": {
+      "ragebait": 0.7692307692307693,
+      "fearmongering": 1.0,
+      "genuine": 0.9565217391304348,
+      "hype": 1.0,
+      "engagement_bait": 0.3333333333333333,
+      "divisive": 0.9090909090909091
+    }
+  },
+  "llama3.2:latest": {
+    "accuracy": 0.975,
+    "correct": 78,
+    "total": 80,
+    "avg_latency_ms": 1503.281782776321,
+    "per_intent": {
+      "ragebait": 1.0,
+      "fearmongering": 1.0,
+      "genuine": 1.0,
+      "hype": 1.0,
+      "engagement_bait": 0.9166666666666666,
+      "divisive": 0.9090909090909091
+    }
+  },
+  "phi3.5:latest": {
+    "accuracy": 0.675,
+    "correct": 54,
+    "total": 80,
+    "avg_latency_ms": 1066.030047791719,
+    "per_intent": {
+      "ragebait": 0.23076923076923078,
+      "fearmongering": 0.9,
+      "genuine": 0.5652173913043478,
+      "hype": 0.8181818181818182,
+      "engagement_bait": 0.9166666666666666,
+      "divisive": 0.8181818181818182
+    }
+  },
+  "mistral:7b-instruct": {
+    "accuracy": 0.9625,
+    "correct": 77,
+    "total": 80,
+    "avg_latency_ms": 925.7604030062794,
+    "per_intent": {
+      "ragebait": 0.9230769230769231,
+      "fearmongering": 1.0,
+      "genuine": 1.0,
+      "hype": 1.0,
+      "engagement_bait": 0.8333333333333334,
+      "divisive": 1.0
+    }
+  },
+  "llama3.1:8b": {
+    "accuracy": 0.975,
+    "correct": 78,
+    "total": 80,
+    "avg_latency_ms": 1798.741577846522,
+    "per_intent": {
+      "ragebait": 1.0,
+      "fearmongering": 1.0,
+      "genuine": 1.0,
+      "hype": 1.0,
+      "engagement_bait": 0.8333333333333334,
+      "divisive": 1.0
+    }
+  },
+  "qwen2.5:7b-instruct": {
+    "accuracy": 0.925,
+    "correct": 74,
+    "total": 80,
+    "avg_latency_ms": 1817.9039014896262,
+    "per_intent": {
+      "ragebait": 0.9230769230769231,
+      "fearmongering": 1.0,
+      "genuine": 1.0,
+      "hype": 0.9090909090909091,
+      "engagement_bait": 0.75,
+      "divisive": 0.9090909090909091
+    }
+  },
+  "dolphin-mistral:latest": {
+    "accuracy": 0.925,
+    "correct": 74,
+    "total": 80,
+    "avg_latency_ms": 1063.6046947889554,
+    "per_intent": {
+      "ragebait": 0.6923076923076923,
+      "fearmongering": 1.0,
+      "genuine": 1.0,
+      "hype": 1.0,
+      "engagement_bait": 0.8333333333333334,
+      "divisive": 1.0
+    }
+  },
+  "gemma3:12b": {
+    "accuracy": 0.9625,
+    "correct": 77,
+    "total": 80,
+    "avg_latency_ms": 2873.678991700581,
+    "per_intent": {
+      "ragebait": 0.9230769230769231,
+      "fearmongering": 1.0,
+      "genuine": 0.9130434782608695,
+      "hype": 1.0,
+      "engagement_bait": 1.0,
+      "divisive": 1.0
+    }
+  },
+  "qwen2.5:14b-instruct-q4_K_M": {
+    "accuracy": 0.975,
+    "correct": 78,
+    "total": 80,
+    "avg_latency_ms": 2604.3177752748306,
+    "per_intent": {
+      "ragebait": 1.0,
+      "fearmongering": 1.0,
+      "genuine": 0.9565217391304348,
+      "hype": 0.9090909090909091,
+      "engagement_bait": 1.0,
+      "divisive": 1.0
+    }
+  },
+  "updated_at": "2026-04-26T14:24:59.625804+00:00"
+}
