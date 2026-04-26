@@ -9,7 +9,7 @@
 <p align="center">
   <!-- Project -->
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License: MIT"></a>
-  <img src="https://img.shields.io/badge/version-0.4.0-green.svg" alt="Version: 0.4.0">
+  <img src="https://img.shields.io/badge/version-0.5.0-green.svg" alt="Version: 0.5.0">
   <img src="https://img.shields.io/badge/accuracy-98%25-brightgreen.svg" alt="Accuracy: 98%">
 </p>
 <p align="center">
