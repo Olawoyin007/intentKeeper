@@ -217,7 +217,7 @@ async def classify_content(request: ClassifyRequest):
     )
 
     logger.debug(
-        f"Classified: {request.content[:50]}... -> {result.intent} ({result.confidence:.2f})"
+        f"Classified (len={len(request.content)}) -> {result.intent} ({result.confidence:.2f})"
     )
 
     return ClassifyResponse(

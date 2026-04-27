@@ -150,12 +150,15 @@ async function loadAllowlist() {
   for (const handle of list) {
     const row = document.createElement('div');
     row.style.cssText = 'display:flex;justify-content:space-between;align-items:center;padding:3px 0;';
-    row.innerHTML = `
-      <span style="font-size:11px;color:#9090b0;">${handle}</span>
-      <button data-handle="${handle}" style="
-        background:none;border:none;color:#555568;cursor:pointer;font-size:10px;padding:2px 4px;">
-        Remove
-      </button>`;
+    const span = document.createElement('span');
+    span.style.cssText = 'font-size:11px;color:#9090b0;';
+    span.textContent = handle;
+    const btn = document.createElement('button');
+    btn.dataset.handle = handle;
+    btn.style.cssText = 'background:none;border:none;color:#555568;cursor:pointer;font-size:10px;padding:2px 4px;';
+    btn.textContent = 'Remove';
+    row.appendChild(span);
+    row.appendChild(btn);
     row.querySelector('button').addEventListener('click', async (e) => {
       const h = e.currentTarget.dataset.handle;
       const s = await chrome.storage.local.get('ik_allowlist');
