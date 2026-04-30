@@ -98,7 +98,8 @@ class IntentClassifier:
         temperature: float = None,
         http_client: httpx.AsyncClient = None,
     ):
-        self.ollama_host = ollama_host or os.getenv("OLLAMA_HOST", "http://localhost:11434")
+        raw_host = ollama_host or os.getenv("OLLAMA_HOST", "http://localhost:11434")
+        self.ollama_host = self._validate_ollama_host(raw_host)
         self.model = model or os.getenv("OLLAMA_MODEL", "llama3.2")
         self.temperature = (
             temperature
@@ -121,6 +122,24 @@ class IntentClassifier:
         # HTTP client — can be injected for testing or shared via lifespan
         self._http_client = http_client
         self._owns_client = False
+
+    @staticmethod
+    def _validate_ollama_host(host: str) -> str:
+        """Reject non-localhost Ollama hosts to prevent accidental external requests.
+
+        intentKeeper is local-first: Ollama must run on the same machine.
+        Raises ValueError if the host resolves to anything other than localhost.
+        """
+        from urllib.parse import urlparse
+
+        parsed = urlparse(host)
+        hostname = parsed.hostname or ""
+        if hostname not in ("localhost", "127.0.0.1", "::1"):
+            raise ValueError(
+                f"OLLAMA_HOST must be a localhost address (got '{host}'). "
+                "intentKeeper only supports local Ollama instances."
+            )
+        return host
 
     async def _get_client(self) -> httpx.AsyncClient:
         """Get or create the async HTTP client.

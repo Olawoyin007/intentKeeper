@@ -102,14 +102,18 @@ class PrivateNetworkAccessMiddleware(BaseHTTPMiddleware):
 
 app.add_middleware(PrivateNetworkAccessMiddleware)
 
-# CORS — restrict to browser extension and localhost origins
+# CORS — restrict to the browser extension and the specific port this server runs on.
+# Wildcarding the port (localhost:*) would allow any page on any localhost port to make
+# credentialed requests here. Locking to INTENTKEEPER_PORT keeps the surface minimal.
+_server_port = os.getenv("INTENTKEEPER_PORT", "8420")
+_allowed_origins = [
+    "chrome-extension://*",
+    f"http://localhost:{_server_port}",
+    f"http://127.0.0.1:{_server_port}",
+]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "chrome-extension://*",
-        "http://localhost:*",
-        "http://127.0.0.1:*",
-    ],
+    allow_origins=_allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*", "Access-Control-Request-Private-Network"],

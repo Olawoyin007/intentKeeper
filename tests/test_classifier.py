@@ -794,3 +794,56 @@ class TestLifespan:
             with patch.object(IntentClassifier, "check_health", return_value=True):
                 async with api_module.lifespan(app):
                     assert api_module.classifier is not None
+
+
+# --- Security ---
+
+
+class TestOllamaHostValidation:
+    """OLLAMA_HOST must be a localhost address (issue #75)."""
+
+    def test_localhost_accepted(self):
+        assert (
+            make_classifier(ollama_host="http://localhost:11434").ollama_host
+            == "http://localhost:11434"
+        )
+
+    def test_127_accepted(self):
+        assert (
+            make_classifier(ollama_host="http://127.0.0.1:11434").ollama_host
+            == "http://127.0.0.1:11434"
+        )
+
+    def test_external_host_rejected(self):
+        with pytest.raises(ValueError, match="localhost"):
+            make_classifier(ollama_host="http://evil.example.com:11434")
+
+    def test_0_0_0_0_rejected(self):
+        with pytest.raises(ValueError, match="localhost"):
+            make_classifier(ollama_host="http://0.0.0.0:11434")
+
+    def test_env_var_external_host_rejected(self):
+        with patch.dict("os.environ", {"OLLAMA_HOST": "http://remote-server:11434"}):
+            with pytest.raises(ValueError, match="localhost"):
+                IntentClassifier()
+
+
+class TestCORSOrigins:
+    """CORS origins should be locked to the server's specific port (issue #75)."""
+
+    def test_default_port_in_allowed_origins(self):
+        from server.api import _allowed_origins
+
+        assert "http://localhost:8420" in _allowed_origins
+        assert "http://127.0.0.1:8420" in _allowed_origins
+
+    def test_wildcard_port_not_present(self):
+        from server.api import _allowed_origins
+
+        assert "http://localhost:*" not in _allowed_origins
+        assert "http://127.0.0.1:*" not in _allowed_origins
+
+    def test_chrome_extension_wildcard_preserved(self):
+        from server.api import _allowed_origins
+
+        assert "chrome-extension://*" in _allowed_origins
