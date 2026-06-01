@@ -2,6 +2,15 @@
 
 All notable changes to IntentKeeper are documented here.
 
+## v0.5.1 (2026-06-01) - Security Hardening
+
+### Security
+- XSS, SSRF, prompt injection mitigations and content logging fixes from full security audit (#74)
+- CORS wildcard narrowed: was `localhost:*`, now restricted to the specific API port only (#76)
+- `ollama_host` URL validation added on server startup - rejects malformed or non-HTTP(S) URLs (#76)
+
+---
+
 ## v0.5.0 (2026-04-26) - User Control & Platform Reliability
 
 **"You decide what stays. The extension gets out of the way."**
