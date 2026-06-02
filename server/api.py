@@ -83,7 +83,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="IntentKeeper",
     description="Local content intent classification API",
-    version="0.2.0",
+    version="0.5.1",
     lifespan=lifespan,
 )
 
@@ -182,7 +182,19 @@ class HealthResponse(BaseModel):
     model: str
 
 
+class VersionResponse(BaseModel):
+    """Version response."""
+
+    version: str
+
+
 # Endpoints
+@app.get("/version", response_model=VersionResponse)
+async def get_version():
+    """Return the server version."""
+    return VersionResponse(version=app.version)
+
+
 @app.get("/health", response_model=HealthResponse)
 async def health_check():
     """Check server and Ollama health."""

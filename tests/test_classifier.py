@@ -388,6 +388,18 @@ class TestAPIEndpoints:
         return classifier
 
     @pytest.mark.asyncio
+    async def test_version_endpoint(self, mock_classifier):
+        """GET /version should return the current server version."""
+        transport = ASGITransport(app=app)
+        async with AsyncClient(transport=transport, base_url="http://test") as ac:
+            response = await ac.get("/version")
+
+        assert response.status_code == 200
+        data = response.json()
+        assert "version" in data
+        assert data["version"] == "0.5.1"
+
+    @pytest.mark.asyncio
     async def test_health_endpoint(self, mock_classifier):
         """GET /health should return health status."""
         with patch("server.api.classifier", mock_classifier):
