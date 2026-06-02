@@ -400,6 +400,23 @@ class TestAPIEndpoints:
         assert data["version"] == "0.5.1"
 
     @pytest.mark.asyncio
+    async def test_config_endpoint(self, mock_classifier):
+        """GET /config should return server configuration fields."""
+        with patch("server.api.classifier", mock_classifier):
+            transport = ASGITransport(app=app)
+            async with AsyncClient(transport=transport, base_url="http://test") as ac:
+                response = await ac.get("/config")
+
+        assert response.status_code == 200
+        data = response.json()
+        assert "model" in data
+        assert "ollama_host" in data
+        assert "max_content_length" in data
+        assert "debug" in data
+        assert isinstance(data["max_content_length"], int)
+        assert isinstance(data["debug"], bool)
+
+    @pytest.mark.asyncio
     async def test_health_endpoint(self, mock_classifier):
         """GET /health should return health status."""
         with patch("server.api.classifier", mock_classifier):

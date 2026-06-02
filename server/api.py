@@ -188,11 +188,31 @@ class VersionResponse(BaseModel):
     version: str
 
 
+class ConfigResponse(BaseModel):
+    """Server configuration response."""
+
+    model: str
+    ollama_host: str
+    max_content_length: int
+    debug: bool
+
+
 # Endpoints
 @app.get("/version", response_model=VersionResponse)
 async def get_version():
     """Return the server version."""
     return VersionResponse(version=app.version)
+
+
+@app.get("/config", response_model=ConfigResponse)
+async def get_config():
+    """Return the current server configuration."""
+    return ConfigResponse(
+        model=classifier.model if classifier else os.getenv("OLLAMA_MODEL", ""),
+        ollama_host=os.getenv("OLLAMA_HOST", "http://localhost:11434"),
+        max_content_length=MAX_CONTENT_LENGTH,
+        debug=os.getenv("DEBUG", "").lower() == "true",
+    )
 
 
 @app.get("/health", response_model=HealthResponse)
