@@ -83,7 +83,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="IntentKeeper",
     description="Local content intent classification API",
-    version="0.2.0",
+    version="0.5.1",
     lifespan=lifespan,
 )
 
@@ -182,7 +182,39 @@ class HealthResponse(BaseModel):
     model: str
 
 
+class VersionResponse(BaseModel):
+    """Version response."""
+
+    version: str
+
+
+class ConfigResponse(BaseModel):
+    """Server configuration response."""
+
+    model: str
+    ollama_host: str
+    max_content_length: int
+    debug: bool
+
+
 # Endpoints
+@app.get("/version", response_model=VersionResponse)
+async def get_version():
+    """Return the server version."""
+    return VersionResponse(version=app.version)
+
+
+@app.get("/config", response_model=ConfigResponse)
+async def get_config():
+    """Return the current server configuration."""
+    return ConfigResponse(
+        model=classifier.model if classifier else os.getenv("OLLAMA_MODEL", ""),
+        ollama_host=os.getenv("OLLAMA_HOST", "http://localhost:11434"),
+        max_content_length=MAX_CONTENT_LENGTH,
+        debug=os.getenv("DEBUG", "").lower() == "true",
+    )
+
+
 @app.get("/health", response_model=HealthResponse)
 async def health_check():
     """Check server and Ollama health."""
