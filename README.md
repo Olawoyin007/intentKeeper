@@ -11,6 +11,7 @@
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License: MIT"></a>
   <img src="https://img.shields.io/badge/version-0.5.1-green.svg" alt="Version: 0.5.1">
   <img src="https://img.shields.io/badge/accuracy-98%25-brightgreen.svg" alt="Accuracy: 98%">
+  <a href="https://github.com/Olawoyin007/intentKeeper/actions/workflows/ci.yml"><img src="https://github.com/Olawoyin007/intentKeeper/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
 </p>
 <p align="center">
   <!-- Platforms -->
@@ -162,8 +163,10 @@ See [MANIFESTO.md](MANIFESTO.md) for the full principles.
 
 ## Documentation
 
-- [docs/usage.md](docs/usage.md) - Setup guide and troubleshooting
-- [docs/architecture.md](docs/architecture.md) - System diagrams
+- [docs/architecture.md](docs/architecture.md) - System diagram, classification flow, component relationships
+- [docs/usage.md](docs/usage.md) - Full setup guide and troubleshooting
+- [CLAUDE.md](CLAUDE.md) - Contributor process guide: pre-merge gates, eval rules, key patterns
+- [THREAT_MODEL.md](THREAT_MODEL.md) - Trust boundary and known security gaps
 - [ROADMAP.md](ROADMAP.md) - Phased implementation plan
 - [CHANGELOG.md](CHANGELOG.md) - Release history
 - [CONTRIBUTING.md](CONTRIBUTING.md) - How to contribute

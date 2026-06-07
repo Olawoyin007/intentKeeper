@@ -9,7 +9,7 @@ This document provides a visual overview of IntentKeeper's architecture. For det
 │                         User's Machine                              │
 │                                                                      │
 │  ┌──────────────────────────────────────────────────────────────┐   │
-│  │              Browser (Chrome / Brave)                        │   │
+│  │         Browser (Chrome / Brave / Edge / Opera)              │   │
 │  │  ┌─────────────┐                                             │   │
 │  │  │  Extension   │ ◄── Intercepts content from:               │   │
 │  │  │              │     Twitter/X (tweets, replies)            │   │
@@ -80,7 +80,7 @@ Content Intercepted (tweet / post / comment)
 │       injected as personalised few-shot     │
 │       examples before the content block     │
 │     + Classification rules                  │
-│     + Content to classify (truncated 5000c) │
+│     + Content to classify (truncated 2000c) │
 └─────────────────────────────────────────────┘
     │
     ▼
@@ -167,6 +167,8 @@ Visual Treatment Applied (classifier.js)
 │   POST /classify/batch   - Batch (max 50)                      │
 │   GET  /health           - Server + Ollama status              │
 │   GET  /intents          - Current definitions                 │
+│   GET  /version          - Server version                      │
+│   GET  /config           - Model, host, max content length     │
 │                                                                 │
 │   Request body includes user_corrections[] (Phase 6.5)         │
 │   Pydantic-validated before passing to classifier              │
@@ -336,4 +338,5 @@ Visual Treatment Applied (classifier.js)
 
 ---
 
-For detailed code-level documentation, see [CLAUDE.md](../CLAUDE.md).
+For key patterns and development commands, see [CLAUDE.md](../CLAUDE.md).
+For trust boundary and known security gaps, see [THREAT_MODEL.md](../THREAT_MODEL.md).

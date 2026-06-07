@@ -1,14 +1,15 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+> **Before any PR**: read `MERGE_CHECKLIST.md`
+> **Before any release**: run `python3 scripts/check_version.py`
 
 ## Project Overview
 
-IntentKeeper is a local-first content filter that classifies online content by its underlying **intent** -ragebait, fearmongering, hype, or genuine insight. It runs entirely on local hardware via Ollama integration.
+intentKeeper is a local-first content filter that classifies social media content by its
+underlying **intent** - ragebait, fearmongering, hype, or genuine insight. It runs entirely
+on local hardware via Ollama. No external API calls, no telemetry, no cloud.
 
-**Core Philosophy**: "The content isn't the problem. The intent behind it is."
-
-A post about politics can be thoughtful analysis OR manufactured outrage. Same topic, opposite effect on your wellbeing. IntentKeeper classifies the *energy* of content, not its subject matter.
+**Core philosophy**: "The content isn't the problem. The intent behind it is."
 
 ## Development Commands
 
@@ -21,16 +22,19 @@ intentkeeper-server
 # or
 uvicorn server.api:app --reload --port 8420
 
-# Run unit tests (58 tests, Ollama not required - all mocked)
+# Run unit tests (93 tests, Ollama not required - all mocked)
 pytest tests/
 
 # Run tests with coverage
 pytest tests/ --cov=server
 
-# Run the classification eval against the labeled test set (requires Ollama running)
+# Run the classification eval (requires Ollama running)
 python eval/run_eval.py
 python eval/run_eval.py --verbose          # show every item
 python eval/run_eval.py --filter ragebait  # one intent only
+
+# Version consistency check
+python3 scripts/check_version.py
 
 # Linting and formatting
 ruff check server/
@@ -38,45 +42,9 @@ ruff check --fix server/
 black server/
 ```
 
-## Eval Harness - IMPORTANT
-
-`eval/test_set.yaml` is a labeled test set of 80 examples (~13 per intent) used to measure classification accuracy. `eval/run_eval.py` runs them through the classifier and reports per-intent accuracy and wrong classifications.
-
-**Current baseline: 98% accuracy** (78/80 correct, measured 2026-04-09).
-
-Previous baselines:
-- 85% (68/80) after Phase 5.1 prompt improvements, measured 2026-04-09
-- 79% (63/80) after expanding to 80 examples, measured 2026-04-08
-- 90% (43/48) on the original 48-example set, measured 2026-04-05
-
-**Rule: run the eval before AND after any change to `scenarios/intents.yaml`.**
-
-This includes changes to intent definitions, few-shot examples, or classification rules. Without this, you have no way to know if a change helped or hurt. The wrong classifications list tells you exactly what to fix next.
-
-```bash
-# Workflow for improving classification quality:
-python eval/run_eval.py           # get baseline
-# make changes to scenarios/intents.yaml
-python eval/run_eval.py           # measure improvement
-# only commit if accuracy is >= baseline
-```
-
-**Workflow for real-world misclassifications (spotted during use):**
-1. Note the content and what it was classified as vs. what it should be
-2. Add it to `eval/test_set.yaml` with the correct label and a `reasoning` note explaining the boundary
-3. Run `python eval/run_eval.py` - this becomes the new baseline
-4. Adjust `scenarios/intents.yaml` (add a rule or example) to fix it
-5. Run eval again - only commit if accuracy >= baseline
-6. If fixing it breaks something else, you've hit a model boundary - document it in CLAUDE.md and leave it
-
-The 2 remaining wrong classifications (2%) are at the model-training boundary:
-- `Millennials ruined the housing market. It's really that simple.` - model reads 'really that simple' as contemptuous; requires fine-tuning to fix
-- `People who recline their airplane seat are inconsiderate. Change my mind.` - model reads 'Change my mind' as contempt language; prompt rules can't reliably override this
-Further improvement here requires fine-tuning, not prompting.
-
 ## Required Environment Variables
 
-Configure in `.env` file (see `.env.example`):
+Configure in `.env` (see `.env.example`):
 
 **Required:**
 - `OLLAMA_HOST` - Ollama server URL (default: `http://localhost:11434`)
@@ -84,6 +52,7 @@ Configure in `.env` file (see `.env.example`):
 
 **Optional:**
 - `OLLAMA_TEMPERATURE` - LLM temperature (default: `0.1`)
+- `OLLAMA_SEED` - Pin sampling seed for reproducible output (unset = non-deterministic)
 - `INTENTKEEPER_HOST` - Server bind address (default: `127.0.0.1`)
 - `INTENTKEEPER_PORT` - Server port (default: `8420`)
 - `MANIPULATION_THRESHOLD` - Score threshold for treatments (default: `0.6`)
@@ -91,274 +60,139 @@ Configure in `.env` file (see `.env.example`):
 - `CACHE_MAX_SIZE` - Max LRU cache entries (default: `1000`)
 - `DEBUG` - Enable debug logging (default: `false`)
 
-## Architecture
+## Key Design Constraints
 
-### Directory Structure
+These are non-negotiable. Every feature decision should be checked against them.
 
-```
-intentKeeper/
-├── server/                      # Local classification API
-│   ├── api.py                  # FastAPI server, endpoints, lifespan
-│   └── classifier.py           # IntentClassifier class, Ollama integration
-├── extension/                   # Chrome extension (Manifest V3)
-│   ├── manifest.json           # Extension manifest
-│   ├── background.js           # Service worker (health checks, settings, API proxy)
-│   ├── styles.css              # Visual treatments (blur, tag, hide)
-│   ├── core/
-│   │   └── classifier.js      # Shared engine: cache, API calls, treatments, MutationObserver
-│   ├── platforms/              # Platform adapters (one per site)
-│   │   ├── twitter.js         # Twitter/X selectors and text extraction
-│   │   ├── youtube.js         # YouTube selectors and text extraction (SPA nav)
-│   │   └── reddit.js          # Reddit selectors and text extraction (3-variant DOM)
-│   ├── popup/                  # Extension popup UI
-│   │   ├── popup.html
-│   │   └── popup.js
-│   ├── icons/                  # Extension icons (16, 48, 128px)
-│   └── tests/                  # Jest tests for extension JS
-│       ├── core.test.js
-│       ├── twitter.test.js
-│       └── youtube.test.js
-├── scenarios/                   # Configuration (YAML)
-│   └── intents.yaml            # Intent definitions, few-shot examples, rules
-├── tests/                       # Pytest test suite (58 tests)
-├── eval/                        # Classification eval harness
-│   ├── test_set.yaml           # 80 labeled examples
-│   └── run_eval.py             # Eval runner
-├── docs/                        # Documentation
-├── pyproject.toml              # Package metadata, dependencies, entry points
-└── .env.example                # Environment template
+- All classification must remain local — no external API calls, ever
+- No telemetry, engagement metrics, or behaviour tracking
+- Fail-open: errors pass content through, never block or hide
+- Intent over topic: classify framing, not subject matter
+- User sovereignty: configurable thresholds, per-intent toggles, everything revealable
+- Transparency: every classification includes reasoning
+
+## Eval Harness
+
+`eval/test_set.yaml` is a labeled test set of 80 examples (~13 per intent) used to measure
+classification accuracy. `eval/run_eval.py` runs them through the classifier and reports
+per-intent accuracy and wrong classifications.
+
+**Current baseline: 98% accuracy** (78/80 correct, measured 2026-04-09).
+
+**Rule: run the eval before AND after any change to `scenarios/intents.yaml`.**
+
+```bash
+python eval/run_eval.py           # get baseline
+# make changes to scenarios/intents.yaml
+python eval/run_eval.py           # measure improvement
+# only commit if accuracy >= baseline
 ```
 
-> `extension/content.js` is a deprecated stub (11 lines). Not loaded by the extension. Left as documentation of the pre-Phase-3.5 architecture.
+The 2 remaining wrong classifications are at the model-training boundary:
+- `Millennials ruined the housing market. It's really that simple.` - model reads 'really
+  that simple' as contemptuous; requires fine-tuning to fix
+- `People who recline their airplane seat are inconsiderate. Change my mind.` - model reads
+  'Change my mind' as contempt language; prompt rules cannot reliably override this
 
-### Core Components
+Further improvement requires fine-tuning, not prompt engineering.
 
-**Server** (`server/`):
-- [server/api.py](server/api.py) - FastAPI application with endpoints:
-  - `POST /classify` -Classify single content
-  - `POST /classify/batch` -Classify multiple items (max 50)
-  - `GET /health` -Server and Ollama health check
-  - `GET /intents` -Current intent definitions
-- [server/classifier.py](server/classifier.py) - `IntentClassifier` class:
-  - Loads intent definitions from YAML
-  - Builds classification prompts with few-shot examples
-  - Calls Ollama API for classification
-  - Parses LLM response into `ClassificationResult`
-
-**Extension** (`extension/`):
-
-The extension uses a two-layer architecture introduced in Phase 3.5:
-
-- [extension/core/classifier.js](extension/core/classifier.js) - Shared engine loaded on every platform:
-  - MutationObserver with 200ms debounce
-  - Client-side LRU cache with content hash keys
-  - Sends batches to background worker for classification
-  - Applies visual treatments (tags, blur, hide)
-  - Calls `window.intentKeeperPlatform` adapter for DOM interaction
-- [extension/platforms/twitter.js](extension/platforms/twitter.js) - Twitter/X adapter
-- [extension/platforms/youtube.js](extension/platforms/youtube.js) - YouTube adapter
-  - Handles SPA navigation (yt-navigate-finish events)
-  - Falls back to `#content` for 2025+ homepage DOM (no `#video-title` in feed cards)
-- [extension/platforms/reddit.js](extension/platforms/reddit.js) - Reddit adapter (3-variant DOM)
-- [extension/background.js](extension/background.js) - Service worker:
-  - Proxies API calls to localhost (avoids Private Network Access blocking)
-  - Batch classification via `/classify/batch` endpoint
-  - Manages settings in `chrome.storage.local`
-  - Periodic health checks (20s interval, badge indicator)
-- [extension/popup/](extension/popup/) - Settings UI:
-  - Enable/disable toggle
-  - Show tags, blur ragebait, hide engagement bait toggles
-  - Sensitivity slider (manipulation threshold)
-  - 5s timeout on health check (MV3 service worker can be dormant)
-
-**Scenarios** (`scenarios/`):
-- [scenarios/intents.yaml](scenarios/intents.yaml) - Intent configuration:
-  - 6 intent categories with descriptions, actions, weights
-  - 19 few-shot examples with reasoning (not just labels - reasoning teaches decision logic)
-  - Classification rules including explicit boundary rules for hard cases
-
-**Eval** (`eval/`):
-- [eval/test_set.yaml](eval/test_set.yaml) - 80 labeled examples (~13 per intent), weighted toward boundary cases
-- [eval/run_eval.py](eval/run_eval.py) - Eval runner: per-intent accuracy, wrong classification list
-
-### Intent Categories
-
-6 intents (consolidated from 9 in v2 - engagement_bait absorbed reaction_farming, hype absorbed clickbait, genuine absorbed neutral):
-
-| Intent | Description | Default Action | Weight |
-|--------|-------------|----------------|--------|
-| `ragebait` | Engineered to provoke anger/outrage | Blur | 0.9 |
-| `fearmongering` | Exaggerated threats, vague doom without sources | Tag | 0.7 |
-| `hype` | Manufactured urgency, FOMO, clickbait titles | Tag | 0.5 |
-| `engagement_bait` | Engineered for metrics - likes, replies, comment warfare | Hide | 0.6 |
-| `divisive` | Us-vs-them framing, group sorting, tribal triggers | Tag | 0.7 |
-| `genuine` | Authentic content, honest perspective, factual info | Pass | 0.0 |
-
-### Classification Flow
+## Testing
 
 ```
-Content Intercepted (content.js)
-    │
-    ▼
-┌─────────────────────────────────────┐
-│  Length Check                        │
-│  < 20 chars → neutral (skip LLM)    │
-└─────────────────────────────────────┘
-    │
-    ▼
-┌─────────────────────────────────────┐
-│  Build Classification Prompt         │
-│  - Intent descriptions               │
-│  - Few-shot examples                 │
-│  - Classification rules              │
-└─────────────────────────────────────┘
-    │
-    ▼
-┌─────────────────────────────────────┐
-│  Ollama API Call                     │
-│  - Temperature: 0.1 (deterministic)  │
-│  - Max tokens: 150 (short response)  │
-└─────────────────────────────────────┘
-    │
-    ▼
-┌─────────────────────────────────────┐
-│  Parse JSON Response                 │
-│  {intent, confidence, reasoning}     │
-└─────────────────────────────────────┘
-    │
-    ▼
-┌─────────────────────────────────────┐
-│  Calculate Action                    │
-│  - Look up action from intents.yaml  │
-│  - Apply manipulation threshold      │
-│  - Return ClassificationResult       │
-└─────────────────────────────────────┘
-    │
-    ▼
-Apply Visual Treatment (content.js)
+tests/
+├── test_classifier.py       # 93 tests: classifier, API endpoints, cache, edge cases, concurrency
+├── test_eval.py             # Eval harness validation
+└── test_reddit_adapter.py   # Reddit DOM adapter structural tests
+
+extension/tests/             # Jest tests (Ollama not required)
+├── core.test.js             # Shared classifier engine
+├── twitter.test.js          # Twitter/X adapter
+└── youtube.test.js          # YouTube adapter
 ```
 
-### ClassificationResult
+## Architecture Reference
 
-```python
-@dataclass
-class ClassificationResult:
-    intent: str           # ragebait, fearmongering, hype, engagement_bait, divisive, genuine
-    confidence: float     # 0.0 to 1.0
-    reasoning: str        # Brief explanation from LLM
-    action: str           # blur, tag, hide, pass
-    manipulation_score: float  # weight × confidence
-```
+Full details are in the docs — do not duplicate them here.
 
-### Visual Treatments
+| Topic | Reference |
+|-------|-----------|
+| System diagram, classification flow, component relationships | `docs/architecture.md` |
+| Intent categories, visual treatments, fail-open design | `docs/architecture.md` |
+| Model benchmarks | `docs/model-benchmark.md` |
+| Setup guide and troubleshooting | `docs/usage.md` |
+| Trust boundary and known security gaps | `THREAT_MODEL.md` |
+| Pre-merge checklist | `MERGE_CHECKLIST.md` |
 
-| Action | CSS Effect | User Experience |
-|--------|------------|-----------------|
-| `blur` | `filter: blur(5px)` + overlay | Content obscured, click to reveal |
-| `tag` | Badge with intent label | Visible but labeled |
-| `hide` | `display: none` | Collapsed, expandable |
-| `pass` | No change | Normal display |
+**Before modifying `server/classifier.py` or `server/api.py`: read `docs/architecture.md`
+first.** Changes to the classification pipeline or API surface that contradict it without
+updating it introduce silent inconsistency.
 
-### Extension Settings (chrome.storage.local)
+## Key Patterns
 
-```javascript
-{
-  enabled: true,              // Master toggle
-  showTags: true,             // Show intent labels
-  blurRagebait: true,         // Blur high-manipulation content
-  hideEngagementBait: true,   // Collapse empty interactions
-  manipulationThreshold: 0.6  // 0.3-0.9 sensitivity slider
-}
-```
+Patterns that affect coding decisions — not obvious from reading the code.
 
-### Error Handling
+**`<content>` tag boundary** (`server/classifier.py`): Social media content sent to the LLM
+is wrapped in `<content>...</content>` tags before the classification prompt is formatted.
+The prompt instructs the LLM not to follow any instructions inside the tags. This limits
+prompt injection from adversarial page content — intentKeeper's input comes from potentially
+hostile third parties, unlike empathySync where input is the user's own typing.
 
-**Fail-open design**: If classification fails for any reason, content passes through unchanged. This ensures:
-- Broken server doesn't block browsing
-- Network issues don't hide content
-- Model errors don't cause false positives
+**`ALLOWED_IMAGE_DOMAINS` allowlist** (`server/classifier.py`): When vision classification
+is enabled, image URLs are validated against a fixed domain allowlist before any fetch is
+made. A malicious tweet can include arbitrary URLs; the allowlist ensures only known platform
+CDN domains are ever fetched. Do not widen this list without understanding the SSRF surface.
 
-```python
-except Exception as e:
-    # Fail open - don't block content if classification fails
-    return ClassificationResult(
-        intent="neutral",
-        confidence=0.0,
-        reasoning=f"Classification failed: {str(e)}",
-        action="pass",
-        manipulation_score=0.0,
-    )
-```
+**Corrections validated before prompt injection** (`server/classifier.py`): User label
+corrections are checked against `valid_intents` before being injected as few-shot examples.
+Corrections with unknown intent labels are silently dropped. This prevents prompt injection
+via the corrections mechanism.
 
-### Key Design Principles
+**Fail-open at the call site** (`server/classifier.py`): `classify()` catches all exceptions
+and returns `intent="neutral", action="pass"` rather than re-raising. Callers never handle
+errors — content always gets a result. This is a deliberate design constraint, not a gap to
+fill.
 
-1. **Local-first**: All processing on user's device via Ollama
-2. **Privacy**: No telemetry, no cloud, no tracking
-3. **Fail-open**: Errors pass content through, never block
-4. **Intent over topic**: Political content can be genuine OR manipulative
-5. **User control**: Configurable thresholds and toggles
-6. **Transparency**: Show reasoning for classifications
-
-### Testing
-
-Tests are in [tests/test_classifier.py](tests/test_classifier.py) with 58 tests covering:
-- Intent classification for each category
-- Short content handling and min-length boundary
-- Fallback behavior on errors (fail-open)
-- Health check endpoint (healthy and degraded)
-- Batch classification and concurrency
-- Cache behavior (TTL expiration, LRU eviction)
-- Edge cases (long content, unicode, confidence clamping)
-- API endpoint validation (empty content, max length)
-- Retry on transient Ollama failures
-
-### Sibling Project
-
-IntentKeeper shares patterns with [empathySync](https://github.com/Olawoyin007/empathySync):
-- Same Ollama integration approach
-- YAML-driven configuration
-- Classification pipeline architecture
-- Local-first philosophy
+**`_validate_ollama_host()` enforces localhost at construction** (`server/classifier.py`):
+The classifier refuses to initialise if `OLLAMA_HOST` is not a localhost address. Checked
+once at startup via the lifespan handler in `server/api.py`.
 
 ## Documentation Maintenance
 
-**Rule: docs must be updated before merging any PR that changes behavior, structure, or features. Never leave docs stale.**
+**Rule: docs must be updated before merging any PR that changes behaviour, structure, or
+features. Never leave docs stale.**
 
 | Document | Update when |
 |----------|-------------|
-| `README.md` | New features shipped, browser support changes, accuracy baseline changes, new platform support |
+| `README.md` | New features, browser support changes, accuracy baseline changes, new platform |
 | `ROADMAP.md` | Phase completed - mark ✅; new phase planned - add entry |
-| `docs/architecture.md` | Intent categories change, new platform adapter added, browser support changes, component relationships change |
-| `CLAUDE.md` (this file) | Eval baseline changes, new intent categories, architecture changes, new environment variables |
+| `docs/architecture.md` | API endpoints change, new platform adapter, browser support changes |
+| `CLAUDE.md` (this file) | Eval baseline changes, new env vars, new key patterns |
 
 ### Per-change checklist
 
-**New platform supported (Reddit, YouTube, etc.):**
-- [ ] docs/architecture.md: update High-Level Overview (browser line, Extension section), Component Relationships
-- [ ] ROADMAP.md: mark phase ✅
-- [ ] README.md: update supported platforms list
-- [ ] CLAUDE.md: update Architecture section if new files added
+**New platform supported:**
+- [ ] `docs/architecture.md` - update High-Level Overview (browser line, Extension section)
+- [ ] `ROADMAP.md` - mark phase ✅
+- [ ] `README.md` - supported platforms list
+- [ ] `CLAUDE.md` - if new files added to directory structure
 
-**Intent categories changed (added, removed, renamed):**
-- [ ] docs/architecture.md: update Intent Categories section (count, spectrum diagram)
-- [ ] CLAUDE.md: update intent table
-- [ ] eval/test_set.yaml: add/update examples
+**Intent categories changed:**
+- [ ] `docs/architecture.md` - Intent Categories section
+- [ ] `eval/test_set.yaml` - add/update examples
+- [ ] Run eval before and after
 
 **Eval baseline changes:**
-- [ ] CLAUDE.md: update baseline percentage and date in Eval Harness section
+- [ ] `CLAUDE.md` - update baseline percentage and date above
 
 **New browser support:**
-- [ ] docs/architecture.md: update "Browser (Chrome)" in High-Level Overview to include new browser
-- [ ] README.md: update browser compatibility
+- [ ] `docs/architecture.md` - "Browser" line in High-Level Overview
+- [ ] `README.md` - browser badge and install instructions
 
 ## Roadmap
 
-See [ROADMAP.md](ROADMAP.md) for the phased implementation plan:
-- Phase 1: Core classifier + Chrome extension (Twitter/X) ✅
-- Phase 2: Hardening & reliability ✅
-- Phase 3: YouTube support ✅ (SPA nav, #content fallback for 2025+ DOM)
-- Phase 4: Reddit support ✅ (3-variant DOM adapter, 22 tests)
-- Phase 5: Classification accuracy ✅ (98%, 78/80, prompt ceiling reached)
-- Phase 6: User-configurable sensitivity
-- Phase 7: Statistics dashboard
-- Phase 8: Multi-browser support - Brave ✅ (PNA middleware); Edge/Opera/Firefox 🔜
+Phases 1-6, 8.1 complete. See `ROADMAP.md` for full history.
+
+Current version: check `pyproject.toml` (source of truth).
+Run `python3 scripts/check_version.py` to verify all files are in sync.
+
+Phase 7 (Statistics Dashboard) is the next planned phase.
