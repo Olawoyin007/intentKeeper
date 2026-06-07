@@ -54,6 +54,9 @@ Please report these **privately** by opening a [private security advisory on Git
 
 ## Security Architecture
 
+For the full trust boundary, known gaps, and honest claims about what the architecture
+does and does not protect, see [THREAT_MODEL.md](../THREAT_MODEL.md).
+
 IntentKeeper's security model is built on:
 
 1. **Local-first** - All classification runs on user hardware via Ollama. No content is sent to external services.
