@@ -2,6 +2,7 @@
  * IntentKeeper - Twitter/X Platform Adapter
  *
  * Knows how to find tweets and extract rich text for classification.
+ * Handles standard tweets and Twitter Articles (Notes) at /i/notes/ URLs.
  * All classification logic lives in core/classifier.js.
  */
 
@@ -29,6 +30,50 @@ function getEmojiText(element) {
 }
 
 /**
+ * Return true if the current page is a Twitter Article (Notes) page.
+ * These live at /i/notes/<id>.
+ */
+function isNotesPage() {
+  return /^\/i\/notes\//.test(window.location.pathname);
+}
+
+/**
+ * Extract text from a Twitter Article element.
+ *
+ * Twitter Articles render their body inside a component with
+ * data-testid="articleRichTextJobComponent". Each paragraph is a child block.
+ * Falls back to querying the wrapping <article> element's textContent if the
+ * specific testid is absent.
+ *
+ * NOTE: These selectors need verification against the live Twitter DOM.
+ * Twitter's internal testid names change without notice. If extraction stops
+ * working, inspect a /i/notes/<id> page and update the selector below.
+ */
+function extractArticleText(articleElement) {
+  const parts = [];
+
+  // Article title - rendered as an <h1> on the notes page
+  const title = articleElement.querySelector('h1');
+  if (title) parts.push(title.textContent.trim());
+
+  // Article body paragraphs via Twitter's internal testid.
+  // Candidate selector - requires live DOM verification.
+  const bodyEl = articleElement.querySelector('[data-testid="articleRichTextJobComponent"]');
+  if (bodyEl) {
+    const bodyText = bodyEl.textContent.trim();
+    if (bodyText) parts.push(bodyText);
+  } else {
+    // Fallback: grab all paragraph text within the article element directly.
+    articleElement.querySelectorAll('p').forEach(p => {
+      const t = p.textContent.trim();
+      if (t) parts.push(t);
+    });
+  }
+
+  return parts.join(' | ');
+}
+
+/**
  * On a thread/status page (/username/status/ID), return the text of the focal
  * post - the tweet the page is anchored on.
  *
@@ -49,13 +94,21 @@ function getFocalPostText() {
 
 const twitterAdapter = {
   platform: 'twitter',
-  baseSelector: '[data-testid="tweet"]',
+  // Standard tweets plus Twitter Article containers on /i/notes/ pages.
+  // The article selector targets the outermost <article> element that wraps
+  // the Notes page body. Requires live DOM verification - Twitter may use a
+  // more specific testid (e.g. data-testid="article") in future layouts.
+  baseSelector: '[data-testid="tweet"], article[data-testid="article"]',
 
   /**
-   * The blurrable content area within a tweet.
-   * Used by the core to target blur treatment at text, not the whole tweet card.
+   * The blurrable content area within a tweet or article.
+   * Used by the core to target blur treatment at text, not the whole card.
    */
   getContentElement(element) {
+    // Article page: blur the rich-text body component if present, else <article>
+    if (element.matches('article[data-testid="article"]')) {
+      return element.querySelector('[data-testid="articleRichTextJobComponent"]') || element;
+    }
     return element.querySelector('[data-testid="tweetText"]');
   },
 
@@ -83,7 +136,12 @@ const twitterAdapter = {
   },
 
   /**
-   * Extract tweet text including author name, quoted tweets, link cards,
+   * Extract text from a tweet or Twitter Article element.
+   *
+   * For Article elements (matched via article[data-testid="article"]):
+   *   delegates to extractArticleText() which pulls title + body paragraphs.
+   *
+   * For standard tweets: extracts author name, quoted tweets, link cards,
    * video context, poll options, image alt text, and social context banners.
    * Richer context improves classification accuracy.
    *
@@ -92,6 +150,11 @@ const twitterAdapter = {
    * Emoji are preserved via getEmojiText() rather than .textContent.
    */
   extractText(tweetElement) {
+    // Twitter Article on a /i/notes/ page - use dedicated extractor
+    if (tweetElement.matches('article[data-testid="article"]')) {
+      return extractArticleText(tweetElement);
+    }
+
     // If the tweet body hasn't rendered yet (Twitter lazy-loads card content),
     // return '' so the element stays unmarked and gets picked up on the next
     // observer pass. Video/poll tweets have no tweetText by design - only skip
