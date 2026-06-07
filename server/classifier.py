@@ -106,6 +106,8 @@ class IntentClassifier:
             if temperature is not None
             else float(os.getenv("OLLAMA_TEMPERATURE", "0.1"))
         )
+        _seed_env = os.getenv("OLLAMA_SEED", "")
+        self.seed: Optional[int] = int(_seed_env) if _seed_env.strip() else None
         self.ollama_url = f"{self.ollama_host}/api/generate"
 
         # Load intent definitions
@@ -472,15 +474,19 @@ JSON response:"""
         Uses `format: json` to nudge the model toward valid JSON output.
         The response is not parsed here - see _parse_response().
         """
+        options: dict = {
+            "temperature": self.temperature,
+            "num_predict": LLM_MAX_TOKENS,
+        }
+        if self.seed is not None:
+            options["seed"] = self.seed
+
         payload = {
             "model": self.model,
             "prompt": prompt,
             "stream": False,
             "format": "json",
-            "options": {
-                "temperature": self.temperature,
-                "num_predict": LLM_MAX_TOKENS,
-            },
+            "options": options,
         }
 
         t0 = time.monotonic()

@@ -2,7 +2,11 @@
 
 All notable changes to IntentKeeper are documented here.
 
-## v0.5.1 (2026-06-01) - Security Hardening
+## v0.5.1 (2026-06-01) - Security Hardening & API Completeness
+
+### New
+- `GET /version` endpoint: returns the server version as JSON (#82)
+- `GET /config` endpoint: returns current server configuration (model, host, max content length, debug flag) (#82)
 
 ### Security
 - XSS, SSRF, prompt injection mitigations and content logging fixes from full security audit (#74)
