@@ -53,6 +53,7 @@ Configure in `.env` (see `.env.example`):
 **Optional:**
 - `OLLAMA_TEMPERATURE` - LLM temperature (default: `0.1`)
 - `OLLAMA_SEED` - Pin sampling seed for reproducible output (unset = non-deterministic)
+- `OLLAMA_VISION_MODEL` - Vision model for image/thumbnail analysis (e.g. `moondream`, `llava:7b`); when unset, image analysis is skipped and only text is classified
 - `INTENTKEEPER_HOST` - Server bind address (default: `127.0.0.1`)
 - `INTENTKEEPER_PORT` - Server port (default: `8420`)
 - `MANIPULATION_THRESHOLD` - Score threshold for treatments (default: `0.6`)
