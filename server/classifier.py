@@ -342,9 +342,13 @@ JSON response:"""
                 "options": {"temperature": 0.1, "num_predict": 80},
             }
 
+            t0 = time.monotonic()
             response = await client.post(self.ollama_url, json=payload, timeout=30)
             response.raise_for_status()
-            description = response.json().get("response", "").strip()
+            duration_s = time.monotonic() - t0
+            result = response.json()
+            logger.debug("ollama vision: duration=%.2fs model=%s", duration_s, vision_model)
+            description = result.get("response", "").strip()
             return description if description else None
 
         except Exception as e:
@@ -479,11 +483,20 @@ JSON response:"""
             },
         }
 
+        t0 = time.monotonic()
         client = await self._get_client()
         response = await client.post(self.ollama_url, json=payload)
         response.raise_for_status()
+        duration_s = time.monotonic() - t0
 
         result = response.json()
+        tokens = result.get("eval_count", 0)
+        logger.debug(
+            "ollama classify: duration=%.2fs tokens=%d model=%s",
+            duration_s,
+            tokens,
+            self.model,
+        )
         return result.get("response", "").strip()
 
     def _parse_response(self, response: str) -> ClassificationResult:
