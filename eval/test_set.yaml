@@ -65,6 +65,16 @@
   expected_intent: ragebait
   note: "clear - moral accusation designed to trigger outrage with no context or nuance"
 
+
+- content: "r/politics: This policy will DESTROY the middle class and anyone supporting it is completely out of touch."
+  expected_intent: ragebait
+  note: "reddit - outrage-focused political framing"
+
+- content: "r/news: How many times do these people get away with it before someone finally does something?"
+  expected_intent: ragebait
+  note: "reddit - anger provoking framing designed to inflame"
+
+
 # ─── fearmongering ───────────────────────────────────────────────────────────
 
 - content: "By the time most people realise what's happening it will be too late. The signs are already there."
@@ -122,6 +132,15 @@
 - content: "Financial experts are sounding the alarm. If you have savings, read this now."
   expected_intent: fearmongering
   note: "boundary - unnamed authority ('financial experts') with vague warning and urgency trigger"
+
+- content: "The REAL reason your phone is SPYING on you RIGHT NOW"
+  expected_intent: fearmongering
+  note: "youtube - fear-based thumbnail text with urgency"
+
+- content: "You won't believe what hackers can see through your webcam while you sleep"
+  expected_intent: fearmongering
+  note: "youtube - threat amplification and personal danger framing"
+
 
 # ─── hype ────────────────────────────────────────────────────────────────────
 
@@ -185,6 +204,14 @@
   expected_intent: hype
   note: "short form - maximally vague hype with zero content"
 
+- content: "I Tested Every AI Tool So You Don't Have To (SHOCKING Results)"
+  expected_intent: hype
+  note: "youtube - ALL CAPS shock word and superlative framing"
+
+- content: "This AI tool changed my life in just 24 hours"
+  expected_intent: hype
+  note: "youtube - exaggerated transformation claim"
+
 # ─── engagement_bait ─────────────────────────────────────────────────────────
 
 - content: "Like if you agree. Retweet if you strongly agree."
@@ -242,6 +269,14 @@
 - content: "Drop your go-to comfort show below. Mine: The Office. Always The Office."
   expected_intent: engagement_bait
   note: "clear - reply farming. No purpose, no question being answered, just comment volume"
+
+- content: "r/AskReddit: What's a fact that sounds fake but is actually true?"
+  expected_intent: engagement_bait
+  note: "reddit - broad question optimized for replies"
+
+- content: "Only 1% of people can answer this correctly. Can you?"
+  expected_intent: engagement_bait
+  note: "youtube - challenge framing encouraging interaction"
 
 # ─── divisive ────────────────────────────────────────────────────────────────
 
@@ -305,6 +340,13 @@
   expected_intent: divisive
   note: "boundary divisive/genuine - cultural binary but the 'neither is fully right' qualifier adds nuance. Still primarily divisive framing"
 
+
+
+- content: "r/politics: People who support this proposal clearly don't care about ordinary families."
+  expected_intent: divisive
+  note: "reddit - us-versus-them political identity framing"
+
+
 # ─── genuine ─────────────────────────────────────────────────────────────────
 
 - content: "The library will be closed Monday for maintenance. Normal hours resume Tuesday at 9am."
@@ -362,3 +404,17 @@
 - content: "The new transit line opens March 15. Fares are $2.50. Service runs 5am to midnight seven days a week."
   expected_intent: genuine
   note: "clear - public information with specific date, specific price, specific hours"
+
+
+
+- content: "How photosynthesis actually works - step by step"
+  expected_intent: genuine
+  note: "youtube - educational tutorial title"
+
+- content: "r/AmItheAsshole: AITA for refusing to lend my brother money after he quit his job? He says family should always help each other, but I feel he's taking advantage of me."
+  expected_intent: genuine
+  note: "reddit - advice seeking discussion with subreddit context"
+
+- content: "r/PersonalFinance: Should I pay off my student loans first or start investing?"
+  expected_intent: genuine
+  note: "reddit - sincere advice seeking discussion"
