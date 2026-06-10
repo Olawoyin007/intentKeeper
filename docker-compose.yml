@@ -1,0 +1,19 @@
+services:
+  intentkeeper:
+    build: .
+    container_name: intentkeeper
+    ports:
+      - "${APP_BIND:-127.0.0.1}:${APP_PORT:-8420}:8420"
+    volumes:
+      - ./.env:/app/.env:ro
+      - ./data:/app/data
+    environment:
+      - OLLAMA_HOST=${OLLAMA_HOST:-http://host.docker.internal:11434}
+      - OLLAMA_MODEL=${OLLAMA_MODEL:-mistral:7b-instruct}
+      # Match your host user: run `id -u` and `id -g` to find these.
+      - PUID=${PUID:-1000}
+      - PGID=${PGID:-1000}
+    extra_hosts:
+      # Lets the container reach Ollama running on the Docker host.
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
