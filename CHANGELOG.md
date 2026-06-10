@@ -2,11 +2,26 @@
 
 All notable changes to IntentKeeper are documented here.
 
+## [Unreleased]
+
+### New
+- Twitter Article (Notes) support: classifies long-form posts at `/i/notes/` URLs - extracts title and body via `articleRichTextJobComponent` testid with `<p>` fallback; article elements added to `baseSelector` alongside tweets (#90, closes #16)
+
+### Eval
+- Added 12 YouTube and Reddit examples across all intent categories to improve platform coverage in the eval set (#92, closes #87)
+
+---
+
 ## v0.5.1 (2026-06-01) - Security Hardening & API Completeness
 
 ### New
 - `GET /version` endpoint: returns the server version as JSON (#82)
 - `GET /config` endpoint: returns current server configuration (model, host, max content length, debug flag) (#82)
+
+### Docs
+- `OLLAMA_VISION_MODEL` documented in `.env.example` and `CLAUDE.md` - enables image/thumbnail analysis via a local vision model (e.g. `moondream`, `llava:7b`); was implemented but invisible to contributors (#89, closes #73)
+- `CACHE_MAX_SIZE` documented in `.env.example` - was in CLAUDE.md but missing from the config template (#89, closes #86)
+- `OLLAMA_SEED` added to `CLAUDE.md` optional vars list - was in `.env.example` only (#89)
 
 ### Security
 - XSS, SSRF, prompt injection mitigations and content logging fixes from full security audit (#74)
