@@ -10,6 +10,11 @@ All notable changes to IntentKeeper are documented here.
 ### Eval
 - Added 12 YouTube and Reddit examples across all intent categories to improve platform coverage in the eval set (#92, closes #87)
 
+### Infrastructure
+- Docker entrypoint hardening: PUID/PGID privilege drop via `gosu`, bind-mount ownership repair on restart, SIGTERM forwarding to uvicorn; adds `docker-compose.yml` with `host.docker.internal` for reaching Ollama on the host (#95)
+- CI: docs-only PRs now skip expensive test and lint steps while still reporting a passing check - prevents blocking required status checks on pure documentation changes (#95)
+- PR template: fixed stale test count, removed Twitter-only phrasing from manual test checkbox (#94)
+
 ---
 
 ## v0.5.1 (2026-06-01) - Security Hardening & API Completeness
