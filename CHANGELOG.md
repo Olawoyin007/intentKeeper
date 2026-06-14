@@ -7,6 +7,10 @@ All notable changes to IntentKeeper are documented here.
 ### New
 - Twitter Article (Notes) support: classifies long-form posts at `/i/notes/` URLs - extracts title and body via `articleRichTextJobComponent` testid with `<p>` fallback; article elements added to `baseSelector` alongside tweets (#90, closes #16)
 
+### Tests
+- Added `extension/tests/reddit.test.js` - 20 Jest tests covering the Reddit adapter across all three DOM variants (Shreddit, old new Reddit, old Reddit): title/subreddit/flair extraction, unloaded-shell empty-string behaviour, comment extraction, content-element selection, and author extraction (closes #91)
+- Fixed two stale `core.test.js` assertions that referenced intents removed in the 9->6 streamlining (`neutral`, `clickbait`, `reaction_farming`) - they now assert the current fall-back-to-raw-string behaviour, so `npm test` is green again (76/76)
+
 ### Eval
 - Added 12 YouTube and Reddit examples across all intent categories to improve platform coverage in the eval set (#92, closes #87)
 - Added 6 fearmongering examples to `eval/test_set.yaml` - YouTube suppressed-truth/personal-danger framing and Reddit r/collapse & r/preppers doom posts, plus two facts-with-source genuine boundary cases - to broaden coverage of the fear/genuine edge; all six classify correctly (fearmongering subset 16/16) (closes #97)
