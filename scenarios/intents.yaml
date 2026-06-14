@@ -242,6 +242,26 @@ few_shot_examples:
     intent: ragebait
     reasoning: "Rhetorical question designed to provoke contempt for a named person. Despite the question form, this is not genuine curiosity - 'Is it just me or' is a sarcastic setup, and 'literally everything' is absolutist contempt framing. Sarcastic credibility attacks = ragebait."
 
+  # --- divisive/ragebait boundary (#98) ---
+  # The hardest edge: same heat, different goal. Ask what the author wants you
+  # to do (sort into a tribe = divisive) vs feel (fury at a target = ragebait).
+
+  - content: "r/unpopularopinion: People who bring toddlers to fancy restaurants have decided their comfort matters more than everyone else's."
+    intent: divisive
+    reasoning: "Sorts people by a behaviour choice into a moral category ('decided their comfort matters more'). The move is to make the reader judge and self-sort, not to ignite fury at a villain. Behaviour-based moral sorting = divisive. It would tip to ragebait only if contempt or mockery aimed at those parents were the dominant signal, not the sorting."
+
+  - content: "I cannot BELIEVE this 'expert' still gets airtime after the garbage he pushed last year. Absolute clown show."
+    intent: ragebait
+    reasoning: "Mockery and contempt aimed at one specific person (scare-quoted 'expert', 'clown show'). There is no tribe to join - the goal is to make you furious at a single target, not to assign you to a side. Personal contemptuous ridicule = ragebait, not divisive."
+
+  - content: "Remote workers and office workers will never understand each other. Two different species at this point honestly."
+    intent: divisive
+    reasoning: "Manufactures a binary between two groups ('two different species'). The exaggeration adds heat, but the primary structure is sorting the reader into one camp against the other, not provoking outrage at a wrongdoer. Binary group framing = divisive even when the tone runs hot."
+
+  - content: "Imagine seeing all of this and still doing nothing. Some of you really need to take a long hard look at yourselves."
+    intent: ragebait
+    reasoning: "Accusatory callout ('take a long hard look at yourselves') engineered to provoke shame and anger. Although 'some of you' gestures at a group, the dominant signal is moral fury directed at the reader, not tribal sorting. Contemptuous guilt-demand = ragebait."
+
   # --- genuine ---
 
   - content: "I've been dealing with anxiety for 10 years. Here's what actually helped me, though everyone's different."

@@ -1,8 +1,9 @@
 # IntentKeeper Eval Test Set
 #
-# 80 labeled examples, ~13 per intent.
-# Each intent has 4-5 clear cases and 3-4 boundary/tricky cases.
-# Boundary cases are marked with a note explaining why they might be confused.
+# 98 labeled examples across 6 intents (genuine is the largest - it is the
+# pass-through class and absorbs the most boundary cases).
+# Most intents mix clear cases with boundary/tricky cases; boundary cases carry
+# a note explaining why they might be confused with an adjacent intent.
 #
 # To add new examples: add to the appropriate intent section.
 # To run: python eval/run_eval.py
@@ -140,6 +141,31 @@
 - content: "You won't believe what hackers can see through your webcam while you sleep"
   expected_intent: fearmongering
   note: "youtube - threat amplification and personal danger framing"
+
+# platform coverage: YouTube + Reddit fearmongering patterns (#97)
+- content: "Doctors HATE this - the truth about your tap water they don't want out"
+  expected_intent: fearmongering
+  note: "youtube - authority-suppression framing ('they don't want out') with vague health threat"
+
+- content: "What they're NOT telling you about this winter could put your whole family at risk"
+  expected_intent: fearmongering
+  note: "youtube - suppressed-truth framing ('not telling you') plus vague personal-danger threat, no specifics"
+
+- content: "r/collapse: It's happening faster than the models predicted. We have maybe a few years left."
+  expected_intent: fearmongering
+  note: "reddit - doom framing with vague 'models' appeal and no source, manufactured certainty"
+
+- content: "r/preppers: They're not telling you how bad the grid actually is. Stock up before winter."
+  expected_intent: fearmongering
+  note: "reddit - suppressed-truth framing with unspecified 'they' and urgency to act"
+
+- content: "r/science: New peer-reviewed study links the additive to a 12% rise in the disorder (n=40,000)."
+  expected_intent: genuine
+  note: "boundary fearmongering/genuine - alarming topic but specific study, sample size, and peer review = genuine, not fear"
+
+- content: "r/news: Officials confirm the recall affects 3 states; full list and batch numbers in the article."
+  expected_intent: genuine
+  note: "boundary - serious subject delivered with specific, verifiable facts and a source; informational, not fearmongering"
 
 
 # ─── hype ────────────────────────────────────────────────────────────────────

@@ -9,6 +9,8 @@ All notable changes to IntentKeeper are documented here.
 
 ### Eval
 - Added 12 YouTube and Reddit examples across all intent categories to improve platform coverage in the eval set (#92, closes #87)
+- Added 6 fearmongering examples to `eval/test_set.yaml` - YouTube suppressed-truth/personal-danger framing and Reddit r/collapse & r/preppers doom posts, plus two facts-with-source genuine boundary cases - to broaden coverage of the fear/genuine edge; all six classify correctly (fearmongering subset 16/16) (closes #97)
+- Added 4 divisive/ragebait boundary few-shot examples to `scenarios/intents.yaml` to sharpen the sort-into-a-tribe (divisive) vs make-you-furious (ragebait) distinction; divisive eval accuracy 100% with no ragebait regression (closes #98)
 
 ### Infrastructure
 - Docker entrypoint hardening: PUID/PGID privilege drop via `gosu`, bind-mount ownership repair on restart, SIGTERM forwarding to uvicorn; adds `docker-compose.yml` with `host.docker.internal` for reaching Ollama on the host (#95)
