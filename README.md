@@ -10,7 +10,7 @@
   <!-- Project -->
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License: MIT"></a>
   <img src="https://img.shields.io/badge/version-0.5.1-green.svg" alt="Version: 0.5.1">
-  <img src="https://img.shields.io/badge/accuracy-98%25-brightgreen.svg" alt="Accuracy: 98%">
+  <img src="https://img.shields.io/badge/accuracy-96%25-brightgreen.svg" alt="Accuracy: 96%">
   <a href="https://github.com/Olawoyin007/intentKeeper/actions/workflows/ci.yml"><img src="https://github.com/Olawoyin007/intentKeeper/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
 </p>
 <p align="center">
@@ -54,7 +54,7 @@ A post about politics can be thoughtful analysis or manufactured outrage. A heal
 
 IntentKeeper classifies the **manipulation patterns** in content - not the topics themselves. It doesn't censor subjects. It flags the framing patterns associated with ragebait, fearmongering, divisive content, and hype before they land.
 
-**Accuracy**: 98% on an 80-example labeled eval set (measured 2026-04-09). The remaining 2% are at the model's training boundary - prompt engineering cannot resolve them without breaking other cases. Classification confidence is shown alongside each label so you know when the model is uncertain.
+**Accuracy**: up to 96% on a 98-example labeled eval set (measured 2026-06-14 with `llama3.1:8b` / `qwen2.5:14b`). The set has grown harder over time - most remaining misses are deliberately included boundary cases, like alarming-but-sourced facts labeled genuine. Classification confidence is shown alongside each label so you know when the model is uncertain.
 
 ## Quick Start
 
@@ -86,15 +86,16 @@ intentkeeper-server
 OLLAMA_MODEL=your-model-name
 ```
 
-**Recommended models** (benchmarked on the 80-example eval set - see [`docs/model-benchmark.md`](docs/model-benchmark.md)):
+**Recommended models** (measured on the 98-example eval set, 2026-06-14 - see [`docs/model-benchmark.md`](docs/model-benchmark.md)):
 
 | Min VRAM | Model | Accuracy | Latency |
 |:--------:|-------|:--------:|:-------:|
-| 4 GB | `llama3.2:latest` | 98% | 1.5s |
-| 8 GB | `mistral:7b-instruct` | 96% | 0.9s |
-| 8 GB | `llama3.1:8b` | 98% | 1.8s |
+| 4 GB | `llama3.2:latest` | 93% | 1.5s |
+| 8 GB | `mistral:7b-instruct` | 94% | 0.9s |
+| 8 GB | `llama3.1:8b` | 96% | 1.8s |
+| 12 GB | `qwen2.5:14b-instruct-q4_K_M` | 96% | 2.6s |
 
-`llama3.2` (2 GB) hits the same 98% accuracy ceiling as models 4x its size - the best default for most hardware. `mistral:7b-instruct` is the fastest option if speed matters more than the 2% gap.
+On the current set the 8B+ models lead at ~96%; `llama3.1:8b` is the best all-round default. `llama3.2` (2 GB) is the lightest option at 93% - a few points behind on the harder boundary cases but fine for low-VRAM machines. `mistral:7b-instruct` is the fastest if latency matters most.
 
 Don't have Ollama yet? [Install it here](https://ollama.com) - it runs entirely on your hardware, no cloud required.
 

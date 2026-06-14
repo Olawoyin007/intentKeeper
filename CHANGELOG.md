@@ -16,6 +16,9 @@ All notable changes to IntentKeeper are documented here.
 - Added 6 fearmongering examples to `eval/test_set.yaml` - YouTube suppressed-truth/personal-danger framing and Reddit r/collapse & r/preppers doom posts, plus two facts-with-source genuine boundary cases - to broaden coverage of the fear/genuine edge; all six classify correctly (fearmongering subset 16/16) (closes #97)
 - Added 4 divisive/ragebait boundary few-shot examples to `scenarios/intents.yaml` to sharpen the sort-into-a-tribe (divisive) vs make-you-furious (ragebait) distinction; divisive eval accuracy 100% with no ragebait regression (closes #98)
 
+### Docs
+- Refreshed the stale `98%` accuracy claim. That figure was `78/80` on the original 80-example set (2026-04-09); the set has since grown to 98 with harder boundary cases. Re-measured on 2026-06-14: `llama3.1:8b`/`qwen2.5:14b` 96%, `gemma3:12b` 95%, `mistral:7b-instruct` 94%, `llama3.2` 93%. Updated the README badge (98% -> 96%), accuracy paragraph, and recommended-models table; `CLAUDE.md` baseline; and added a dated spot-check to `docs/model-benchmark.md` (the full 80-example table is kept as a labeled snapshot). Note the reversal: on the harder set the 8B+ models now lead the 2 GB `llama3.2`, so `llama3.1:8b` replaces `llama3.2` as the recommended default
+
 ### Infrastructure
 - Docker entrypoint hardening: PUID/PGID privilege drop via `gosu`, bind-mount ownership repair on restart, SIGTERM forwarding to uvicorn; adds `docker-compose.yml` with `host.docker.internal` for reaching Ollama on the host (#95)
 - CI: docs-only PRs now skip expensive test and lint steps while still reporting a passing check - prevents blocking required status checks on pure documentation changes (#95)
