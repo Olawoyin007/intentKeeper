@@ -128,3 +128,21 @@ jobs:
           test -f extension/styles.css
           test -f extension/popup/popup.html
           test -f extension/popup/popup.js
+
+      - name: Set up Node
+        if: steps.docs-check.outputs.docs_only != 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: extension/package-lock.json
+
+      - name: Install extension dependencies
+        if: steps.docs-check.outputs.docs_only != 'true'
+        working-directory: extension
+        run: npm ci
+
+      - name: Run extension tests (jest)
+        if: steps.docs-check.outputs.docs_only != 'true'
+        working-directory: extension
+        run: npm test

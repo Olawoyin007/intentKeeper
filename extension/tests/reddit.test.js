@@ -6,20 +6,14 @@
 
 const { redditAdapter } = require('../platforms/reddit');
 
-// Elements must be attached to the document for jsdom to compute textContent.
-// extractText's old-Reddit branch keys off window.location.hostname, so tests
-// that need it set the hostname and afterEach restores the jsdom default.
-function setHostname(hostname) {
-  Object.defineProperty(window, 'location', {
-    value: { hostname },
-    writable: true,
-    configurable: true,
-  });
-}
+// Default jsdom URL is http://localhost/, so isOldReddit()/isShreddit() are both
+// false and baseSelector resolves to the new-Reddit branch. Old-Reddit extraction
+// depends on window.location.hostname, which jsdom makes non-configurable - those
+// tests live in reddit.oldreddit.test.js with a file-level old.reddit.com URL.
 
+// Elements must be attached to the document for jsdom to compute textContent.
 afterEach(() => {
   document.body.innerHTML = '';
-  setHostname('localhost');
 });
 
 // ---- DOM helpers: Shreddit (current Reddit) ----
@@ -162,21 +156,9 @@ describe('redditAdapter.extractText - old new Reddit', () => {
   });
 });
 
-// ---- extractText: old Reddit ----
-
-describe('redditAdapter.extractText - old Reddit', () => {
-  test('extracts post title from .title a (hostname old.reddit.com)', () => {
-    setHostname('old.reddit.com');
-    const el = makeOldRedditPost({ title: 'An old.reddit post title' });
-    expect(redditAdapter.extractText(el)).toContain('An old.reddit post title');
-  });
-
-  test('includes subreddit context on old Reddit', () => {
-    setHostname('old.reddit.com');
-    const el = makeOldRedditPost({ title: 'A post', subreddit: 'r/AskHistorians' });
-    expect(redditAdapter.extractText(el)).toContain('[r/AskHistorians]');
-  });
-});
+// Old-Reddit extractText coverage lives in reddit.oldreddit.test.js (it needs a
+// file-level old.reddit.com URL). getContentElement and extractAuthor for old
+// Reddit are below - they key off classes/selectors, not hostname.
 
 // ---- getContentElement ----
 
