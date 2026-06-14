@@ -74,11 +74,13 @@ These are non-negotiable. Every feature decision should be checked against them.
 
 ## Eval Harness
 
-`eval/test_set.yaml` is a labeled test set of 80 examples (~13 per intent) used to measure
+`eval/test_set.yaml` is a labeled test set of 98 examples used to measure
 classification accuracy. `eval/run_eval.py` runs them through the classifier and reports
 per-intent accuracy and wrong classifications.
 
-**Current baseline: 98% accuracy** (78/80 correct, measured 2026-04-09).
+**Current baseline: 96% accuracy** (94/98 with `llama3.1:8b`, measured 2026-06-14). Most
+remaining misses are deliberately included boundary cases. The harness reads `OLLAMA_MODEL`
+from the environment - it does not auto-load `.env`.
 
 **Rule: run the eval before AND after any change to `scenarios/intents.yaml`.**
 

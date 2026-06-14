@@ -1,13 +1,27 @@
 # Model Benchmark
 
-Classification accuracy on the 80-example labeled eval set (`eval/test_set.yaml`).
+Classification accuracy on the labeled eval set (`eval/test_set.yaml`).
 Higher accuracy = fewer wrong classifications on real social media content.
 
-_Last run: 2026-04-26 14:24 UTC_
+_Last full benchmark: 2026-04-26 14:24 UTC, on the then-80-example set._
+
+> **2026-06-14 spot-check (current 98-example set).** The eval set has since grown to 98
+> examples with harder boundary cases, so the headline numbers have moved:
+>
+> | Model | Min VRAM | Accuracy |
+> |-------|:--------:|:--------:|
+> | `llama3.1:8b` | 8 GB | 96% (94/98) |
+> | `qwen2.5:14b-instruct-q4_K_M` | 12 GB | 96% (94/98) |
+> | `gemma3:12b` | 12 GB | 95% (93/98) |
+> | `mistral:7b-instruct` | 8 GB | 94% (92/98) |
+> | `llama3.2:latest` | 4 GB | 93% (91/98) |
+>
+> Note the reversal from the table below: on the harder set the 8B+ models pull ahead of
+> the 2 GB `llama3.2`. Regenerate the full table with `python scripts/benchmark.py`.
 
 ---
 
-## Overall Accuracy
+## Overall Accuracy (80-example set, 2026-04-26)
 
 | Model | Size | Min VRAM | Accuracy | Avg Latency/item |
 |-------|------|:--------:|:--------:|:----------------:|
