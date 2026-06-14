@@ -29,19 +29,22 @@ describe('hashContent', () => {
 });
 
 describe('formatIntent', () => {
-  test('formats all core Twitter intents', () => {
+  test('formats all six v2 intents', () => {
     expect(formatIntent('ragebait')).toBe('Ragebait');
     expect(formatIntent('fearmongering')).toBe('Fear-mongering');
     expect(formatIntent('hype')).toBe('Hype');
     expect(formatIntent('engagement_bait')).toBe('Engagement Bait');
     expect(formatIntent('divisive')).toBe('Divisive');
     expect(formatIntent('genuine')).toBe('Genuine');
-    expect(formatIntent('neutral')).toBe('Neutral');
   });
 
-  test('formats YouTube-specific intents added in Phase 3', () => {
-    expect(formatIntent('clickbait')).toBe('Clickbait');
-    expect(formatIntent('reaction_farming')).toBe('Reaction Farming');
+  test('legacy intents merged in the 9->6 streamlining fall back to their raw string', () => {
+    // clickbait -> hype, reaction_farming -> engagement_bait, neutral -> genuine.
+    // These labels are no longer in the map; formatIntent returns them unchanged
+    // rather than crashing, so any stale payload still renders something.
+    expect(formatIntent('clickbait')).toBe('clickbait');
+    expect(formatIntent('reaction_farming')).toBe('reaction_farming');
+    expect(formatIntent('neutral')).toBe('neutral');
   });
 
   test('returns the raw string for unknown intents rather than crashing', () => {
