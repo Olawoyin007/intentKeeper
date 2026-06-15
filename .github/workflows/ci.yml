@@ -131,7 +131,7 @@ jobs:
 
       - name: Set up Node
         if: steps.docs-check.outputs.docs_only != 'true'
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: '22'
           cache: 'npm'
