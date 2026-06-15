@@ -7,6 +7,9 @@ on:
 jobs:
   validate-description:
     runs-on: ubuntu-latest
+    # Dependabot PRs have auto-generated bodies without our Summary/Testing
+    # sections, so skip the description check for them.
+    if: github.actor != 'dependabot[bot]'
     steps:
       - name: Check PR description
         env:
