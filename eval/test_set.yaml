@@ -1,6 +1,6 @@
 # IntentKeeper Eval Test Set
 #
-# 98 labeled examples across 6 intents (genuine is the largest - it is the
+# 105 labeled examples across 6 intents (genuine is the largest - it is the
 # pass-through class and absorbs the most boundary cases).
 # Most intents mix clear cases with boundary/tricky cases; boundary cases carry
 # a note explaining why they might be confused with an adjacent intent.
@@ -237,6 +237,35 @@
 - content: "This AI tool changed my life in just 24 hours"
   expected_intent: hype
   note: "youtube - exaggerated transformation claim"
+
+- content: "The REAL Reason This Game Flopped - Nobody Is Talking About This"
+  expected_intent: hype
+  note: "youtube - 'REAL reason' vague-payoff clickbait + 'nobody is talking about' framing"
+
+- content: "Watch This BEFORE It Gets Taken Down"
+  expected_intent: hype
+  note: "youtube - manufactured FOMO and false scarcity with zero substance"
+
+- content: "This Is the GREATEST Comeback in Sports History. Period."
+  expected_intent: hype
+  note: "youtube - superlative overload with closing 'Period.' for false finality"
+
+- content: "I Spent 100 Hours Playing This So You Don't Have To (You Won't BELIEVE the Ending)"
+  expected_intent: hype
+  note: "youtube - 'so you don't have to' clickbait + 'you won't believe' payoff bait"
+
+- content: "Why EVERYONE Is Switching to This in 2026 (Don't Get Left Behind)"
+  expected_intent: hype
+  note: "youtube - bandwagon FOMO with a vague product and 'left behind' urgency"
+
+- content: "The Truth About Passive Income That Gurus Don't Want You to See"
+  expected_intent: hype
+  note: "youtube - clickbait 'truth' conspiracy framing with vague hidden-knowledge payoff"
+
+# boundary: youtube title that sounds like hype but is a genuine deep-dive
+- content: "I Benchmarked the RTX 5090 Across 30 Games - Full Results and Methodology in the Description"
+  expected_intent: genuine
+  note: "youtube boundary hype/genuine - sounds like an 'I tested everything' clickbait title but cites specific hardware, a sample size, and links its methodology. Substance = genuine"
 
 # ─── engagement_bait ─────────────────────────────────────────────────────────
 
