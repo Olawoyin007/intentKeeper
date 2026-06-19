@@ -88,6 +88,14 @@ function escapeHtml(str) {
 }
 
 /**
+ * Collapse internal runs of whitespace/newlines to a single space and trim.
+ * Keeps cache keys stable and length checks meaningful across platforms.
+ */
+function normalizeWhitespace(str) {
+  return str.replace(/\s+/g, ' ').trim();
+}
+
+/**
  * Human-readable label for each intent, including YouTube-specific intents
  * added in Phase 3.
  */
@@ -461,7 +469,7 @@ async function processItems(adapter) {
 
     const itemData = [];
     for (const item of items) {
-      const text = adapter.extractText(item);
+      const text = normalizeWhitespace(adapter.extractText(item));
       const mediaUrls = adapter.extractMediaUrls ? adapter.extractMediaUrls(item) : [];
       if (text.length < MIN_CONTENT_LENGTH) {
         // Only permanently skip items with SOME text (genuinely short content).
@@ -585,7 +593,7 @@ function setupObserver(adapter) {
 
 // Expose utility functions for testing in Node (Jest/jsdom)
 if (typeof module !== 'undefined') {
-  module.exports = { hashContent, formatIntent, escapeHtml, buildSelector };
+  module.exports = { hashContent, normalizeWhitespace, formatIntent, escapeHtml, buildSelector };
 }
 
 window.IntentKeeperCore = {

@@ -3,7 +3,7 @@
  * Covers pure utility functions and the selector-building logic.
  */
 
-const { hashContent, formatIntent, escapeHtml, buildSelector } = require('../core/classifier');
+const { hashContent, normalizeWhitespace, formatIntent, escapeHtml, buildSelector } = require('../core/classifier');
 
 describe('hashContent', () => {
   test('same input produces same hash', () => {
@@ -74,6 +74,24 @@ describe('escapeHtml', () => {
 
   test('handles empty string', () => {
     expect(escapeHtml('')).toBe('');
+  });
+});
+
+describe('normalizeWhitespace', () => {
+  test('collapses internal runs of whitespace and newlines', () => {
+    expect(normalizeWhitespace('a\n\n  b')).toBe('a b');
+  });
+
+  test('trims leading and trailing whitespace', () => {
+    expect(normalizeWhitespace('  hello  ')).toBe('hello');
+  });
+
+  test('leaves an already-clean string unchanged', () => {
+    expect(normalizeWhitespace('hello world')).toBe('hello world');
+  });
+
+  test('handles empty string', () => {
+    expect(normalizeWhitespace('')).toBe('');
   });
 });
 
