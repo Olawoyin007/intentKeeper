@@ -10,6 +10,9 @@ All notable changes to IntentKeeper are documented here.
 ### Fixed
 - `normalizeWhitespace` helper collapses internal runs of whitespace/newlines (and trims) on extracted post text in `processItems()`, before it is hashed and length-checked. Adapters previously only `.trim()`ed the ends, so multi-line YouTube/Twitter/Reddit blobs produced unstable cache keys (same post, different internal spacing -> cache miss -> redundant classification) and could slip past the `MIN_CONTENT_LENGTH` gate on padding alone (closes #106)
 
+### Removed
+- Dropped the unused `CONFIDENCE_HIGH = 0.85` constant from `classifier.js`. The Phase 6.4 spec lists "high confidence: standard treatment", which is the default else-case and needs no branch, so the constant was never read. `CONFIDENCE_LOW` (which gates the "?" uncertainty marker) is retained; ROADMAP 6.4 updated to match
+
 ### Tests
 - Added `extension/tests/reddit.test.js` - 20 Jest tests covering the Reddit adapter across all three DOM variants (Shreddit, old new Reddit, old Reddit): title/subreddit/flair extraction, unloaded-shell empty-string behaviour, comment extraction, content-element selection, and author extraction (closes #91)
 - Fixed two stale `core.test.js` assertions that referenced intents removed in the 9->6 streamlining (`neutral`, `clickbait`, `reaction_farming`) - they now assert the current fall-back-to-raw-string behaviour, so `npm test` is green again (76/76)
