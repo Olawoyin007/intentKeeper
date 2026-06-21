@@ -4,6 +4,9 @@ All notable changes to IntentKeeper are documented here.
 
 ## [Unreleased]
 
+### Security
+- Cleared all 21 npm audit advisories in the extension dev toolchain (all transitive under `jest`, dev-only - the extension ships content scripts, not `node_modules`, so there was no runtime/user exposure). `npm audit fix` bumped `ws` 8.20.x -> 8.21.0 (high: uninitialized memory disclosure + fragment DoS) and `@babel/core` -> 7.29.7 (low: arbitrary file read via `sourceMappingURL`, #9). Added an `overrides` pin of `js-yaml` `^4.2.0` to clear the quadratic-complexity merge-key DoS (#10) and its 17 dependents - the advisory covers `<=4.1.1`, and `@istanbuljs/load-nyc-config` (the only consumer, used in coverage) tolerates the 4.x API. Verified: `npm audit` 0 vulnerabilities, plain and `--coverage` Jest runs both 81/81
+
 ### New
 - Twitter Article (Notes) support: classifies long-form posts at `/i/notes/` URLs - extracts title and body via `articleRichTextJobComponent` testid with `<p>` fallback; article elements added to `baseSelector` alongside tweets (#90, closes #16)
 
