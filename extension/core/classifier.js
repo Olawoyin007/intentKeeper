@@ -314,9 +314,9 @@ async function classifyBatch(batchItems, platform) {
 
 // --- Visual Treatments ---
 
-// Confidence thresholds matching Phase 6.4 spec
+// Low-confidence threshold (Phase 6.4 spec): below this, the label is muted and
+// gets a "?" suffix. High confidence needs no constant - it's the default treatment.
 const CONFIDENCE_LOW = 0.65;
-const CONFIDENCE_HIGH = 0.85;
 
 function applyTag(element, intent, confidence, content) {
   const tag = document.createElement('div');

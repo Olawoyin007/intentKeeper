@@ -244,7 +244,7 @@
 - [x] High confidence (>0.85): standard treatment
 - [x] Tooltip: "Classified as ragebait (confidence: 72%)"
 - [x] Blur overlay: low-confidence note rendered inline
-- [x] `CONFIDENCE_LOW` / `CONFIDENCE_HIGH` constants in classifier.js
+- [x] `CONFIDENCE_LOW` constant in classifier.js (high confidence is the default treatment, so no `CONFIDENCE_HIGH` constant is needed)
 
 ### 6.5 User Override & Local Corrections ✅ DONE
 **Philosophy**: Corrections stored locally only in `chrome.storage.local`. Nothing leaves the device.
