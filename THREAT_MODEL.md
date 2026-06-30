@@ -17,9 +17,10 @@ isolation**, and **honest claims about what the fail-open design means for users
 intentKeeper assumes a **single trusted user running both the extension and the local
 server on their own machine**:
 
-- The FastAPI server (`localhost:8420` by default) has no authentication. CORS is restricted
-  to `chrome-extension://*` and `localhost:{port}` only. Do not expose the server to an
-  untrusted network - anyone who can reach that port can submit classification requests.
+- The FastAPI server (`localhost:8420` by default) has no authentication. CORS is locked to
+  the configured server port (the extension itself reaches the server via MV3
+  `host_permissions`, not CORS - see Known gaps). Do not expose the server to an untrusted
+  network - anyone who can reach that port can submit classification requests.
 - The browser extension runs in an isolated world inside Chrome/Brave (Manifest V3). It
   cannot read page JavaScript variables, but it does read the DOM. A page can inject text
   into the DOM; that text can reach the classification prompt.
@@ -48,12 +49,31 @@ server on their own machine**:
 - **Minimal extension permissions.** The extension requests only `storage` and `activeTab`.
   It uses Manifest V3, which runs background logic as a service worker rather than a
   persistent background page, reducing the persistent footprint.
-- **CORS locked to extension and server port.** The server allows only
-  `chrome-extension://*` and `http://localhost:{INTENTKEEPER_PORT}` as origins. A web page
-  at a different localhost port cannot make credentialed requests to the classification API.
+- **CORS locked to the server port.** The server allows only
+  `http://localhost:{INTENTKEEPER_PORT}` (and the `127.0.0.1` form) as credentialed
+  origins, so a web page at a different localhost port cannot make credentialed requests to
+  the classification API. (The extension reaches the server via `host_permissions`, not
+  CORS - see Known gaps.)
 - **Fail-open on every error.** If the server is unreachable, Ollama is down, the model
   returns invalid JSON, or any other failure occurs, the extension passes content through
   without modification. Content is never silently hidden or blocked due to errors.
+
+## Engineering controls
+
+The protections above are enforced in code at the locations below. This table is
+the quick index for reviewers: a change that weakens one of these is a
+regression, not a refactor.
+
+| Control | Enforcement | Where |
+|---------|-------------|-------|
+| Local Ollama only | `_validate_ollama_host()` rejects any non-loopback hostname | `server/classifier.py` |
+| SSRF allowlist | `ALLOWED_IMAGE_DOMAINS` + http(s) scheme check before any image fetch | `server/classifier.py` `_describe_image()` |
+| Prompt-injection boundary | Content wrapped in `<content>` tags with a do-not-follow directive; truncated to 2000 chars | `server/classifier.py` `_build_prompt_prefix()` |
+| Correction-injection guard | Correction labels validated against the intent enum; unknown labels skipped | `server/classifier.py` `_build_classification_prompt()` |
+| Bounded request bodies | Pydantic limits: content length, `media_urls` <= 4, corrections <= 10, batch <= 50 | `server/api.py` request models |
+| DOM-XSS escaping | `escapeHtml()` on `reasoning`; `intent` validated to a fixed enum; popup uses `textContent` | `extension/core/classifier.js`, `extension/popup/popup.js` |
+| Extension talks only to its own server | `API_URL` hardcoded to `localhost:8420`; `host_permissions` scoped to it | `extension/background.js`, `extension/manifest.json` |
+| Fail-open on error | Classifier exceptions return `neutral` / `pass` | `server/classifier.py` `classify()` |
 
 ## Known gaps
 
@@ -84,11 +104,14 @@ These are open and acknowledged.
   has processed it could display content that was never classified. The extension's
   MutationObserver re-processes new DOM nodes, but a carefully timed rewrite between
   observer callbacks could slip through. This is a known browser extension limitation.
-- **`chrome-extension://*` in CORS allows any installed extension.** The server accepts
-  requests from any `chrome-extension://` origin, not only from intentKeeper's own
-  extension ID. A malicious extension installed on the same browser could submit
-  classification requests to the server. The practical risk is limited since all
-  classification does is return an intent label, but it is not a zero-surface allowance.
+- **The `chrome-extension://*` CORS entry is a no-op, not a wildcard.** Starlette's
+  `CORSMiddleware` matches `allow_origins` by exact string, so the literal
+  `chrome-extension://*` matches no real extension origin (verified: a
+  `chrome-extension://<id>` origin is rejected). The extension reaches the server through
+  MV3 `host_permissions`, which bypass page CORS, not through this entry. CORS therefore
+  currently fails closed for extension origins - the entry is misleading dead config, not
+  an over-permissive allowance. See issue #113 for the cleanup (switch to
+  `allow_origin_regex` if extension-origin matching is actually wanted).
 - **No OLLAMA_HOST scheme validation.** `_validate_ollama_host()` enforces a localhost
   hostname but does not enforce the `http` scheme. A value like `ftp://localhost:11434` or
   an IP-literal that maps to localhost on a VPN might pass the check on some network
