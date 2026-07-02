@@ -433,7 +433,7 @@ Safari requires Apple developer account, Xcode, and wrapping the extension in a 
 
 ## Current Status (2026-06-07)
 
-**Completed**: Phase 1 (Core + Twitter/X), Phase 2 (Hardening), Phase 3.1-3.3 + 3.5 (YouTube + platform abstraction), Phase 4 (Reddit - 3 DOM variants), Phase 5.1-5.2 (98% accuracy), Phase 6.1-6.5 (User-Configurable Sensitivity - all subphases complete), Phase 8.1 (Brave PNA middleware) - **v0.5.1 released**
+**Completed**: Phase 1 (Core + Twitter/X), Phase 2 (Hardening), Phase 3.1-3.3 + 3.5 (YouTube + platform abstraction), Phase 4 (Reddit - 3 DOM variants), Phase 5.1-5.2 (98% accuracy), Phase 6.1-6.5 (User-Configurable Sensitivity - all subphases complete), Phase 8.1 (Brave PNA middleware) - **v0.6.0 released** (2026-07-02)
 
 **Prompt ceiling**: The 2 remaining misclassified cases are at the model's training boundary. Fine-tuning (Phase 5.3) would be needed to pass 98%. Prompting cannot resolve them.
 
@@ -473,7 +473,7 @@ IntentKeeper shares architectural DNA with [empathySync](https://github.com/Olaw
 **v0.3.0** (Phase 3): YouTube support ✅ COMPLETE (platform abstraction done, intent anchoring deferred)
 **v0.4.0** (Phase 4): Reddit support ✅ COMPLETE
 **v0.5.0** (Phase 5): Classification accuracy - 98% reached ✅ COMPLETE (prompt ceiling; fine-tuning needed for final 2%)
-**v0.6.0** (Phase 6): User-configurable sensitivity
+**v0.6.0**: Twitter Articles (Notes) support + eval expansion (fearmongering/divisive/hype) + security & CI hardening (npm audit cleared, Jest in CI, Docker entrypoint) ✅ COMPLETE (2026-07-02). Note: Phase 6 (user-configurable sensitivity) shipped earlier in v0.5.0/v0.5.1, so this line no longer maps to Phase 6.
 **v0.7.0** (Phase 7): Statistics dashboard
 **v0.8.0** (Phase 8): Multi-browser support (Brave, Edge, Opera, Firefox)
 **v0.8.5** (Phase 8.5): Non-technical user access - DEFERRED

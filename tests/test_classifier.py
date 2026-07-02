@@ -397,7 +397,7 @@ class TestAPIEndpoints:
         assert response.status_code == 200
         data = response.json()
         assert "version" in data
-        assert data["version"] == "0.5.1"
+        assert data["version"] == "0.6.0"
 
     @pytest.mark.asyncio
     async def test_config_endpoint(self, mock_classifier):
