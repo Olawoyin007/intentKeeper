@@ -102,12 +102,15 @@ class PrivateNetworkAccessMiddleware(BaseHTTPMiddleware):
 
 app.add_middleware(PrivateNetworkAccessMiddleware)
 
-# CORS — restrict to the browser extension and the specific port this server runs on.
-# Wildcarding the port (localhost:*) would allow any page on any localhost port to make
-# credentialed requests here. Locking to INTENTKEEPER_PORT keeps the surface minimal.
+# CORS: lock credentialed access to the specific port this server runs on.
+# The browser extension does NOT depend on CORS - MV3 host_permissions for this port let the
+# service worker's own fetches bypass page CORS. So this allowlist only governs credentialed
+# requests from web pages, and we keep it to INTENTKEEPER_PORT. Wildcarding the port
+# (localhost:*) would let any page on any localhost port make credentialed requests here.
+# A literal "chrome-extension://*" used to sit here but was dead config: Starlette matches
+# allow_origins by exact string, so it never matched a real extension origin (see issue #113).
 _server_port = os.getenv("INTENTKEEPER_PORT", "8420")
 _allowed_origins = [
-    "chrome-extension://*",
     f"http://localhost:{_server_port}",
     f"http://127.0.0.1:{_server_port}",
 ]

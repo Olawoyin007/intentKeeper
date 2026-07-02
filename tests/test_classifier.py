@@ -872,7 +872,10 @@ class TestCORSOrigins:
         assert "http://localhost:*" not in _allowed_origins
         assert "http://127.0.0.1:*" not in _allowed_origins
 
-    def test_chrome_extension_wildcard_preserved(self):
+    def test_chrome_extension_literal_not_present(self):
+        # The literal "chrome-extension://*" was dead config: Starlette matches allow_origins
+        # by exact string, so it never matched a real extension origin. The extension reaches
+        # the server via MV3 host_permissions, not CORS. Removed in issue #113.
         from server.api import _allowed_origins
 
-        assert "chrome-extension://*" in _allowed_origins
+        assert "chrome-extension://*" not in _allowed_origins
