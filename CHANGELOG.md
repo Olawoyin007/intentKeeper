@@ -2,6 +2,11 @@
 
 All notable changes to IntentKeeper are documented here.
 
+## [Unreleased]
+
+### Security
+- Removed the dead `chrome-extension://*` entry from the CORS `allow_origins` list in `server/api.py`. Starlette matches `allow_origins` by exact string, so the literal never matched a real extension origin - it was misleading config, not an active allowance. No behaviour change: the extension reaches the server via MV3 `host_permissions`, which bypass page CORS, and CORS continues to fail closed for extension origins. Added a comment explaining this and flipped the test that had asserted the dead entry was present (closes #113)
+
 ## v0.6.0 (2026-07-02) - Long-Form Posts & Eval Depth
 
 ### Security
