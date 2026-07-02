@@ -83,7 +83,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="IntentKeeper",
     description="Local content intent classification API",
-    version="0.5.1",
+    version="0.6.0",
     lifespan=lifespan,
 )
 

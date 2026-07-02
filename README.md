@@ -9,7 +9,7 @@
 <p align="center">
   <!-- Project -->
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License: MIT"></a>
-  <img src="https://img.shields.io/badge/version-0.5.1-green.svg" alt="Version: 0.5.1">
+  <img src="https://img.shields.io/badge/version-0.6.0-green.svg" alt="Version: 0.6.0">
   <img src="https://img.shields.io/badge/accuracy-96%25-brightgreen.svg" alt="Accuracy: 96%">
   <a href="https://github.com/Olawoyin007/intentKeeper/actions/workflows/ci.yml"><img src="https://github.com/Olawoyin007/intentKeeper/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
 </p>
