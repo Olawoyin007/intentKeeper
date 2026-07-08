@@ -68,7 +68,13 @@ cd intentKeeper
 docker compose up
 ```
 
-This starts Ollama and the classification server together. The model pulls automatically on first run.
+This starts Ollama and the classification server together. The model pulls automatically on first run. The server binds to `127.0.0.1:8420` by default; set `APP_BIND`/`APP_PORT` to change that.
+
+Already running Ollama on the host? Use the server-only compose file instead:
+
+```bash
+docker compose -f docker-compose.host-ollama.yml up
+```
 
 **Option B: Manual**
 

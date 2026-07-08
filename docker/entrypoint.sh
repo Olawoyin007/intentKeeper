@@ -4,7 +4,7 @@
 # Without this the container writes root-owned files into bind-mounted
 # host volumes and the host user can't edit them without sudo.
 #
-# Set PUID/PGID in docker-compose.yml or your .env to match your host user:
+# Set PUID/PGID in your compose file or .env to match your host user:
 #   id -u   # find your PUID
 #   id -g   # find your PGID
 set -e
