@@ -10,6 +10,33 @@
 
 ---
 
+## Execution contract (read before starting any phase)
+
+Written so any implementing agent - regardless of capability - can execute a
+phase without guessing:
+
+1. Read `CLAUDE.md` first; read `MERGE_CHECKLIST.md` before every PR and
+   complete the row for your change type.
+2. One sub-phase = one PR, branched from `main` (branch protection blocks
+   direct pushes). Pre-commit runs black + ruff; on a hook failure, fix and
+   make a NEW commit - never amend.
+3. Verify before declaring done, all three:
+   - `pytest tests/ -q` (server suite)
+   - `cd extension && npm test` (Jest suite)
+   - `python eval/run_eval.py` before AND after any change to
+     `scenarios/intents.yaml` - accuracy must not regress from the recorded
+     baseline (105 examples; ~96% on llama3.1:8b)
+4. Never violate the Guiding Principles at the bottom of this file - in
+   particular: no telemetry of any kind, fail-open on every error path, and
+   nothing ever leaves the device.
+5. When a step is ambiguous, take the smallest interpretation that satisfies
+   the phase's **Done when** line and record the choice in the PR body.
+
+Planned phases below carry **Done when / Verify / Pitfalls** lines - treat
+them as the acceptance test, not as suggestions.
+
+---
+
 ## Phase 1: Core Classifier + Chrome Extension ✅ COMPLETE
 
 **Goal**: Prove the concept works with Twitter/X as the first platform.
@@ -268,15 +295,29 @@
 - [ ] Sessions, content items classified, intents detected
 - [ ] Store in IndexedDB (browser local storage)
 
+**Files**: `extension/core/stats.js` (new - counters written from the shared classification path in `extension/core/`), Jest tests in `extension/tests/stats.test.js`.
+**Done when**: every classified item increments exactly one per-intent daily counter in IndexedDB; only aggregate counts are stored - never the content text, author, or URL; uninstalling the extension leaves nothing behind anywhere else.
+**Verify**: `cd extension && npm test` (use `fake-indexeddb` in Jest - do not mock the counting logic itself); `pytest tests/ -q` untouched.
+**Pitfalls**: the server must know nothing about stats - this is extension-only. Write counters from the one shared classification path in `extension/core/`, not per-platform adapters, or platforms will drift.
+
 ### 7.2 Dashboard UI
 - [ ] Options page with charts
 - [ ] "Your week: 45% genuine, 30% ragebait, 15% hype, 10% neutral"
 - [ ] Trend lines over time
 
+**Files**: `extension/options/` (new options page - register `options_page`/`options_ui` in `manifest.json`), reads the 7.1 IndexedDB store.
+**Done when**: the options page renders weekly percentages per intent and a daily trend; it works fully offline; page loads with zero external requests.
+**Verify**: Jest for the aggregation functions (pure functions in `extension/core/`, DOM-free); manual check in Chrome (`chrome://extensions` → Details → Extension options).
+**Pitfalls**: MV3 CSP forbids remote scripts - no CDN chart library; either hand-rolled SVG/canvas bars or a vendored library committed to the repo. Keep aggregation logic in a pure module so Jest can cover it without a browser.
+
 ### 7.3 Insights
 - [ ] "You encounter more ragebait on weekends"
 - [ ] "Your engagement bait exposure decreased this week"
 - [ ] Optional: suggest breaks after high-manipulation sessions
+
+**Done when**: insights are computed from the 7.1 counters only, each insight names its threshold (e.g. weekend ragebait share ≥ 1.5x weekday share), and no insight nags - one line on the dashboard, nothing pushed.
+**Verify**: Jest table-driven tests: synthetic counter histories in, expected insight strings out.
+**Pitfalls**: this is the feature most at risk of drifting into engagement mechanics - insights render only when the dashboard is opened; no notifications, no badges, no streaks.
 
 ---
 
@@ -291,8 +332,8 @@ Chrome, Brave, Edge, and Opera all run Chromium and support Manifest V3 natively
 - [x] Brave Private Network Access (PNA) support: `PrivateNetworkAccessMiddleware` added to API server - responds with `Access-Control-Allow-Private-Network: true` when Brave's PNA preflight fires. 3 tests in `TestPrivateNetworkAccessMiddleware`.
 - [x] Tested on Microsoft Edge - `chrome.*` API aliases work as expected
 - [x] Tested on Opera - works without modification
-- [ ] Submit to Chrome Web Store (covers Brave and Opera users via CWS)
-- [ ] Submit to Microsoft Edge Add-ons store
+- [ ] Submit to Chrome Web Store (covers Brave and Opera users via CWS) - **human task**: requires developer account, payment, and store listing; an agent prepares the zip + listing text, the owner submits
+- [ ] Submit to Microsoft Edge Add-ons store - **human task**, same split
 - [ ] Document installation instructions for each browser
 
 ### 8.2 Firefox
@@ -303,9 +344,14 @@ Firefox uses a different extension format and has subtle WebExtensions API incom
 - [ ] Audit and fix any `chrome.*` calls not covered by the WebExtensions polyfill
 - [ ] Handle Firefox's stricter Content Security Policy
 - [ ] Test on Firefox Developer Edition
-- [ ] Prepare for Mozilla Add-ons (AMO) submission
+- [ ] Prepare for Mozilla Add-ons (AMO) submission - **human task**: AMO account + review submission; agent prepares the artifact
 - [ ] Privacy policy document
 - [ ] Extension description and screenshots
+
+**Files**: `extension/manifest.json` (or a build step emitting a Firefox variant), `extension/background.js`, any `chrome.*` call sites.
+**Done when**: the extension loads via `about:debugging` on Firefox Developer Edition and all three platforms (Twitter/X, YouTube, Reddit) classify and render treatments in a manual smoke test; the Chrome build still passes all Jest tests unchanged.
+**Verify**: `cd extension && npm test`; manual smoke on Firefox Dev Edition + one Chromium browser (no regression).
+**Pitfalls**: the two known hard incompatibilities - (1) Firefox MV3 does not run `background.service_worker`; it needs `background.scripts` (event page), so the background logic must tolerate both registration styles or be built per-target; (2) `browser_specific_settings.gecko.id` is mandatory for `storage` API persistence in Firefox. Prefer a tiny build script emitting two manifests over runtime feature-sniffing.
 
 ### 8.3 Safari (Optional - High Effort)
 
@@ -412,11 +458,11 @@ Safari requires Apple developer account, Xcode, and wrapping the extension in a 
 |-------|--------|--------|----------|
 | 1. Core + Twitter | High | Medium | ✅ COMPLETE |
 | 2. Hardening & Reliability | Critical | Medium | ✅ COMPLETE |
-| 3. YouTube | High | Medium | 🟡 In Progress |
+| 3. YouTube | High | Medium | ✅ COMPLETE (3.4 anchoring deferred) |
 | 5. Classification Accuracy | Critical | Low | ✅ COMPLETE (98%, prompt ceiling) |
 | 4. Reddit | High | Medium | ✅ COMPLETE |
-| 6. User Sensitivity | Medium | Low | 🔵 After 5 |
-| 7. Statistics | Medium | Medium | 🔵 After 6 |
+| 6. User Sensitivity | Medium | Low | ✅ COMPLETE |
+| 7. Statistics | Medium | Medium | 🔜 NEXT |
 | 8. Multi-Browser (Chrome/Brave/Edge/Opera/Firefox) | Medium | Low-Medium | 🟡 Chrome/Brave/Edge/Opera ✅, Store submissions + Firefox 🔵 |
 | 8.5. Non-Technical User Access | High | Medium-High | ⏸ DEFERRED - infra overhead before APIs stabilise |
 | 9. Advanced Classification | High | High | 🔵 Long-term |
@@ -431,7 +477,7 @@ Safari requires Apple developer account, Xcode, and wrapping the extension in a 
 
 ---
 
-## Current Status (2026-06-07)
+## Current Status (2026-07-10)
 
 **Completed**: Phase 1 (Core + Twitter/X), Phase 2 (Hardening), Phase 3.1-3.3 + 3.5 (YouTube + platform abstraction), Phase 4 (Reddit - 3 DOM variants), Phase 5.1-5.2 (98% accuracy), Phase 6.1-6.5 (User-Configurable Sensitivity - all subphases complete), Phase 8.1 (Brave PNA middleware) - **v0.6.0 released** (2026-07-02)
 
@@ -441,7 +487,7 @@ Safari requires Apple developer account, Xcode, and wrapping the extension in a 
 
 **Stats**:
 
-- 98% eval accuracy (78/80)
+- ~96% eval accuracy on the expanded 105-example set (llama3.1:8b); the earlier 80-example set peaked at 98% (prompt ceiling)
 - 6 intent categories (ragebait, fearmongering, hype, engagement_bait, divisive, genuine)
 - 3 platforms (Twitter/X, YouTube, Reddit)
 - 4 browsers: Chrome, Brave, Edge, Opera
