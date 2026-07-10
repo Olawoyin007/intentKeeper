@@ -54,7 +54,7 @@ A post about politics can be thoughtful analysis or manufactured outrage. A heal
 
 IntentKeeper classifies the **manipulation patterns** in content - not the topics themselves. It doesn't censor subjects. It flags the framing patterns associated with ragebait, fearmongering, divisive content, and hype before they land.
 
-**Accuracy**: up to 96% on a 98-example labeled eval set (measured 2026-06-14 with `llama3.1:8b` / `qwen2.5:14b`). The set has grown harder over time - most remaining misses are deliberately included boundary cases, like alarming-but-sourced facts labeled genuine. Classification confidence is shown alongside each label so you know when the model is uncertain.
+**Accuracy**: up to 96% on a 105-example labeled eval set (measured 2026-07-10 with `llama3.1:8b`). The set has grown harder over time - most remaining misses are deliberately included boundary cases, like alarming-but-sourced facts labeled genuine. Classification confidence is shown alongside each label so you know when the model is uncertain.
 
 ## Quick Start
 
