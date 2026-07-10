@@ -4,6 +4,15 @@ All notable changes to IntentKeeper are documented here.
 
 ## [Unreleased]
 
+### Changed
+- ROADMAP.md now carries an execution contract (test/eval verify commands,
+  PR-per-sub-phase, principles gate) and "Done when / Verify / Pitfalls"
+  acceptance blocks on the planned phases (7.1-7.3, 8.2), so an implementing
+  agent of any capability can execute a phase without rediscovering repo
+  constraints. Store submissions marked as human tasks. Stale status fixed:
+  priority matrix rows (Phase 3, 6, 7), status date, and the eval stat now
+  reflecting the 105-example set (~96% on llama3.1:8b).
+
 ### Security
 - Removed the dead `chrome-extension://*` entry from the CORS `allow_origins` list in `server/api.py`. Starlette matches `allow_origins` by exact string, so the literal never matched a real extension origin - it was misleading config, not an active allowance. No behaviour change: the extension reaches the server via MV3 `host_permissions`, which bypass page CORS, and CORS continues to fail closed for extension origins. Added a comment explaining this and flipped the test that had asserted the dead entry was present (closes #113)
 - Fixed the compose-file shadowing left by #95: `docker-compose.yml` (server-only, host Ollama, hardened defaults) was silently dead because Compose prefers `docker-compose.yaml`, so the documented `docker compose up` ran the old bundled stack with the API published on all interfaces (`8420:8420`). The canonical `docker-compose.yaml` now binds `127.0.0.1` by default (`APP_BIND`/`APP_PORT` to override), passes `PUID`/`PGID` through to the #95 entrypoint, and bind-mounts `./data`; the host-Ollama variant is renamed to `docker-compose.host-ollama.yml` and documented in the README (`docker compose -f docker-compose.host-ollama.yml up`)
