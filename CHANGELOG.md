@@ -7,11 +7,17 @@ All notable changes to IntentKeeper are documented here.
 ### Changed
 - ROADMAP.md now carries an execution contract (test/eval verify commands,
   PR-per-sub-phase, principles gate) and "Done when / Verify / Pitfalls"
-  acceptance blocks on the planned phases (7.1-7.3, 8.2), so an implementing
-  agent of any capability can execute a phase without rediscovering repo
-  constraints. Store submissions marked as human tasks. Stale status fixed:
-  priority matrix rows (Phase 3, 6, 7), status date, and the eval stat now
+  acceptance blocks on the planned phases (7.1-7.3, 8.2), so any work
+  session can execute a phase without rediscovering repo constraints.
+  Store submissions marked as human tasks. Stale status fixed: priority
+  matrix rows (Phase 3, 6, 7), status date, and the eval stat now
   reflecting the 105-example set (~96% on llama3.1:8b).
+- Refreshed the stale 98-example eval figures. The set grew to 105 in v0.6.0
+  but README, CLAUDE.md, and docs/model-benchmark.md still carried the
+  98-example baseline. Re-measured 2026-07-10: `llama3.1:8b` 96% (101/105),
+  all four misses `engagement_bait` boundary cases. Added a dated spot-check
+  to docs/model-benchmark.md; other models keep their dated 2026-06-14
+  numbers until re-measured.
 
 ### Security
 - Removed the dead `chrome-extension://*` entry from the CORS `allow_origins` list in `server/api.py`. Starlette matches `allow_origins` by exact string, so the literal never matched a real extension origin - it was misleading config, not an active allowance. No behaviour change: the extension reaches the server via MV3 `host_permissions`, which bypass page CORS, and CORS continues to fail closed for extension origins. Added a comment explaining this and flipped the test that had asserted the dead entry was present (closes #113)

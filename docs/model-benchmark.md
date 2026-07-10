@@ -5,7 +5,17 @@ Higher accuracy = fewer wrong classifications on real social media content.
 
 _Last full benchmark: 2026-04-26 14:24 UTC, on the then-80-example set._
 
-> **2026-06-14 spot-check (current 98-example set).** The eval set has since grown to 98
+> **2026-07-10 spot-check (current 105-example set).** The set grew from 98 to 105 in
+> v0.6.0 (YouTube/Reddit, fearmongering, and hype boundary additions):
+>
+> | Model | Min VRAM | Accuracy |
+> |-------|:--------:|:--------:|
+> | `llama3.1:8b` | 8 GB | 96% (101/105) |
+>
+> All four misses are `engagement_bait` boundary cases. Other models were not
+> re-measured on the 105 set; their most recent numbers are the 2026-06-14 table below.
+
+> **2026-06-14 spot-check (98-example set).** The eval set has since grown to 98
 > examples with harder boundary cases, so the headline numbers have moved:
 >
 > | Model | Min VRAM | Accuracy |
