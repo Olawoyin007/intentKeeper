@@ -5,6 +5,12 @@ All notable changes to IntentKeeper are documented here.
 ## [Unreleased]
 
 ### Changed
+- Phase 7 (Statistics Dashboard) deferred pending manifesto reconciliation.
+  The manifesto commits intentKeeper to "doesn't track or nudge" and its
+  Living Clause forbids changes that add tracking; exposure counters sit in
+  that grey zone and the 7.3 insights would model the user's browsing rhythm
+  outright. Per the project's own rule, the manifesto wins until a discussion
+  issue resolves the tension.
 - ROADMAP.md now carries an execution contract (test/eval verify commands,
   PR-per-sub-phase, principles gate) and "Done when / Verify / Pitfalls"
   acceptance blocks on the planned phases (7.1-7.3, 8.2), so any work
