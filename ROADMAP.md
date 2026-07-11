@@ -286,9 +286,21 @@ them as the acceptance test, not as suggestions.
 
 ---
 
-## Phase 7: Statistics Dashboard 🔜 PLANNED
+## Phase 7: Statistics Dashboard ⏸ DEFERRED (manifesto tension, 2026-07-11)
 
 **Goal**: Show users their content exposure patterns (local only).
+
+> **Deferred** - this phase conflicts with the manifesto as written. The
+> empathySync comparison table says intentKeeper "doesn't track or nudge", the
+> Living Clause forbids changes that add tracking, and 7.3's insights ("you
+> encounter more ragebait on weekends") model the user's browsing rhythm, which
+> brushes against the "no user profiling" commitment. Local aggregate
+> feed-composition stats (7.1/7.2) are arguably transparency about the
+> environment rather than tracking of the user, but that distinction is not one
+> the manifesto currently makes. Do not implement until a manifesto discussion
+> issue resolves the tension (tighten the manifesto to carve out pull-only,
+> local, feed-not-user measurement - or retire the phase). The manifesto wins
+> until then.
 
 ### 7.1 Local Analytics
 - [ ] Track classifications by intent over time
@@ -483,7 +495,7 @@ Safari requires Apple developer account, Xcode, and wrapping the extension in a 
 
 **Prompt ceiling**: The 2 remaining misclassified cases are at the model's training boundary. Fine-tuning (Phase 5.3) would be needed to pass 98%. Prompting cannot resolve them.
 
-**Next Up**: Phase 7 (Statistics Dashboard) or Phase 8.2 (Firefox support)
+**Next Up**: Phase 8.2 (Firefox support). Phase 7 deferred 2026-07-11 pending manifesto reconciliation (see the Phase 7 deferral note).
 
 **Stats**:
 
@@ -520,7 +532,7 @@ IntentKeeper shares architectural DNA with [empathySync](https://github.com/Olaw
 **v0.4.0** (Phase 4): Reddit support ✅ COMPLETE
 **v0.5.0** (Phase 5): Classification accuracy - 98% reached ✅ COMPLETE (prompt ceiling; fine-tuning needed for final 2%)
 **v0.6.0**: Twitter Articles (Notes) support + eval expansion (fearmongering/divisive/hype) + security & CI hardening (npm audit cleared, Jest in CI, Docker entrypoint) ✅ COMPLETE (2026-07-02). Note: Phase 6 (user-configurable sensitivity) shipped earlier in v0.5.0/v0.5.1, so this line no longer maps to Phase 6.
-**v0.7.0** (Phase 7): Statistics dashboard
+**v0.7.0** (Phase 7): Statistics dashboard - DEFERRED (manifesto tension)
 **v0.8.0** (Phase 8): Multi-browser support (Brave, Edge, Opera, Firefox)
 **v0.8.5** (Phase 8.5): Non-technical user access - DEFERRED
 **v1.0.0** (Phase 9): Advanced classification features

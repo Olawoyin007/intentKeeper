@@ -198,4 +198,5 @@ Phases 1-6, 8.1 complete. See `ROADMAP.md` for full history.
 Current version: check `pyproject.toml` (source of truth).
 Run `python3 scripts/check_version.py` to verify all files are in sync.
 
-Phase 7 (Statistics Dashboard) is the next planned phase.
+Phase 8.2 (Firefox support) is the next planned phase. Phase 7 (Statistics
+Dashboard) is deferred pending manifesto reconciliation - see ROADMAP.md.
