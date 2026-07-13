@@ -1,3 +1,7 @@
+// Cross-browser shim: Firefox exposes promise-based extension APIs on `browser`;
+// Chrome MV3 exposes them on `chrome`. Alias so this file uses promise-based `browser.*`.
+globalThis.browser = globalThis.browser || globalThis.chrome;
+
 /**
  * IntentKeeper Popup Script
  *
@@ -23,7 +27,7 @@ const elements = {
  * Load settings from storage
  */
 async function loadSettings() {
-  const stored = await chrome.storage.local.get('intentkeeper_settings');
+  const stored = await browser.storage.local.get('intentkeeper_settings');
   const settings = stored.intentkeeper_settings || {};
 
   elements.enabled.checked = settings.enabled !== false;
@@ -62,7 +66,7 @@ async function saveSettings() {
     intentEnabled
   };
 
-  await chrome.storage.local.set({ intentkeeper_settings: settings });
+  await browser.storage.local.set({ intentkeeper_settings: settings });
 }
 
 /**
@@ -76,7 +80,7 @@ async function checkHealth() {
       setTimeout(() => reject(new Error('timeout')), 5000)
     );
     const data = await Promise.race([
-      chrome.runtime.sendMessage({ type: 'CHECK_HEALTH' }),
+      browser.runtime.sendMessage({ type: 'CHECK_HEALTH' }),
       timeout
     ]);
 
@@ -115,7 +119,7 @@ elements.threshold.addEventListener('change', saveSettings);
 // --- Corrections (Phase 6.5) ---
 
 async function loadCorrectionsCount() {
-  const stored = await chrome.storage.local.get('ik_corrections');
+  const stored = await browser.storage.local.get('ik_corrections');
   const count = (stored.ik_corrections || []).length;
   const countEl = document.getElementById('corrections-count');
   const descEl = document.getElementById('corrections-desc');
@@ -128,14 +132,14 @@ async function loadCorrectionsCount() {
 }
 
 document.getElementById('clear-corrections').addEventListener('click', async () => {
-  await chrome.storage.local.remove('ik_corrections');
+  await browser.storage.local.remove('ik_corrections');
   await loadCorrectionsCount();
 });
 
 // --- Allowlist (Phase 6.2) ---
 
 async function loadAllowlist() {
-  const stored = await chrome.storage.local.get('ik_allowlist');
+  const stored = await browser.storage.local.get('ik_allowlist');
   const list = stored.ik_allowlist || [];
   const listEl = document.getElementById('allowlist-list');
   const emptyEl = document.getElementById('allowlist-empty');
@@ -161,9 +165,9 @@ async function loadAllowlist() {
     row.appendChild(btn);
     row.querySelector('button').addEventListener('click', async (e) => {
       const h = e.currentTarget.dataset.handle;
-      const s = await chrome.storage.local.get('ik_allowlist');
+      const s = await browser.storage.local.get('ik_allowlist');
       const updated = (s.ik_allowlist || []).filter(x => x !== h);
-      await chrome.storage.local.set({ ik_allowlist: updated });
+      await browser.storage.local.set({ ik_allowlist: updated });
       await loadAllowlist();
     });
     listEl.appendChild(row);
@@ -177,11 +181,11 @@ document.getElementById('allowlist-add').addEventListener('click', async () => {
   // Normalize: strip leading @ or u/
   const handle = raw.replace(/^@/, '').replace(/^u\//, '');
   if (!handle) return;
-  const stored = await chrome.storage.local.get('ik_allowlist');
+  const stored = await browser.storage.local.get('ik_allowlist');
   const list = stored.ik_allowlist || [];
   if (!list.includes(handle)) {
     list.push(handle);
-    await chrome.storage.local.set({ ik_allowlist: list });
+    await browser.storage.local.set({ ik_allowlist: list });
   }
   input.value = '';
   await loadAllowlist();

@@ -1,3 +1,7 @@
+// Cross-browser shim: Firefox exposes promise-based extension APIs on `browser`;
+// Chrome MV3 exposes them on `chrome`. Alias so this file uses promise-based `browser.*`.
+globalThis.browser = globalThis.browser || globalThis.chrome;
+
 /**
  * IntentKeeper Background Service Worker
  *
@@ -31,11 +35,11 @@ const DEFAULT_SETTINGS = {
 /**
  * Initialize settings on install
  */
-chrome.runtime.onInstalled.addListener(async () => {
+browser.runtime.onInstalled.addListener(async () => {
   // Set default settings
-  const stored = await chrome.storage.local.get('intentkeeper_settings');
+  const stored = await browser.storage.local.get('intentkeeper_settings');
   if (!stored.intentkeeper_settings) {
-    await chrome.storage.local.set({ intentkeeper_settings: DEFAULT_SETTINGS });
+    await browser.storage.local.set({ intentkeeper_settings: DEFAULT_SETTINGS });
   }
 });
 
@@ -80,7 +84,7 @@ async function classifyContent(content, source) {
  */
 async function loadCorrectionsForPrompt() {
   try {
-    const stored = await chrome.storage.local.get('ik_corrections');
+    const stored = await browser.storage.local.get('ik_corrections');
     const corrections = stored.ik_corrections || [];
     // Most recent 5, formatted for the server
     return corrections.slice(-5).map(c => ({
@@ -125,7 +129,7 @@ async function classifyBatch(items) {
 /**
  * Handle messages from content scripts and popup
  */
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === 'CHECK_HEALTH') {
     checkApiHealth().then(data => {
       sendResponse(data);
@@ -154,7 +158,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
 
   if (message.type === 'GET_SETTINGS') {
-    chrome.storage.local.get('intentkeeper_settings').then(stored => {
+    browser.storage.local.get('intentkeeper_settings').then(stored => {
       sendResponse(stored.intentkeeper_settings || DEFAULT_SETTINGS);
     }).catch(() => {
       sendResponse(DEFAULT_SETTINGS);
@@ -163,7 +167,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
 
   if (message.type === 'SAVE_SETTINGS') {
-    chrome.storage.local.set({ intentkeeper_settings: message.settings }).then(() => {
+    browser.storage.local.set({ intentkeeper_settings: message.settings }).then(() => {
       sendResponse({ success: true });
     }).catch(() => {
       sendResponse({ success: false });
@@ -179,11 +183,11 @@ async function updateBadge() {
   const health = await checkApiHealth();
 
   if (health.status === 'ok') {
-    chrome.action.setBadgeText({ text: '' });
-    chrome.action.setBadgeBackgroundColor({ color: '#4CAF50' });
+    browser.action.setBadgeText({ text: '' });
+    browser.action.setBadgeBackgroundColor({ color: '#4CAF50' });
   } else {
-    chrome.action.setBadgeText({ text: '!' });
-    chrome.action.setBadgeBackgroundColor({ color: '#f44336' });
+    browser.action.setBadgeText({ text: '!' });
+    browser.action.setBadgeBackgroundColor({ color: '#f44336' });
   }
 }
 
