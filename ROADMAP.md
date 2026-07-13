@@ -352,11 +352,11 @@ Chrome, Brave, Edge, and Opera all run Chromium and support Manifest V3 natively
 
 Firefox uses a different extension format and has subtle WebExtensions API incompatibilities with Chrome MV3. This requires real porting work.
 
-- [ ] Port Manifest V3 to Firefox MV3 format (`browser_specific_settings`, `browser_action` vs `action`)
-- [ ] Audit and fix any `chrome.*` calls not covered by the WebExtensions polyfill
-- [ ] Handle Firefox's stricter Content Security Policy
-- [ ] Test on Firefox Developer Edition
-- [ ] Prepare for Mozilla Add-ons (AMO) submission - **human task**: AMO account + review submission; agent prepares the artifact
+- [x] Port Manifest V3 to Firefox MV3 format - `build.js` emits `dist/chrome` (service worker) and `dist/firefox` (event-page `background.scripts` + mandatory `browser_specific_settings.gecko.id`) from one source manifest
+- [x] Audit and fix any `chrome.*` calls - all three call-site files (`background.js`, `core/classifier.js`, `popup/popup.js`) now use a one-line `globalThis.browser = globalThis.browser || globalThis.chrome` alias + promise-based `browser.*` (lighter than vendoring the polyfill, and native `onMessage` `return true`/`sendResponse` still works on both)
+- [x] Handle Firefox's stricter Content Security Policy - verified no inline scripts, event handlers, or `eval`; `popup.html` loads `popup.js` externally, so the default MV3 CSP is satisfied with no override
+- [ ] Test on Firefox Developer Edition - **human task**: load `dist/firefox` via `about:debugging`
+- [ ] Prepare for Mozilla Add-ons (AMO) submission - **human task**: AMO account + review submission; `dist/firefox` is the artifact
 - [ ] Privacy policy document
 - [ ] Extension description and screenshots
 
