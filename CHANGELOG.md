@@ -4,6 +4,20 @@ All notable changes to IntentKeeper are documented here.
 
 ## [Unreleased]
 
+### Added
+- Firefox support (Phase 8.2). A new `extension/build.js` (`npm run build`)
+  emits per-browser bundles from one source manifest: `dist/chrome` keeps the
+  MV3 service worker, `dist/firefox` uses an event-page `background.scripts`
+  and the mandatory `browser_specific_settings.gecko.id`. The three files that
+  call extension APIs (`background.js`, `core/classifier.js`, `popup/popup.js`)
+  now use a one-line `globalThis.browser = globalThis.browser || globalThis.chrome`
+  alias and promise-based `browser.*`, so the same code runs on Chromium (where
+  `browser` aliases MV3's promise-based `chrome`) and Firefox (native promises).
+  Chose the alias over vendoring `webextension-polyfill` - it is lighter and
+  keeps the existing `onMessage` `return true`/`sendResponse` pattern, which is
+  native on both engines. All 81 Jest tests pass unchanged. Manual Firefox
+  Developer Edition smoke test and AMO submission remain (human tasks).
+
 ### Changed
 - Phase 7 (Statistics Dashboard) deferred pending manifesto reconciliation.
   The manifesto commits intentKeeper to "doesn't track or nudge" and its
