@@ -5,6 +5,27 @@ Higher accuracy = fewer wrong classifications on real social media content.
 
 _Last full benchmark: 2026-04-26 14:24 UTC, on the then-80-example set._
 
+> **2026-07-13 spot-check (Spark/GB10 hardware, full 105-example set, 11 models).**
+> Supersedes the single-model 2026-07-10 spot-check below with a full sweep.
+>
+> | Model | Min VRAM | Accuracy |
+> |-------|:--------:|:--------:|
+> | `qwen2.5:14b-instruct-q4_K_M` | 12 GB | 97% (102/105) |
+> | `llama3.1:8b` | 8 GB | 96% (101/105) |
+> | `gemma3:12b` | 12 GB | 94% (99/105) |
+> | `mistral:7b-instruct` | 8 GB | 94% (99/105) |
+> | `phi4:latest` | 12 GB | 93% (98/105) |
+> | `gemma2:9b` | 10 GB | 93% (98/105) |
+> | `llama3.2:latest` | 4 GB | 92% (97/105) |
+> | `qwen2.5:7b-instruct` | 8 GB | 90% (95/105) |
+> | `gemma3:4b` | 4 GB | 80% (84/105) |
+> | `qwen2.5:3b-instruct` | 4 GB | 78% (82/105) |
+> | `llama3.2:1b` | CPU / Any | 21% (22/105) |
+>
+> Confirms `llama3.1:8b` as the sweet spot: 96% at 8 GB, and the fastest of the
+> accurate tier (1.48s/ex). `qwen2.5:14b-instruct-q4_K_M` edges it out at 97% for
+> users with 12 GB+ headroom. `llama3.2:1b` collapses (21%) - too small for this task.
+>
 > **2026-07-10 spot-check (current 105-example set).** The set grew from 98 to 105 in
 > v0.6.0 (YouTube/Reddit, fearmongering, and hype boundary additions):
 >
