@@ -54,7 +54,7 @@ A post about politics can be thoughtful analysis or manufactured outrage. A heal
 
 IntentKeeper classifies the **manipulation patterns** in content - not the topics themselves. It doesn't censor subjects. It flags the framing patterns associated with ragebait, fearmongering, divisive content, and hype before they land.
 
-**Accuracy**: up to 96% on a 105-example labeled eval set (measured 2026-07-10 with `llama3.1:8b`). The set has grown harder over time - most remaining misses are deliberately included boundary cases, like alarming-but-sourced facts labeled genuine. Classification confidence is shown alongside each label so you know when the model is uncertain.
+**Accuracy**: up to 96% on a 105-example labeled eval set (measured 2026-07-13 with `llama3.1:8b`). The set has grown harder over time - most remaining misses are deliberately included boundary cases, like alarming-but-sourced facts labeled genuine. Classification confidence is shown alongside each label so you know when the model is uncertain.
 
 ## Quick Start
 
@@ -92,16 +92,16 @@ intentkeeper-server
 OLLAMA_MODEL=your-model-name
 ```
 
-**Recommended models** (measured on the 98-example eval set, 2026-06-14 - see [`docs/model-benchmark.md`](docs/model-benchmark.md)):
+**Recommended models** (accuracy from the full 105-example sweep, 2026-07-13 - see [`docs/model-benchmark.md`](docs/model-benchmark.md); latency figures indicative):
 
 | Min VRAM | Model | Accuracy | Latency |
 |:--------:|-------|:--------:|:-------:|
-| 4 GB | `llama3.2:latest` | 93% | 1.5s |
+| 4 GB | `llama3.2:latest` | 92% | 1.5s |
 | 8 GB | `mistral:7b-instruct` | 94% | 0.9s |
 | 8 GB | `llama3.1:8b` | 96% | 1.8s |
-| 12 GB | `qwen2.5:14b-instruct-q4_K_M` | 96% | 2.6s |
+| 12 GB | `qwen2.5:14b-instruct-q4_K_M` | 97% | 2.6s |
 
-On the current set the 8B+ models lead at ~96%; `llama3.1:8b` is the best all-round default. `llama3.2` (2 GB) is the lightest option at 93% - a few points behind on the harder boundary cases but fine for low-VRAM machines. `mistral:7b-instruct` is the fastest if latency matters most.
+On the current set the 8B+ models lead at ~96-97%; `llama3.1:8b` is the best all-round default. `llama3.2` (2 GB) is the lightest option at 92% - a few points behind on the harder boundary cases but fine for low-VRAM machines. `mistral:7b-instruct` is the fastest if latency matters most.
 
 Don't have Ollama yet? [Install it here](https://ollama.com) - it runs entirely on your hardware, no cloud required.
 
