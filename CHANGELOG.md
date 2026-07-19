@@ -4,6 +4,12 @@ All notable changes to IntentKeeper are documented here.
 
 ## [Unreleased]
 
+### Added
+- `intentkeeper-server` now accepts `--host`, `--port`, and `--version` CLI
+  flags (issue #117). Host/port precedence is CLI flag > environment variable
+  (`INTENTKEEPER_HOST`/`INTENTKEEPER_PORT`) > built-in default; `--version`
+  prints the server version and exits. Running with no flags is unchanged.
+
 ### Documentation
 - `docs/model-benchmark.md`: added a 2026-07-13 full sweep (Spark/GB10 hardware,
   full 105-example set, 11 models), superseding the single-model 2026-07-10

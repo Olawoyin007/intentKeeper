@@ -5,6 +5,7 @@ FastAPI server that provides content classification endpoints
 for the browser extension.
 """
 
+import argparse
 import logging
 import os
 from contextlib import asynccontextmanager
@@ -308,8 +309,20 @@ async def get_intents():
 
 def main():
     """Entry point for the server."""
-    host = os.getenv("INTENTKEEPER_HOST", "127.0.0.1")
-    port = int(os.getenv("INTENTKEEPER_PORT", "8420"))
+    parser = argparse.ArgumentParser(prog="intentkeeper-server")
+    parser.add_argument("--host", default=None, help="Bind address (overrides INTENTKEEPER_HOST)")
+    parser.add_argument(
+        "--port",
+        type=int,
+        default=None,
+        help="Port number (overrides INTENTKEEPER_PORT)",
+    )
+    parser.add_argument("--version", action="version", version=app.version)
+    args = parser.parse_args()
+
+    # Precedence: CLI flag > environment variable > built-in default.
+    host = args.host or os.getenv("INTENTKEEPER_HOST", "127.0.0.1")
+    port = args.port if args.port is not None else int(os.getenv("INTENTKEEPER_PORT", "8420"))
 
     logger.info(f"Starting IntentKeeper server on {host}:{port}")
     uvicorn.run(app, host=host, port=port)
