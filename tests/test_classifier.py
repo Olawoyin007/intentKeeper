@@ -11,12 +11,13 @@ Covers:
 """
 
 import asyncio
+import os
 from unittest.mock import AsyncMock, patch
 
 import pytest
 from httpx import ASGITransport, AsyncClient
 
-from server.api import app
+from server.api import app, main
 from server.classifier import (
     MAX_CONTENT_LENGTH,
     MIN_CONTENT_LENGTH,
@@ -879,3 +880,54 @@ class TestCORSOrigins:
         from server.api import _allowed_origins
 
         assert "chrome-extension://*" not in _allowed_origins
+
+
+class TestServerEntrypoint:
+    """CLI flag handling in main() (issue #117). uvicorn.run is mocked so
+    the server never actually starts."""
+
+    def test_no_flags_uses_defaults(self):
+        with (
+            patch("server.api.uvicorn.run") as mock_run,
+            patch("sys.argv", ["intentkeeper-server"]),
+            patch.dict(os.environ, {}, clear=True),
+        ):
+            main()
+        mock_run.assert_called_once_with(app, host="127.0.0.1", port=8420)
+
+    def test_env_vars_used_as_defaults(self):
+        with (
+            patch("server.api.uvicorn.run") as mock_run,
+            patch("sys.argv", ["intentkeeper-server"]),
+            patch.dict(
+                os.environ,
+                {"INTENTKEEPER_HOST": "0.0.0.0", "INTENTKEEPER_PORT": "9000"},
+                clear=True,
+            ),
+        ):
+            main()
+        mock_run.assert_called_once_with(app, host="0.0.0.0", port=9000)
+
+    def test_flags_override_env(self):
+        with (
+            patch("server.api.uvicorn.run") as mock_run,
+            patch("sys.argv", ["intentkeeper-server", "--host", "1.2.3.4", "--port", "5555"]),
+            patch.dict(
+                os.environ,
+                {"INTENTKEEPER_HOST": "0.0.0.0", "INTENTKEEPER_PORT": "9000"},
+                clear=True,
+            ),
+        ):
+            main()
+        mock_run.assert_called_once_with(app, host="1.2.3.4", port=5555)
+
+    def test_version_flag_prints_and_exits(self, capsys):
+        with (
+            patch("server.api.uvicorn.run") as mock_run,
+            patch("sys.argv", ["intentkeeper-server", "--version"]),
+        ):
+            with pytest.raises(SystemExit) as exc:
+                main()
+        assert exc.value.code == 0
+        assert app.version in capsys.readouterr().out
+        mock_run.assert_not_called()
