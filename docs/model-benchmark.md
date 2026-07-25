@@ -5,7 +5,7 @@ Higher accuracy = fewer wrong classifications on real social media content.
 
 _Last full benchmark: 2026-04-26 14:24 UTC, on the then-80-example set._
 
-> **2026-07-13 spot-check (Spark/GB10 hardware, full 105-example set, 11 models).**
+> **2026-07-13 spot-check (full 105-example set, 11 models).**
 > Supersedes the single-model 2026-07-10 spot-check below with a full sweep.
 >
 > | Model | Min VRAM | Accuracy |
