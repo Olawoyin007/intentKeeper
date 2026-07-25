@@ -11,8 +11,8 @@ All notable changes to IntentKeeper are documented here.
   prints the server version and exits. Running with no flags is unchanged.
 
 ### Documentation
-- `docs/model-benchmark.md`: added a 2026-07-13 full sweep (Spark/GB10 hardware,
-  full 105-example set, 11 models), superseding the single-model 2026-07-10
+- `docs/model-benchmark.md`: added a 2026-07-13 full sweep (full 105-example
+  set, 11 models), superseding the single-model 2026-07-10
   spot-check. Confirms `llama3.1:8b` as the sweet spot (96% at 8 GB);
   `qwen2.5:14b-instruct-q4_K_M` edges it at 97%. `README.md` recommended-models
   table updated to the fresh figures (was the 98-example 2026-06-14 set).
