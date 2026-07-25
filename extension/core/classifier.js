@@ -1,3 +1,7 @@
+// Cross-browser shim: Firefox exposes promise-based extension APIs on `browser`;
+// Chrome MV3 exposes them on `chrome`. Alias so this file uses promise-based `browser.*`.
+globalThis.browser = globalThis.browser || globalThis.chrome;
+
 /**
  * IntentKeeper Core - Shared Classification Engine
  *
@@ -115,7 +119,7 @@ function formatIntent(intent) {
 
 async function loadSettings() {
   try {
-    const stored = await chrome.storage.local.get('intentkeeper_settings');
+    const stored = await browser.storage.local.get('intentkeeper_settings');
     if (stored.intentkeeper_settings) {
       settings = { ...settings, ...stored.intentkeeper_settings };
     }
@@ -125,7 +129,7 @@ async function loadSettings() {
 }
 
 // React to settings/allowlist changes without requiring a page reload
-chrome.storage.onChanged.addListener((changes, area) => {
+browser.storage.onChanged.addListener((changes, area) => {
   if (area !== 'local') return;
   if (changes.intentkeeper_settings) {
     const newSettings = changes.intentkeeper_settings.newValue;
@@ -149,7 +153,7 @@ let allowlist = new Set();
 
 async function loadAllowlist() {
   try {
-    const stored = await chrome.storage.local.get(ALLOWLIST_KEY);
+    const stored = await browser.storage.local.get(ALLOWLIST_KEY);
     allowlist = new Set(stored[ALLOWLIST_KEY] || []);
   } catch (e) {
     debug.log('Failed to load allowlist');
@@ -164,7 +168,7 @@ const ALL_INTENTS = ['ragebait', 'fearmongering', 'hype', 'engagement_bait', 'di
 
 async function saveCorrection(snippet, originalIntent, correctedIntent) {
   try {
-    const stored = await chrome.storage.local.get(CORRECTIONS_KEY);
+    const stored = await browser.storage.local.get(CORRECTIONS_KEY);
     const corrections = stored[CORRECTIONS_KEY] || [];
     corrections.push({
       snippet: snippet.slice(0, 200),
@@ -174,7 +178,7 @@ async function saveCorrection(snippet, originalIntent, correctedIntent) {
     });
     // LRU: keep most recent MAX_CORRECTIONS
     if (corrections.length > MAX_CORRECTIONS) corrections.splice(0, corrections.length - MAX_CORRECTIONS);
-    await chrome.storage.local.set({ [CORRECTIONS_KEY]: corrections });
+    await browser.storage.local.set({ [CORRECTIONS_KEY]: corrections });
     debug.log(`Correction saved: ${originalIntent} -> ${correctedIntent}`);
   } catch (e) {
     debug.error('Failed to save correction', e);
@@ -183,7 +187,7 @@ async function saveCorrection(snippet, originalIntent, correctedIntent) {
 
 async function getCorrectionsCount() {
   try {
-    const stored = await chrome.storage.local.get(CORRECTIONS_KEY);
+    const stored = await browser.storage.local.get(CORRECTIONS_KEY);
     return (stored[CORRECTIONS_KEY] || []).length;
   } catch (e) {
     return 0;
@@ -191,7 +195,7 @@ async function getCorrectionsCount() {
 }
 
 async function clearCorrections() {
-  await chrome.storage.local.remove(CORRECTIONS_KEY);
+  await browser.storage.local.remove(CORRECTIONS_KEY);
 }
 
 /**
@@ -291,7 +295,7 @@ async function classifyBatch(batchItems, platform) {
       source: platform,
       ...(mediaUrls && mediaUrls.length > 0 ? { media_urls: mediaUrls } : {})
     }));
-    const batchResults = await chrome.runtime.sendMessage({
+    const batchResults = await browser.runtime.sendMessage({
       type: 'CLASSIFY_BATCH',
       items
     });
@@ -610,7 +614,7 @@ window.IntentKeeperCore = {
 
     let connected = false;
     try {
-      const health = await chrome.runtime.sendMessage({ type: 'CHECK_HEALTH' });
+      const health = await browser.runtime.sendMessage({ type: 'CHECK_HEALTH' });
       if (!health || health.status === 'disconnected') {
         debug.error('API not available');
         createStatusBadge(adapter.platform, false);
