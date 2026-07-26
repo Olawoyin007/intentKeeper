@@ -3,7 +3,7 @@
  * Covers pure utility functions and the selector-building logic.
  */
 
-const { hashContent, normalizeWhitespace, formatIntent, escapeHtml, buildSelector } = require('../core/classifier');
+const { hashContent, normalizeWhitespace, contentSignal, formatIntent, escapeHtml, buildSelector } = require('../core/classifier');
 
 describe('hashContent', () => {
   test('same input produces same hash', () => {
@@ -92,6 +92,46 @@ describe('normalizeWhitespace', () => {
 
   test('handles empty string', () => {
     expect(normalizeWhitespace('')).toBe('');
+  });
+});
+
+describe('contentSignal', () => {
+  // The minimum-signal skip in processItems compares this against MIN_CONTENT_LENGTH (20).
+
+  test('strips adapter metadata brackets, keeps real text', () => {
+    expect(contentSignal('[Author: SomeName] this is the real tweet body'))
+      .toBe('this is the real tweet body');
+  });
+
+  test('strips multiple bracket tags (Reddit-style)', () => {
+    expect(contentSignal('[r/news] [Flair: Politics] a genuine post title here'))
+      .toBe('a genuine post title here');
+  });
+
+  test('strips URLs', () => {
+    expect(contentSignal('check this https://t.co/abc123 out'))
+      .toBe('check this out');
+  });
+
+  test('strips @handles', () => {
+    expect(contentSignal('@alice @bob what do you all think'))
+      .toBe('what do you all think');
+  });
+
+  test('a media-dominant post reduces to (near) nothing - it will be skipped', () => {
+    // Video tweet with only author + video flag scraped: no readable content.
+    const signal = contentSignal('[Author: SomeName] [Video tweet]');
+    expect(signal).toBe('');
+    expect(signal.length).toBeLessThan(20);
+  });
+
+  test('a real post stays above the skip threshold even with metadata', () => {
+    const signal = contentSignal('[Author: X] [Context: reposted] the sky is falling and you should be very afraid');
+    expect(signal.length).toBeGreaterThanOrEqual(20);
+  });
+
+  test('handles empty string', () => {
+    expect(contentSignal('')).toBe('');
   });
 });
 
