@@ -100,6 +100,23 @@ function normalizeWhitespace(str) {
 }
 
 /**
+ * Strip out everything that carries no readable content - adapter metadata
+ * (`[Author: X]`, `[r/news]`, `[Video tweet]`), URLs, and @handles - and return
+ * what's left. Used only to decide whether a post has enough real text to be
+ * worth classifying; the full text (handles and all) is still what gets sent to
+ * the classifier when a post is not skipped. Media-dominant posts scrape down to
+ * mostly metadata, so this is what the minimum-signal skip in processItems tests.
+ */
+function contentSignal(str) {
+  return str
+    .replace(/\[[^\]]*\]/g, ' ')      // adapter metadata brackets
+    .replace(/https?:\/\/\S+/g, ' ')  // URLs
+    .replace(/@\w+/g, ' ')            // @handles / mentions
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+/**
  * Human-readable label for each intent, including YouTube-specific intents
  * added in Phase 3.
  */
@@ -475,8 +492,13 @@ async function processItems(adapter) {
     for (const item of items) {
       const text = normalizeWhitespace(adapter.extractText(item));
       const mediaUrls = adapter.extractMediaUrls ? adapter.extractMediaUrls(item) : [];
-      if (text.length < MIN_CONTENT_LENGTH) {
-        // Only permanently skip items with SOME text (genuinely short content).
+      // Minimum-signal skip: a media-dominant post scrapes down to mostly
+      // metadata/handles/URLs, leaving too little real text to classify. Skip it
+      // rather than waste a classify call on low-confidence noise (fail open - no
+      // treatment). Posts carrying media URLs are never skipped here: the server's
+      // vision model may read the image, so we let it decide.
+      if (mediaUrls.length === 0 && contentSignal(text).length < MIN_CONTENT_LENGTH) {
+        // Only permanently skip items with SOME text (genuinely thin content).
         // Empty string means the element is still loading (lazy render) -
         // leave it unmarked so the next observer pass can pick it up.
         if (text.length > 0) {
@@ -597,7 +619,7 @@ function setupObserver(adapter) {
 
 // Expose utility functions for testing in Node (Jest/jsdom)
 if (typeof module !== 'undefined') {
-  module.exports = { hashContent, normalizeWhitespace, formatIntent, escapeHtml, buildSelector };
+  module.exports = { hashContent, normalizeWhitespace, contentSignal, formatIntent, escapeHtml, buildSelector };
 }
 
 window.IntentKeeperCore = {

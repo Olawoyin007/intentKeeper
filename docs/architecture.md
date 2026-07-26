@@ -52,11 +52,14 @@ Content Intercepted (tweet / post / comment)
     │
     ▼
 ┌─────────────────────────────────────────────┐
-│  1. LENGTH CHECK                            │
-│     < 20 characters → mark "skipped"       │
+│  1. MINIMUM-SIGNAL CHECK                    │
+│     readable text (metadata/URL/@handle     │
+│      stripped) < 20 chars AND no media URLs │
+│      → mark "skipped" (media-dominant post) │
 │     empty string → leave unmarked          │
 │       (element still loading, retry next   │
 │        observer pass)                       │
+│     has media URLs → pass (vision may read) │
 └─────────────────────────────────────────────┘
     │ Pass
     ▼
