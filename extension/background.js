@@ -191,6 +191,21 @@ async function updateBadge() {
   }
 }
 
-// Check health on startup and periodically
-updateBadge();
-setInterval(updateBadge, HEALTH_CHECK_INTERVAL);
+// Check health on startup and periodically. Skipped under Node (Jest) so
+// importing this module for unit tests doesn't fire a real fetch or timer.
+if (typeof module === 'undefined') {
+  updateBadge();
+  setInterval(updateBadge, HEALTH_CHECK_INTERVAL);
+}
+
+// Expose functions for testing in Node (Jest). No-op in the browser worker.
+if (typeof module !== 'undefined') {
+  module.exports = {
+    checkApiHealth,
+    classifyContent,
+    classifyBatch,
+    loadCorrectionsForPrompt,
+    updateBadge,
+    DEFAULT_SETTINGS,
+  };
+}
