@@ -5,6 +5,11 @@ All notable changes to IntentKeeper are documented here.
 ## [Unreleased]
 
 ### Added
+- Chrome Web Store submission kit (Phase 8.1). `store/CHROME_WEB_STORE.md`
+  (listing copy, single-purpose statement, permission justifications,
+  data-safety answers, reviewer notes), `PRIVACY.md` (privacy policy), and
+  `store/SUBMISSION_CHECKLIST.md` (the human steps: dev account, $5 fee,
+  screenshots, submit). Same kit carries over to the Edge Add-ons store.
 - `intentkeeper-server` now accepts `--host`, `--port`, and `--version` CLI
   flags (issue #117). Host/port precedence is CLI flag > environment variable
   (`INTENTKEEPER_HOST`/`INTENTKEEPER_PORT`) > built-in default; `--version`
@@ -30,6 +35,11 @@ All notable changes to IntentKeeper are documented here.
   table updated to the fresh figures (was the 98-example 2026-06-14 set).
 
 ### Changed
+- Removed the unused `activeTab` permission from `extension/manifest.json`. It
+  was declared but never used (no `tabs`/`activeTab` call anywhere), and unused
+  permissions are a Chrome Web Store review risk and a weaker privacy story. The
+  extension now requests only `storage` plus the localhost host permission. No
+  behaviour change; build emits it out of both `dist/chrome` and `dist/firefox`.
 - Phase 7 (Statistics Dashboard) deferred pending manifesto reconciliation.
   The manifesto commits intentKeeper to "doesn't track or nudge" and its
   Living Clause forbids changes that add tracking; exposure counters sit in
