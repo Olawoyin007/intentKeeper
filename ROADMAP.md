@@ -344,8 +344,13 @@ Chrome, Brave, Edge, and Opera all run Chromium and support Manifest V3 natively
 - [x] Brave Private Network Access (PNA) support: `PrivateNetworkAccessMiddleware` added to API server - responds with `Access-Control-Allow-Private-Network: true` when Brave's PNA preflight fires. 3 tests in `TestPrivateNetworkAccessMiddleware`.
 - [x] Tested on Microsoft Edge - `chrome.*` API aliases work as expected
 - [x] Tested on Opera - works without modification
-- [ ] Submit to Chrome Web Store (covers Brave and Opera users via CWS) - **human task**: requires developer account, payment, and store listing; an agent prepares the zip + listing text, the owner submits
-- [ ] Submit to Microsoft Edge Add-ons store - **human task**, same split
+- [x] Store submission kit prepared: listing copy, permission justifications,
+      data-safety answers, and reviewer notes in `store/CHROME_WEB_STORE.md`;
+      privacy policy in `PRIVACY.md`; step-by-step guide in
+      `store/SUBMISSION_CHECKLIST.md`. Unused `activeTab` permission removed so
+      the listing requests only `storage` + the localhost host permission.
+- [ ] Submit to Chrome Web Store (covers Brave and Opera users via CWS) - **human task**: dev account + $5 fee, screenshots, and the actual submit. Kit ready in `store/`.
+- [ ] Submit to Microsoft Edge Add-ons store - **human task**, same kit carries over
 - [ ] Document installation instructions for each browser
 
 ### 8.2 Firefox
