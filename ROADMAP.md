@@ -431,6 +431,10 @@ Safari requires Apple developer account, Xcode, and wrapping the extension in a 
 **Goal**: Push classification accuracy with advanced techniques.
 
 ### 9.1 Multimedia Support
+- [x] Honest placeholder for media the tool cannot read yet (issues #124, #136):
+      media-dominant posts show a "not analyzed yet" badge instead of a guessed
+      label when no vision model is configured. `/health.vision` is the plug-in
+      seam - set `OLLAMA_VISION_MODEL` and those posts flow through vision.
 - [ ] Image analysis for memes (requires vision model)
 - [ ] Video thumbnail analysis
 - [ ] Audio/video content classification (transcription)
