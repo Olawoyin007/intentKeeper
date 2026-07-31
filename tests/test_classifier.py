@@ -418,8 +418,11 @@ class TestAPIEndpoints:
         assert isinstance(data["debug"], bool)
 
     @pytest.mark.asyncio
-    async def test_health_endpoint(self, mock_classifier):
+    async def test_health_endpoint(self, mock_classifier, monkeypatch):
         """GET /health should return health status."""
+        # With no vision model configured, /health.vision is False and the
+        # extension marks media "not analyzed" instead of guessing.
+        monkeypatch.delenv("OLLAMA_VISION_MODEL", raising=False)
         with patch("server.api.classifier", mock_classifier):
             transport = ASGITransport(app=app)
             async with AsyncClient(transport=transport, base_url="http://test") as ac:
@@ -429,6 +432,19 @@ class TestAPIEndpoints:
         data = response.json()
         assert data["status"] == "ok"
         assert data["ollama_connected"] is True
+        assert data["vision"] is False
+
+    @pytest.mark.asyncio
+    async def test_health_reports_vision_when_configured(self, mock_classifier, monkeypatch):
+        """/health.vision is True when a vision model is configured."""
+        monkeypatch.setenv("OLLAMA_VISION_MODEL", "moondream")
+        with patch("server.api.classifier", mock_classifier):
+            transport = ASGITransport(app=app)
+            async with AsyncClient(transport=transport, base_url="http://test") as ac:
+                response = await ac.get("/health")
+
+        assert response.status_code == 200
+        assert response.json()["vision"] is True
 
     @pytest.mark.asyncio
     async def test_classify_endpoint(self, mock_classifier):
