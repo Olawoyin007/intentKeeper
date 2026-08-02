@@ -195,8 +195,24 @@ document.getElementById('allowlist-input').addEventListener('keydown', (e) => {
   if (e.key === 'Enter') document.getElementById('allowlist-add').click();
 });
 
-// Initialize
-loadSettings();
-checkHealth();
-loadCorrectionsCount();
-loadAllowlist();
+// Initialize. Guarded so importing this file under Node (Jest) doesn't fire the
+// initial load calls before a test has set up the DOM / mocks; the browser popup
+// (no `module`) runs them as before.
+if (typeof module === 'undefined') {
+  loadSettings();
+  checkHealth();
+  loadCorrectionsCount();
+  loadAllowlist();
+}
+
+// Expose functions for testing in Node (Jest). No-op in the browser popup.
+if (typeof module !== 'undefined') {
+  module.exports = {
+    loadSettings,
+    saveSettings,
+    checkHealth,
+    loadCorrectionsCount,
+    loadAllowlist,
+    INTENT_KEYS,
+  };
+}
