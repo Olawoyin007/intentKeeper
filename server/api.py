@@ -184,6 +184,7 @@ class HealthResponse(BaseModel):
     status: str
     ollama_connected: bool
     model: str
+    vision: bool = False
 
 
 class VersionResponse(BaseModel):
@@ -227,6 +228,7 @@ async def health_check():
         status="ok" if ollama_ok else "degraded",
         ollama_connected=ollama_ok,
         model=classifier.model if classifier else "none",
+        vision=bool(os.getenv("OLLAMA_VISION_MODEL", "").strip()),
     )
 
 

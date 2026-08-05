@@ -225,6 +225,15 @@
   color: #808080;
 }
 
+/* Not a verdict: a media-dominant post no vision model has read yet. Dim and
+   italic so it reads as a status, not a manipulation label. */
+.intentkeeper-tag--unanalyzed {
+  background: rgba(128, 128, 128, 0.12);
+  color: #9aa0a6;
+  font-weight: 400;
+  font-style: italic;
+}
+
 .intentkeeper-tag-clickbait {
   background: rgba(255, 69, 0, 0.2);
   color: #ff4500;

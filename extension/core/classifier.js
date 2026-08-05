@@ -47,6 +47,11 @@ let pendingReprocess = false;
 let foundCount = 0;
 let classifiedCount = 0;
 
+// Whether the server has a vision model configured (reported by /health).
+// When false, media-dominant posts are marked "not analyzed yet" rather than
+// judged from scraped metadata. Flipped on once a vision model is plugged in.
+let visionAvailable = false;
+
 // Debug logger - only logs when debug._enabled is true
 const debug = {
   _enabled: false,
@@ -356,6 +361,25 @@ function applyTag(element, intent, confidence, content) {
 }
 
 /**
+ * Mark a media-dominant post as not yet analyzed. The post is mostly image or
+ * video with too little text to classify, and no vision model is configured to
+ * read the media - so intentKeeper makes no manipulation judgement and says so
+ * plainly, rather than guessing from scraped metadata. Honest placeholder until
+ * a vision model is plugged in (OLLAMA_VISION_MODEL). Respects the tag toggle:
+ * with tags off it just marks the item processed so it is not re-scanned.
+ */
+function applyNotAnalyzed(element) {
+  element.setAttribute(PROCESSED_ATTR, 'media-unanalyzed');
+  if (!settings.showTags) return;
+  const tag = document.createElement('div');
+  tag.className = 'intentkeeper-tag intentkeeper-tag--unanalyzed';
+  tag.textContent = 'Media - not analyzed yet';
+  tag.title = 'This post is mostly image or video. No vision model is configured, so it has not been judged.';
+  element.style.position = 'relative';
+  element.insertBefore(tag, element.firstChild);
+}
+
+/**
  * Blur the content area within an element, with a reveal button.
  *
  * Uses adapter.getContentElement() to find the sub-element to blur.
@@ -492,31 +516,42 @@ async function processItems(adapter) {
     for (const item of items) {
       const text = normalizeWhitespace(adapter.extractText(item));
       const mediaUrls = adapter.extractMediaUrls ? adapter.extractMediaUrls(item) : [];
-      // Minimum-signal skip: a media-dominant post scrapes down to mostly
-      // metadata/handles/URLs, leaving too little real text to classify. Skip it
-      // rather than waste a classify call on low-confidence noise (fail open - no
-      // treatment). Posts carrying media URLs are never skipped here: the server's
-      // vision model may read the image, so we let it decide.
-      if (mediaUrls.length === 0 && contentSignal(text).length < MIN_CONTENT_LENGTH) {
-        // Only permanently skip items with SOME text (genuinely thin content).
-        // Empty string means the element is still loading (lazy render) -
-        // leave it unmarked so the next observer pass can pick it up.
+      // A post scrapes down to mostly metadata/handles/URLs has too little real
+      // text to classify on words alone. What we do then depends on the media:
+      const hasSignal = contentSignal(text).length >= MIN_CONTENT_LENGTH;
+      const mediaOnly = !hasSignal && mediaUrls.length > 0;
+
+      if (!hasSignal && !mediaOnly) {
+        // Thin text and no media: genuinely nothing to classify. Silent skip.
+        // Empty string means the element is still loading (lazy render) - leave
+        // it unmarked so the next observer pass can pick it up.
         if (text.length > 0) {
           item.setAttribute(PROCESSED_ATTR, 'skipped');
         }
-      } else {
-        // Skip classification for allowlisted authors
-        if (adapter.extractAuthor) {
-          const author = adapter.extractAuthor(item);
-          if (author && allowlist.has(author)) {
-            item.setAttribute(PROCESSED_ATTR, 'allowed');
-            continue;
-          }
-        }
-        item.classList.add('intentkeeper-classifying');
-        foundCount++;
-        itemData.push({ item, text, mediaUrls });
+        continue;
       }
+
+      if (mediaOnly && !visionAvailable) {
+        // Image/video post with too little text, and no vision model configured
+        // to actually read the media. Don't fabricate a verdict from scraped
+        // alt-text/metadata - mark it honestly as "not analyzed yet". When a
+        // vision model is plugged in (visionAvailable), this branch is skipped
+        // and the post flows through to be classified with image context.
+        applyNotAnalyzed(item);
+        continue;
+      }
+
+      // Skip classification for allowlisted authors
+      if (adapter.extractAuthor) {
+        const author = adapter.extractAuthor(item);
+        if (author && allowlist.has(author)) {
+          item.setAttribute(PROCESSED_ATTR, 'allowed');
+          continue;
+        }
+      }
+      item.classList.add('intentkeeper-classifying');
+      foundCount++;
+      itemData.push({ item, text, mediaUrls });
     }
 
     for (let i = 0; i < itemData.length; i += MAX_CONCURRENT) {
@@ -643,7 +678,8 @@ window.IntentKeeperCore = {
         return;
       }
       connected = true;
-      debug.log(`API connected (model: ${health.model})`);
+      visionAvailable = !!health.vision;
+      debug.log(`API connected (model: ${health.model}, vision: ${visionAvailable})`);
     } catch (e) {
       debug.error('Cannot connect to background worker', e.message || e);
       createStatusBadge(adapter.platform, false);
