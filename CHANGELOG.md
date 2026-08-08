@@ -34,7 +34,27 @@ All notable changes to IntentKeeper are documented here.
   `qwen2.5:14b-instruct-q4_K_M` edges it at 97%. `README.md` recommended-models
   table updated to the fresh figures (was the 98-example 2026-06-14 set).
 
+### Added
+- `/health` now reports `vision: bool` - whether an `OLLAMA_VISION_MODEL` is
+  configured on the server. The extension uses this to decide how to handle
+  media-dominant posts (see below).
+
 ### Changed
+- Honest handling of media-dominant / low-text posts (issues #124, #136). The
+  extension measures a post's *readable* text - metadata brackets
+  (`[Author: X]`, `[r/news]`, `[Video tweet]`), URLs, and @handles stripped
+  via the new `contentSignal()` helper. Three outcomes now, instead of a bad
+  guess from scraped metadata:
+  - Enough readable text: classified normally (full text still sent), whether
+    or not media is attached.
+  - Too little text but the post carries an image/video, and **no** vision
+    model is configured: a dim, non-judgemental "Media - not analyzed yet"
+    badge instead of a manipulation label. When a vision model is plugged in
+    (`OLLAMA_VISION_MODEL`), these posts flow through to be classified with
+    image context instead.
+  - Too little text and no media: silent skip (nothing to classify).
+  Fails open throughout, matching the manifesto - no fabricated verdicts.
+  `contentSignal()` covered by 7 Jest tests; `/health.vision` by 2 server tests.
 - Removed the unused `activeTab` permission from `extension/manifest.json`. It
   was declared but never used (no `tabs`/`activeTab` call anywhere), and unused
   permissions are a Chrome Web Store review risk and a weaker privacy story. The

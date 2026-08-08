@@ -52,11 +52,19 @@ Content Intercepted (tweet / post / comment)
     │
     ▼
 ┌─────────────────────────────────────────────┐
-│  1. LENGTH CHECK                            │
-│     < 20 characters → mark "skipped"       │
+│  1. MINIMUM-SIGNAL CHECK                    │
+│     readable text = contentSignal(text):    │
+│      metadata brackets/URLs/@handles removed│
+│     ≥ 20 chars → classify (text carries it, │
+│       whether or not media is attached)     │
+│     < 20 AND no media → mark "skipped"      │
+│     < 20 AND media, no vision model → mark  │
+│       "media-unanalyzed" ("not analyzed yet"│
+│       badge, no verdict fabricated)         │
+│     < 20 AND media, vision on → pass        │
+│       (server vision reads the image)       │
 │     empty string → leave unmarked          │
-│       (element still loading, retry next   │
-│        observer pass)                       │
+│       (element still loading, retry next)   │
 └─────────────────────────────────────────────┘
     │ Pass
     ▼
