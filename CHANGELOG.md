@@ -4,6 +4,8 @@ All notable changes to IntentKeeper are documented here.
 
 ## [Unreleased]
 
+## v0.7.0 (2026-08-23) - Firefox, Store Kit & Honest Media
+
 ### Added
 - Chrome Web Store submission kit (Phase 8.1). `store/CHROME_WEB_STORE.md`
   (listing copy, single-purpose statement, permission justifications,
@@ -26,6 +28,9 @@ All notable changes to IntentKeeper are documented here.
   keeps the existing `onMessage` `return true`/`sendResponse` pattern, which is
   native on both engines. All 81 Jest tests pass unchanged. Manual Firefox
   Developer Edition smoke test and AMO submission remain (human tasks).
+- `/health` now reports `vision: bool` - whether an `OLLAMA_VISION_MODEL` is
+  configured on the server. The extension uses this to decide how to handle
+  media-dominant posts (see below).
 
 ### Documentation
 - `docs/model-benchmark.md`: added a 2026-07-13 full sweep (full 105-example
@@ -33,11 +38,6 @@ All notable changes to IntentKeeper are documented here.
   spot-check. Confirms `llama3.1:8b` as the sweet spot (96% at 8 GB);
   `qwen2.5:14b-instruct-q4_K_M` edges it at 97%. `README.md` recommended-models
   table updated to the fresh figures (was the 98-example 2026-06-14 set).
-
-### Added
-- `/health` now reports `vision: bool` - whether an `OLLAMA_VISION_MODEL` is
-  configured on the server. The extension uses this to decide how to handle
-  media-dominant posts (see below).
 
 ### Changed
 - Honest handling of media-dominant / low-text posts (issues #124, #136). The
@@ -83,7 +83,7 @@ All notable changes to IntentKeeper are documented here.
 ### Security
 - Removed the dead `chrome-extension://*` entry from the CORS `allow_origins` list in `server/api.py`. Starlette matches `allow_origins` by exact string, so the literal never matched a real extension origin - it was misleading config, not an active allowance. No behaviour change: the extension reaches the server via MV3 `host_permissions`, which bypass page CORS, and CORS continues to fail closed for extension origins. Added a comment explaining this and flipped the test that had asserted the dead entry was present (closes #113)
 - Fixed the compose-file shadowing left by #95: `docker-compose.yml` (server-only, host Ollama, hardened defaults) was silently dead because Compose prefers `docker-compose.yaml`, so the documented `docker compose up` ran the old bundled stack with the API published on all interfaces (`8420:8420`). The canonical `docker-compose.yaml` now binds `127.0.0.1` by default (`APP_BIND`/`APP_PORT` to override), passes `PUID`/`PGID` through to the #95 entrypoint, and bind-mounts `./data`; the host-Ollama variant is renamed to `docker-compose.host-ollama.yml` and documented in the README (`docker compose -f docker-compose.host-ollama.yml up`)
-- Cleared two high-severity npm advisories in the extension's dev toolchain (transitive under `jest`): `js-yaml` (GHSA quadratic-CPU DoS via YAML merge-key chains, `<4.3.0`) and `brace-expansion` (GHSA-mh99-v99m-4gvg unbounded-expansion OOM, patched only in `5.0.8`). Bumped the existing `js-yaml` override to `^4.3.0` and added a `brace-expansion: ^5.0.8` override; `npm audit` is now clean and all 81 jest tests pass. Dev-only: neither package ships in the extension users install (Dependabot #11, #12)
+- Cleared the high-severity npm advisories in the extension's dev toolchain (all transitive under `jest`, dev-only - neither package ships in the extension users install). Final override floors: `js-yaml` -> `4.3.1` (CVE-2026-59870, quadratic CPU in `!!omap` resolution; Dependabot #14, PR #138) and `brace-expansion` -> `5.0.9` (GHSA-rgw5-rvv9-x895, DoS via unbounded intermediate arrays that bypassed the CVE-2026-14257 mitigation; PR #138). `npm audit` reports 0 vulnerabilities and all 88 jest tests pass (Dependabot #11, #12)
 
 ## v0.6.0 (2026-07-02) - Long-Form Posts & Eval Depth
 
