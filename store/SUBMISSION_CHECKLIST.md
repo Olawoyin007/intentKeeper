@@ -29,9 +29,9 @@ What an agent has prepared, and what only you can do. Work top to bottom.
       npm test          # confirm green before packaging
       npm run build     # emits dist/chrome (MV3) and dist/firefox
       cd dist/chrome
-      zip -r ../../../intentkeeper-chrome-0.6.0.zip .
+      zip -r ../../../intentkeeper-chrome-0.7.0.zip .
       ```
-- [ ] The file to upload is `intentkeeper-chrome-0.6.0.zip` (the **contents** of
+- [ ] The file to upload is `intentkeeper-chrome-0.7.0.zip` (the **contents** of
       `dist/chrome`, zipped - `manifest.json` must be at the zip root).
 
 ### 3. Screenshots (cannot be automated)
