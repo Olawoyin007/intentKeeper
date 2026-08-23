@@ -26,6 +26,32 @@ Five posts through the running classifier (`gemma3:12b`):
 Three of four jokes misread. Two of them confidently (0.95), and routed to the
 two most aggressive actions - blur and hide.
 
+## Measured false-positive rate
+
+The four jokes above were an anecdote. To get a real number, a 27-item set of
+ordinary good content (jokes, banter, sarcasm, life updates, wholesome notes)
+plus 6 real-manipulation controls was run through the classifier (`gemma3:12b`,
+2026-08-23). Reproduce with `python eval/run_false_positive_eval.py` against
+`eval/false_positive_set.yaml`.
+
+- **10 of 27 benign posts flagged as manipulation - 37%.**
+- **7 of those 10 were blurred or hidden**, not merely labelled.
+- False-positive confidence ran **0.70 to 0.95**.
+- All **6 controls were caught** - the classifier reliably flags loud manipulation.
+
+The good content that survived was the earnest kind: neutral life updates,
+wholesome notes, genuine enthusiasm. The playful kind - roasts, sarcasm, absurd
+humour - did not. Affectionate roasting reads as `ragebait`; irony reads as
+`ragebait` / `engagement_bait`.
+
+The decisive detail is that the confidences overlap. A benign joke ("turning up
+late to your OWN birthday dinner, iconic") and a real control ("people who don't
+wake up at 5am will never be successful") both scored `divisive` at 0.85 -
+identical. There is no confidence threshold that keeps the real manipulation and
+drops the joke, because the model gives both the same label at the same
+certainty. Tuning cannot separate them; the separating signal - who is speaking
+to whom, and how they mean it - is not in the text.
+
 ## Why it fails (structural, not a tuning bug)
 
 1. **Intent lives in the relationship, not the text.** A roast between friends
@@ -51,7 +77,8 @@ The 96% accuracy is measured on a 105-example labeled set of loud manipulation.
 It contains no affectionate banter, no sarcasm, no visual posts. So the number
 is real but narrow: it says the tool is good at spotting the loud manipulation
 it was built to spot. It says nothing about false positives on ordinary content
-- which is the failure this document is about, and which the eval never tested.
+- which is the failure this document is about. The main eval never tested that;
+`eval/false_positive_set.yaml` now does, and the measured rate is 37% (above).
 
 That is itself the lesson: a curated benchmark can hide an entire failure
 distribution. High accuracy on the examples you thought to include is not the
