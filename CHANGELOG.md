@@ -27,6 +27,19 @@ All notable changes to IntentKeeper are documented here.
   native on both engines. All 81 Jest tests pass unchanged. Manual Firefox
   Developer Edition smoke test and AMO submission remain (human tasks).
 
+### Tests
+- Extension test coverage for the two untested JS surfaces (issue #17). Added
+  `extension/tests/background.test.js` (17 tests: API proxy for `/classify` and
+  `/classify/batch`, health-check fail-open, correction loading/formatting,
+  batch enrichment with user corrections, and the status badge) and
+  `extension/tests/popup.test.js` (12 tests: settings load/save round-trip,
+  connection-status rendering, correction count, and allowlist add with
+  `@`/`u/` normalization). Both files use a small `module.exports` guard added
+  to `background.js` and `popup.js` (same pattern already in `core/classifier.js`)
+  so their functions are importable under Node; browser behaviour is unchanged.
+  `content.js` was not covered - it has been dead code since Phase 3.5 (the
+  content script split into `core/classifier.js` + `platforms/*`). Jest 110 pass.
+
 ### Documentation
 - `docs/model-benchmark.md`: added a 2026-07-13 full sweep (full 105-example
   set, 11 models), superseding the single-model 2026-07-10
