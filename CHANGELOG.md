@@ -4,6 +4,23 @@ All notable changes to IntentKeeper are documented here.
 
 ## [Unreleased]
 
+### Security
+- Cleared the two open advisories in the extension's dev toolchain: `browserslist`
+  (**high** - unbounded memory growth with no cache eviction, leading to eventual
+  OOM, plus an uncaught crash / prototype write via an untrusted
+  `browserslist-stats.json`) and `baseline-browser-mapping` (moderate - process
+  termination on invalid input). Both are transitive under
+  `jest` -> `@babel/core` -> `helper-compilation-targets`. The extension's
+  `dependencies` block is empty - it ships no runtime npm packages - so neither
+  ever reached anyone who installs it. Fixed with `overrides` floors
+  (`browserslist` `^4.28.9`, `baseline-browser-mapping` `^2.11.22`) rather than by
+  merging the dependabot PRs: #142 and #144 both rewrite `package-lock.json` and
+  so conflicted with each other, and an override pins the floor instead of leaving
+  the version to whatever the lockfile resolves next time. Same pattern already
+  used for js-yaml and brace-expansion in #138. Also raises the `js-yaml` floor to
+  `^4.3.2` (#145 - a routine patch, no advisory), so one change supersedes all
+  three dependabot PRs. `npm audit` reports 0 vulnerabilities.
+
 ### Fixed
 - The eval verdict now records the model that produced the score, and the run
   prints it in its header. A score without a model is not comparable: the
