@@ -1,0 +1,66 @@
+# False-positive probe set.
+#
+# The main eval (test_set.yaml) measures accuracy on manipulation examples -
+# it does NOT test whether benign content is wrongly flagged. This set fills
+# that gap. It asks the question the product actually lives or dies on:
+#
+#   How often does the classifier flag GOOD content as manipulation?
+#
+# `benign`   - ordinary good posts (jokes, banter, sarcasm, life updates,
+#              wholesome notes). These MUST pass through. Any flag is a false
+#              positive.
+# `controls` - real loud manipulation, to confirm the classifier still catches
+#              what it is good at.
+#
+# Run:  python eval/run_false_positive_eval.py   (server must be running)
+
+benign:
+  # --- self-deprecating jokes ---
+  - "lol I have the emotional range of a teaspoon before coffee, send help"
+  - "my toxic trait is thinking I'll remember it without writing it down"
+  - "me, a functioning adult: googles 'how to boil egg' for the 40th time"
+  - "started the day with a plan and a smoothie. it's noon. the smoothie is gone and so is the plan"
+
+  # --- affectionate roast / banter between friends ---
+  - "mate your fantasy team is so bad even the AI feels sorry for you 😂"
+  - "imagine losing to me at FIFA and then blaming the controller, couldn't be me... oh wait that was you"
+  - "you calling ME slow? bestie you took 3 business days to reply to a yes/no question"
+  - "not you turning up an hour late to your OWN birthday dinner, iconic behaviour honestly"
+
+  # --- sarcasm / irony (non-hostile) ---
+  - "oh WONDERFUL, another Monday, truly my favourite gift the universe keeps giving"
+  - "cannot wait for the 6am gym alarm I set with such hope and delusion last night"
+  - "love when the bus is 'due' for 15 straight minutes. real one. never shows"
+  - "great, the one day I dress nice and I see literally nobody. the universe is efficient"
+
+  # --- dry / absurd humour ---
+  - "my plan today: drink coffee, question all my life choices, repeat"
+  - "in this house we support all pronouns including 'it' when referring to the roomba"
+  - "the duck at the park looked at me like it knew my bank balance. it was right to"
+  - "sir this is a Wendy's (there was no Wendy's, I was in my kitchen, talking to myself)"
+
+  # --- genuine enthusiasm (real, not hype-manipulation) ---
+  - "finally beat my 5k time after 6 months, so happy I could cry, legs are jelly"
+  - "the bread came out perfect this time. crumb structure is beautiful. I am so proud of this loaf"
+  - "just finished the book everyone recommended and yeah okay they were right, wonderful read"
+  - "we adopted the shy cat nobody wanted and she just sat on my lap for the first time 🥹"
+
+  # --- neutral life updates / logistics ---
+  - "heads up the 4pm meeting moved to 4:30, same link"
+  - "anyone know a good dentist near the station, mine just retired"
+  - "reminder that the shops close early today for the bank holiday"
+  - "rained the whole walk home but the podcast was good so, net positive"
+
+  # --- wholesome / supportive ---
+  - "proud of you for going to that appointment you were dreading. that took real courage"
+  - "gentle reminder to drink some water and unclench your jaw, you're doing fine"
+  - "whoever needs to hear this: the messy first draft still counts as writing"
+
+controls:
+  # --- real manipulation, must be flagged ---
+  - "They are DESTROYING our country and NOBODY is talking about it. RT before they delete this!!"
+  - "Society is COLLAPSING. Stock up now or regret it when it's too late. They don't want you prepared."
+  - "This ONE AI tool changes EVERYTHING. You're already behind. Link in bio before it's gone."
+  - "Reply with your star sign and I'll tell you your fatal flaw 👀 (you won't be ready)"
+  - "People who don't wake up at 5am will never be successful. Losers make excuses. Winners execute."
+  - "Doctors HATE him. He reversed his condition with this one kitchen ingredient. Watch before it's banned."

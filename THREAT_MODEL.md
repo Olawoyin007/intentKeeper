@@ -46,9 +46,10 @@ server on their own machine**:
   domains (`pbs.twimg.com`, `i.ytimg.com`, `preview.redd.it`, `i.redd.it`,
   `external-preview.redd.it`) are fetched. All other URLs are rejected before any network
   call is made (`server/classifier.py`, `ALLOWED_IMAGE_DOMAINS`).
-- **Minimal extension permissions.** The extension requests only `storage` and `activeTab`.
-  It uses Manifest V3, which runs background logic as a service worker rather than a
-  persistent background page, reducing the persistent footprint.
+- **Minimal extension permissions.** The extension requests only `storage` plus a localhost
+  host permission (`http://localhost:8420/*`). It uses Manifest V3, which runs background
+  logic as a service worker rather than a persistent background page, reducing the persistent
+  footprint.
 - **CORS locked to the server port.** The server allows only
   `http://localhost:{INTENTKEEPER_PORT}` (and the `127.0.0.1` form) as credentialed
   origins, so a web page at a different localhost port cannot make credentialed requests to
@@ -94,6 +95,16 @@ These are open and acknowledged.
   manipulation is preferred over false positives. This is the deliberate design choice.
   Users who rely on intentKeeper as a primary manipulation filter should understand that
   classification errors always resolve in favour of showing content, not hiding it.
+- **Confident false positives are not covered by fail-open.** Fail-open only triggers on
+  *errors* - server unreachable, invalid JSON, a thrown exception. A confident but wrong
+  classification is not an error. If the model labels a friendly joke, roast, or piece of
+  sarcasm `ragebait` at high confidence, that verdict passes straight through and the post
+  is blurred or hidden; fail-open does nothing. This is a user-facing harm (good content
+  suppressed), distinct from the security threats above, and the confidence-disclosure
+  marker does not reach it - it only fires below 0.65, while these misfires land at
+  0.85-0.95. Measured behaviour on ordinary banter is documented in
+  [KNOWN_LIMITS.md](KNOWN_LIMITS.md); it is the reason the project is reconsidering blur and
+  hide as default actions.
 - **`chrome.storage.local` is not encrypted.** The allowlist, corrections, and settings
   stored by the extension are in plaintext in the browser's profile directory. Their
   confidentiality equals the operating system account and browser profile permissions. On a
