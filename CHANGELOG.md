@@ -43,6 +43,23 @@ All notable changes to IntentKeeper are documented here.
   105-example set the nightly drives) previously had no tests, distinct from
   `tests/eval/run_eval.py` which `tests/test_eval.py` covers.
 
+### Documentation
+- Phase 8.2 (Firefox) moved from `CODE COMPLETE` to `IN PROGRESS` and the
+  verification actually done is recorded. A real Firefox loads the build:
+  `web-ext run` against a standalone Firefox 156.0 (linux-aarch64), headless,
+  installed it as a temporary add-on under
+  `intentkeeper@olawoyin007.github.io` with no load errors - clearing the two
+  incompatibilities the phase named as the hard parts, the event-page
+  `background.scripts` registration and the mandatory `gecko.id`. The popup also
+  renders correctly, with **Blur ragebait** and **Hide engagement bait** both
+  showing off, confirming v0.7.0's tag-only default visually rather than only in
+  a unit test. `web-ext lint` is 0 errors, 6 warnings - five `innerHTML` flags
+  the linter cannot see through (every attacker-influenced value is already
+  `escapeHtml()`-wrapped, including the LLM `reasoning` string), and one
+  AMO-listing field that no longer applies. The visual check on a live timeline
+  remains open: it needs a display and signed-in accounts, and the dev box is
+  headless ARM64 with no X server.
+
 ## v0.7.0 (2026-09-20) - Firefox, Honest Limits & Tag-Only Defaults
 
 ### Changed
