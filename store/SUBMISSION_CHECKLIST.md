@@ -1,5 +1,11 @@
 # Chrome Web Store - Submission Checklist
 
+> **Status: on hold (2026-09-20). Submission is not planned.** The classifier is
+> reliable on loud one-to-many manipulation and unreliable on ordinary human
+> speech - 37% false positives on benign content, see `KNOWN_LIMITS.md`. A store
+> listing reaches users who have not read that document. Manual install is the
+> supported route. This checklist is kept intact in case that changes.
+
 What an agent has prepared, and what only you can do. Work top to bottom.
 
 ## What is ready (in this repo)
@@ -29,9 +35,9 @@ What an agent has prepared, and what only you can do. Work top to bottom.
       npm test          # confirm green before packaging
       npm run build     # emits dist/chrome (MV3) and dist/firefox
       cd dist/chrome
-      zip -r ../../../intentkeeper-chrome-0.6.0.zip .
+      zip -r ../../../intentkeeper-chrome-0.7.0.zip .
       ```
-- [ ] The file to upload is `intentkeeper-chrome-0.6.0.zip` (the **contents** of
+- [ ] The file to upload is `intentkeeper-chrome-0.7.0.zip` (the **contents** of
       `dist/chrome`, zipped - `manifest.json` must be at the zip root).
 
 ### 3. Screenshots (cannot be automated)

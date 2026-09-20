@@ -18,8 +18,13 @@ const HEALTH_CHECK_INTERVAL = 20000;
 const DEFAULT_SETTINGS = {
   enabled: true,
   showTags: true,
-  blurRagebait: true,
-  hideEngagementBait: true,
+  // Tag-only by default. The classifier misreads jokes, sarcasm and affectionate
+  // banter as ragebait / engagement_bait at high confidence (37% false-positive
+  // rate on benign content - see KNOWN_LIMITS.md), and blur/hide are the two
+  // treatments that actually withhold content. Manifesto Principle 3 says false
+  // positives are unacceptable, so these ship off and the user opts in.
+  blurRagebait: false,
+  hideEngagementBait: false,
   manipulationThreshold: 0.6,
   // Phase 6.1: per-intent kill switches. When false, that intent passes through
   // with no treatment at all (overrides blurRagebait / hideEngagementBait too).

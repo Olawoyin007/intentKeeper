@@ -193,10 +193,24 @@ features. Never leave docs stale.**
 
 ## Roadmap
 
-Phases 1-6, 8.1 complete. See `ROADMAP.md` for full history.
+Phases 1-6 complete. Phase 8 is code complete (Chromium shipped; the Firefox
+build is untested on a real Firefox - `about:debugging` smoke test outstanding).
+See `ROADMAP.md` for full history.
+
+**Default posture (v0.7.0)**: tag-only. `blurRagebait` and `hideEngagementBait`
+ship `false`. They are the only treatments that withhold content, and the measured
+false-positive rate on benign content is 37% (`KNOWN_LIMITS.md`), which Manifesto
+Principle 3 rules out. Four sites define this - `DEFAULT_SETTINGS` in
+`extension/background.js`, the fallback in `extension/core/classifier.js`, the
+`checked` attributes in `popup.html`, and the load logic in `popup.js` (which uses
+`=== true`, not `!== false`, so an absent key means off). A regression test in
+`extension/tests/background.test.js` pins it. Public store submission is dropped
+for the same reason; manual install is the supported route.
 
 Current version: check `pyproject.toml` (source of truth).
 Run `python3 scripts/check_version.py` to verify all files are in sync.
 
-Phase 8.2 (Firefox support) is the next planned phase. Phase 7 (Statistics
-Dashboard) is deferred pending manifesto reconciliation - see ROADMAP.md.
+Next up: bringing down the false-positive rate (issue #125 - expand the eval
+corpus with sarcasm, irony and boundary cases) gates everything downstream.
+Phase 7 (Statistics Dashboard) is deferred pending manifesto reconciliation -
+see ROADMAP.md.

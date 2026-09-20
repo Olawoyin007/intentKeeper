@@ -333,13 +333,13 @@ them as the acceptance test, not as suggestions.
 
 ---
 
-## Phase 8: Multi-Browser Support 🔧 IN PROGRESS
+## Phase 8: Multi-Browser Support 🟡 CODE COMPLETE
 
 **Goal**: Bring IntentKeeper to all major browsers.
 
 ### 8.1 Chromium Browsers (Chrome, Brave, Edge, Opera) ✅ WORKING
 
-Chrome, Brave, Edge, and Opera all run Chromium and support Manifest V3 natively - the extension works on all four without code changes. Store submissions are the remaining work.
+Chrome, Brave, Edge, and Opera all run Chromium and support Manifest V3 natively - the extension works on all four without code changes. Store submission is **not** planned (see below); manual install is the supported route.
 
 - [x] Brave Private Network Access (PNA) support: `PrivateNetworkAccessMiddleware` added to API server - responds with `Access-Control-Allow-Private-Network: true` when Brave's PNA preflight fires. 3 tests in `TestPrivateNetworkAccessMiddleware`.
 - [x] Tested on Microsoft Edge - `chrome.*` API aliases work as expected
@@ -349,11 +349,23 @@ Chrome, Brave, Edge, and Opera all run Chromium and support Manifest V3 natively
       privacy policy in `PRIVACY.md`; step-by-step guide in
       `store/SUBMISSION_CHECKLIST.md`. Unused `activeTab` permission removed so
       the listing requests only `storage` + the localhost host permission.
-- [ ] Submit to Chrome Web Store (covers Brave and Opera users via CWS) - **human task**: dev account + $5 fee, screenshots, and the actual submit. Kit ready in `store/`.
-- [ ] Submit to Microsoft Edge Add-ons store - **human task**, same kit carries over
+- [~] Submit to Chrome Web Store - **dropped (2026-09-20)**. The classifier is
+      reliable on one narrow slice of content (loud one-to-many manipulation from
+      strangers: 6/6 controls caught) and unreliable on ordinary human speech
+      (37% false positives on benign jokes, sarcasm and banter - see
+      `KNOWN_LIMITS.md`). A store listing puts it in front of an audience that
+      has not read that document and cannot be expected to. Manual install keeps
+      the audience to people who have read the limits and chosen to accept them.
+      Revisit if the false-positive rate is brought down materially.
+- [~] Submit to Microsoft Edge Add-ons store - **dropped**, same reason.
 - [ ] Document installation instructions for each browser
 
-### 8.2 Firefox
+The submission kit in `store/` is kept, not deleted. Writing it is what forced
+the single-purpose statement and the permission audit that removed the unused
+`activeTab` permission, and it is the starting point if submission is ever
+revisited.
+
+### 8.2 Firefox 🟡 CODE COMPLETE - manual smoke test outstanding
 
 Firefox uses a different extension format and has subtle WebExtensions API incompatibilities with Chrome MV3. This requires real porting work.
 
@@ -361,9 +373,12 @@ Firefox uses a different extension format and has subtle WebExtensions API incom
 - [x] Audit and fix any `chrome.*` calls - all three call-site files (`background.js`, `core/classifier.js`, `popup/popup.js`) now use a one-line `globalThis.browser = globalThis.browser || globalThis.chrome` alias + promise-based `browser.*` (lighter than vendoring the polyfill, and native `onMessage` `return true`/`sendResponse` still works on both)
 - [x] Handle Firefox's stricter Content Security Policy - verified no inline scripts, event handlers, or `eval`; `popup.html` loads `popup.js` externally, so the default MV3 CSP is satisfied with no override
 - [ ] Test on Firefox Developer Edition - **human task**: load `dist/firefox` via `about:debugging`
-- [ ] Prepare for Mozilla Add-ons (AMO) submission - **human task**: AMO account + review submission; `dist/firefox` is the artifact
-- [ ] Privacy policy document
-- [ ] Extension description and screenshots
+- [~] Prepare for Mozilla Add-ons (AMO) submission - **dropped (2026-09-20)**,
+      same reason as the Chromium stores in 8.1: a public listing reaches users
+      who have not read `KNOWN_LIMITS.md`. Manual install via `about:debugging`
+      is the supported route. `dist/firefox` remains the artifact if revisited.
+- [x] Privacy policy document - `PRIVACY.md`
+- [~] Extension description and screenshots - **dropped**, store-listing work.
 
 **Files**: `extension/manifest.json` (or a build step emitting a Firefox variant), `extension/background.js`, any `chrome.*` call sites.
 **Done when**: the extension loads via `about:debugging` on Firefox Developer Edition and all three platforms (Twitter/X, YouTube, Reddit) classify and render treatments in a manual smoke test; the Chrome build still passes all Jest tests unchanged.
@@ -484,7 +499,7 @@ Safari requires Apple developer account, Xcode, and wrapping the extension in a 
 | 4. Reddit | High | Medium | ✅ COMPLETE |
 | 6. User Sensitivity | Medium | Low | ✅ COMPLETE |
 | 7. Statistics | Medium | Medium | 🔜 NEXT |
-| 8. Multi-Browser (Chrome/Brave/Edge/Opera/Firefox) | Medium | Low-Medium | 🟡 Chrome/Brave/Edge/Opera ✅, Store submissions + Firefox 🔵 |
+| 8. Multi-Browser (Chrome/Brave/Edge/Opera/Firefox) | Medium | Low-Medium | 🟡 Chrome/Brave/Edge/Opera ✅, Firefox ✅, store submissions dropped |
 | 8.5. Non-Technical User Access | High | Medium-High | ⏸ DEFERRED - infra overhead before APIs stabilise |
 | 9. Advanced Classification | High | High | 🔵 Long-term |
 | 10. Cross-Platform | Medium | High | 🔵 Long-term |
@@ -498,13 +513,20 @@ Safari requires Apple developer account, Xcode, and wrapping the extension in a 
 
 ---
 
-## Current Status (2026-07-10)
+## Current Status (2026-09-20)
 
-**Completed**: Phase 1 (Core + Twitter/X), Phase 2 (Hardening), Phase 3.1-3.3 + 3.5 (YouTube + platform abstraction), Phase 4 (Reddit - 3 DOM variants), Phase 5.1-5.2 (98% accuracy), Phase 6.1-6.5 (User-Configurable Sensitivity - all subphases complete), Phase 8.1 (Brave PNA middleware) - **v0.6.0 released** (2026-07-02)
+**Completed**: Phase 1 (Core + Twitter/X), Phase 2 (Hardening), Phase 3.1-3.3 + 3.5 (YouTube + platform abstraction), Phase 4 (Reddit - 3 DOM variants), Phase 5.1-5.2 (98% accuracy), Phase 6.1-6.5 (User-Configurable Sensitivity - all subphases complete), Phase 8 (Multi-browser: Chromium shipped, Firefox code complete - the `about:debugging` smoke test on Firefox Dev Edition is still outstanding) - **v0.7.0 released** (2026-09-20)
+
+**Default posture changed in v0.7.0**: intentKeeper is tag-only on a fresh
+install. A false-positive probe measured 37% of benign content flagged, 7 of 10
+blurred or hidden (`KNOWN_LIMITS.md`), which is the failure Manifesto Principle 3
+rules out. Blur and hide remain available as opt-in toggles. Public store
+submission (Chrome, Edge, AMO) is dropped for the same reason - manual install
+keeps the audience to people who have read the limits.
 
 **Prompt ceiling**: The 2 remaining misclassified cases are at the model's training boundary. Fine-tuning (Phase 5.3) would be needed to pass 98%. Prompting cannot resolve them.
 
-**Next Up**: Phase 8.2 (Firefox support). Phase 7 deferred 2026-07-11 pending manifesto reconciliation (see the Phase 7 deferral note).
+**Next Up**: reducing the false-positive rate is the blocker on everything downstream - issue #125 (expand the eval corpus with sarcasm, irony and boundary cases) is the first step. Phase 7 deferred 2026-07-11 pending manifesto reconciliation (see the Phase 7 deferral note).
 
 **Stats**:
 
