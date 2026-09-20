@@ -4,6 +4,28 @@ All notable changes to IntentKeeper are documented here.
 
 ## [Unreleased]
 
+### Fixed
+- The eval verdict now records the model that produced the score, and the run
+  prints it in its header. A score without a model is not comparable: the
+  documented baseline is 96% on `llama3.1:8b`, so a nightly run scoring 94% on a
+  different model is a model difference, not a regression - which is what issues
+  #141 and #143 were reporting, twice. `result.json` gains a `model` field.
+  Related trap: `OLLAMA_MODEL` is not exported on the eval box and
+  `eval/run_eval.py` deliberately does not read `.env`, so an unpinned run falls
+  back to the classifier default `"llama3.2"` (`server/classifier.py`) - a model
+  no baseline was measured on. The nightly runner is now pinned to `llama3.1:8b`
+  (outside this repo, in `~/eval-runs/run-eval.sh`).
+- Committed the `--result-json` flag for `eval/run_eval.py`. The nightly runner
+  already invoked it, but it existed only as an uncommitted working-tree change,
+  so any run from a clean checkout would have died on an unrecognised argument.
+
+### Tests
+- Five tests for `build_result()` in `eval/run_eval.py` covering the verdict
+  shape - that it carries the model, that an empty set does not divide by zero,
+  per-intent accuracy, and failed-check truncation. This harness (the
+  105-example set the nightly drives) previously had no tests, distinct from
+  `tests/eval/run_eval.py` which `tests/test_eval.py` covers.
+
 ## v0.7.0 (2026-09-20) - Firefox, Honest Limits & Tag-Only Defaults
 
 ### Changed
