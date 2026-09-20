@@ -333,7 +333,7 @@ them as the acceptance test, not as suggestions.
 
 ---
 
-## Phase 8: Multi-Browser Support ✅ COMPLETE
+## Phase 8: Multi-Browser Support 🟡 CODE COMPLETE
 
 **Goal**: Bring IntentKeeper to all major browsers.
 
@@ -365,7 +365,7 @@ the single-purpose statement and the permission audit that removed the unused
 `activeTab` permission, and it is the starting point if submission is ever
 revisited.
 
-### 8.2 Firefox ✅ COMPLETE
+### 8.2 Firefox 🟡 CODE COMPLETE - manual smoke test outstanding
 
 Firefox uses a different extension format and has subtle WebExtensions API incompatibilities with Chrome MV3. This requires real porting work.
 
@@ -515,7 +515,7 @@ Safari requires Apple developer account, Xcode, and wrapping the extension in a 
 
 ## Current Status (2026-09-20)
 
-**Completed**: Phase 1 (Core + Twitter/X), Phase 2 (Hardening), Phase 3.1-3.3 + 3.5 (YouTube + platform abstraction), Phase 4 (Reddit - 3 DOM variants), Phase 5.1-5.2 (98% accuracy), Phase 6.1-6.5 (User-Configurable Sensitivity - all subphases complete), Phase 8 (Multi-browser: Chromium + Firefox) - **v0.7.0 released** (2026-09-20)
+**Completed**: Phase 1 (Core + Twitter/X), Phase 2 (Hardening), Phase 3.1-3.3 + 3.5 (YouTube + platform abstraction), Phase 4 (Reddit - 3 DOM variants), Phase 5.1-5.2 (98% accuracy), Phase 6.1-6.5 (User-Configurable Sensitivity - all subphases complete), Phase 8 (Multi-browser: Chromium shipped, Firefox code complete - the `about:debugging` smoke test on Firefox Dev Edition is still outstanding) - **v0.7.0 released** (2026-09-20)
 
 **Default posture changed in v0.7.0**: intentKeeper is tag-only on a fresh
 install. A false-positive probe measured 37% of benign content flagged, 7 of 10

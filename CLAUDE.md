@@ -193,7 +193,9 @@ features. Never leave docs stale.**
 
 ## Roadmap
 
-Phases 1-6 and 8 (Chromium + Firefox) complete. See `ROADMAP.md` for full history.
+Phases 1-6 complete. Phase 8 is code complete (Chromium shipped; the Firefox
+build is untested on a real Firefox - `about:debugging` smoke test outstanding).
+See `ROADMAP.md` for full history.
 
 **Default posture (v0.7.0)**: tag-only. `blurRagebait` and `hideEngagementBait`
 ship `false`. They are the only treatments that withhold content, and the measured
