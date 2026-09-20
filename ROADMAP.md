@@ -333,7 +333,7 @@ them as the acceptance test, not as suggestions.
 
 ---
 
-## Phase 8: Multi-Browser Support 🔧 IN PROGRESS
+## Phase 8: Multi-Browser Support ✅ COMPLETE
 
 **Goal**: Bring IntentKeeper to all major browsers.
 
@@ -365,7 +365,7 @@ the single-purpose statement and the permission audit that removed the unused
 `activeTab` permission, and it is the starting point if submission is ever
 revisited.
 
-### 8.2 Firefox
+### 8.2 Firefox ✅ COMPLETE
 
 Firefox uses a different extension format and has subtle WebExtensions API incompatibilities with Chrome MV3. This requires real porting work.
 
@@ -373,9 +373,12 @@ Firefox uses a different extension format and has subtle WebExtensions API incom
 - [x] Audit and fix any `chrome.*` calls - all three call-site files (`background.js`, `core/classifier.js`, `popup/popup.js`) now use a one-line `globalThis.browser = globalThis.browser || globalThis.chrome` alias + promise-based `browser.*` (lighter than vendoring the polyfill, and native `onMessage` `return true`/`sendResponse` still works on both)
 - [x] Handle Firefox's stricter Content Security Policy - verified no inline scripts, event handlers, or `eval`; `popup.html` loads `popup.js` externally, so the default MV3 CSP is satisfied with no override
 - [ ] Test on Firefox Developer Edition - **human task**: load `dist/firefox` via `about:debugging`
-- [ ] Prepare for Mozilla Add-ons (AMO) submission - **human task**: AMO account + review submission; `dist/firefox` is the artifact
-- [ ] Privacy policy document
-- [ ] Extension description and screenshots
+- [~] Prepare for Mozilla Add-ons (AMO) submission - **dropped (2026-09-20)**,
+      same reason as the Chromium stores in 8.1: a public listing reaches users
+      who have not read `KNOWN_LIMITS.md`. Manual install via `about:debugging`
+      is the supported route. `dist/firefox` remains the artifact if revisited.
+- [x] Privacy policy document - `PRIVACY.md`
+- [~] Extension description and screenshots - **dropped**, store-listing work.
 
 **Files**: `extension/manifest.json` (or a build step emitting a Firefox variant), `extension/background.js`, any `chrome.*` call sites.
 **Done when**: the extension loads via `about:debugging` on Firefox Developer Edition and all three platforms (Twitter/X, YouTube, Reddit) classify and render treatments in a manual smoke test; the Chrome build still passes all Jest tests unchanged.
@@ -510,13 +513,20 @@ Safari requires Apple developer account, Xcode, and wrapping the extension in a 
 
 ---
 
-## Current Status (2026-07-10)
+## Current Status (2026-09-20)
 
-**Completed**: Phase 1 (Core + Twitter/X), Phase 2 (Hardening), Phase 3.1-3.3 + 3.5 (YouTube + platform abstraction), Phase 4 (Reddit - 3 DOM variants), Phase 5.1-5.2 (98% accuracy), Phase 6.1-6.5 (User-Configurable Sensitivity - all subphases complete), Phase 8.1 (Brave PNA middleware) - **v0.6.0 released** (2026-07-02)
+**Completed**: Phase 1 (Core + Twitter/X), Phase 2 (Hardening), Phase 3.1-3.3 + 3.5 (YouTube + platform abstraction), Phase 4 (Reddit - 3 DOM variants), Phase 5.1-5.2 (98% accuracy), Phase 6.1-6.5 (User-Configurable Sensitivity - all subphases complete), Phase 8 (Multi-browser: Chromium + Firefox) - **v0.7.0 released** (2026-09-20)
+
+**Default posture changed in v0.7.0**: intentKeeper is tag-only on a fresh
+install. A false-positive probe measured 37% of benign content flagged, 7 of 10
+blurred or hidden (`KNOWN_LIMITS.md`), which is the failure Manifesto Principle 3
+rules out. Blur and hide remain available as opt-in toggles. Public store
+submission (Chrome, Edge, AMO) is dropped for the same reason - manual install
+keeps the audience to people who have read the limits.
 
 **Prompt ceiling**: The 2 remaining misclassified cases are at the model's training boundary. Fine-tuning (Phase 5.3) would be needed to pass 98%. Prompting cannot resolve them.
 
-**Next Up**: Phase 8.2 (Firefox support). Phase 7 deferred 2026-07-11 pending manifesto reconciliation (see the Phase 7 deferral note).
+**Next Up**: reducing the false-positive rate is the blocker on everything downstream - issue #125 (expand the eval corpus with sarcasm, irony and boundary cases) is the first step. Phase 7 deferred 2026-07-11 pending manifesto reconciliation (see the Phase 7 deferral note).
 
 **Stats**:
 
