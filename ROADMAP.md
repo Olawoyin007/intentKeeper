@@ -383,11 +383,20 @@ Firefox uses a different extension format and has subtle WebExtensions API incom
       through `escapeHtml()` (including `escapeHtml(reasoning)`, the one carrying
       LLM output derived from hostile page content); the 6th is a
       `data_collection_permissions` field that only matters for an AMO listing.
-- [ ] Visual smoke test on a live timeline - **human task, still open**: does the
-      popup render, do tags appear on Twitter/X, YouTube and Reddit, and (new in
-      v0.7.0) is nothing blurred or hidden on a fresh profile. Needs a machine
-      with a display; the dev box is headless (no X server, ARM64) so this could
-      not be done there.
+- [x] Popup renders correctly in Firefox (2026-09-20). Rendered
+      `dist/firefox/popup/popup.html` via `firefox --headless --screenshot`:
+      layout is intact, and the two treatment toggles - **Blur ragebait** and
+      **Hide engagement bait** - both show **off**, with intent tags and all five
+      intent filters on. That is v0.7.0's tag-only default, confirmed visually in
+      a real Firefox rather than only in a unit test. Caveat: this is the static
+      render, since `popup.js` cannot reach `browser.storage` outside an
+      extension context, so it verifies the shipped default state, not the
+      storage round-trip.
+- [ ] Visual smoke test on a live timeline - **human task, still open**: do tags
+      appear on Twitter/X, YouTube and Reddit, and is nothing blurred or hidden
+      on a fresh profile. Needs a browser with a display and signed-in accounts;
+      the dev box is headless ARM64 with no X server, so this part cannot be done
+      there.
 - [~] Prepare for Mozilla Add-ons (AMO) submission - **dropped (2026-09-20)**,
       same reason as the Chromium stores in 8.1: a public listing reaches users
       who have not read `KNOWN_LIMITS.md`. Manual install via `about:debugging`
