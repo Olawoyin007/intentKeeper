@@ -365,14 +365,29 @@ the single-purpose statement and the permission audit that removed the unused
 `activeTab` permission, and it is the starting point if submission is ever
 revisited.
 
-### 8.2 Firefox 🟡 CODE COMPLETE - manual smoke test outstanding
+### 8.2 Firefox 🟡 IN PROGRESS - smoke test underway
 
 Firefox uses a different extension format and has subtle WebExtensions API incompatibilities with Chrome MV3. This requires real porting work.
 
 - [x] Port Manifest V3 to Firefox MV3 format - `build.js` emits `dist/chrome` (service worker) and `dist/firefox` (event-page `background.scripts` + mandatory `browser_specific_settings.gecko.id`) from one source manifest
 - [x] Audit and fix any `chrome.*` calls - all three call-site files (`background.js`, `core/classifier.js`, `popup/popup.js`) now use a one-line `globalThis.browser = globalThis.browser || globalThis.chrome` alias + promise-based `browser.*` (lighter than vendoring the polyfill, and native `onMessage` `return true`/`sendResponse` still works on both)
 - [x] Handle Firefox's stricter Content Security Policy - verified no inline scripts, event handlers, or `eval`; `popup.html` loads `popup.js` externally, so the default MV3 CSP is satisfied with no override
-- [ ] Test on Firefox Developer Edition - **human task**: load `dist/firefox` via `about:debugging`
+- [x] Loads in a real Firefox (2026-09-20). `web-ext run` against a standalone
+      **Firefox 156.0 (linux-aarch64)**, headless, installed the build cleanly:
+      `Installed dist/firefox as a temporary add-on`, registered under
+      `intentkeeper@olawoyin007.github.io` with no load errors. This clears both
+      incompatibilities flagged in Pitfalls below - the event-page
+      `background.scripts` registration and the mandatory `gecko.id`.
+- [x] `web-ext lint` - **0 errors, 6 warnings**. 5 are `innerHTML` flags in
+      `core/classifier.js` where every attacker-influenced value already goes
+      through `escapeHtml()` (including `escapeHtml(reasoning)`, the one carrying
+      LLM output derived from hostile page content); the 6th is a
+      `data_collection_permissions` field that only matters for an AMO listing.
+- [ ] Visual smoke test on a live timeline - **human task, still open**: does the
+      popup render, do tags appear on Twitter/X, YouTube and Reddit, and (new in
+      v0.7.0) is nothing blurred or hidden on a fresh profile. Needs a machine
+      with a display; the dev box is headless (no X server, ARM64) so this could
+      not be done there.
 - [~] Prepare for Mozilla Add-ons (AMO) submission - **dropped (2026-09-20)**,
       same reason as the Chromium stores in 8.1: a public listing reaches users
       who have not read `KNOWN_LIMITS.md`. Manual install via `about:debugging`
