@@ -339,7 +339,7 @@ them as the acceptance test, not as suggestions.
 
 ### 8.1 Chromium Browsers (Chrome, Brave, Edge, Opera) ✅ WORKING
 
-Chrome, Brave, Edge, and Opera all run Chromium and support Manifest V3 natively - the extension works on all four without code changes. Store submissions are the remaining work.
+Chrome, Brave, Edge, and Opera all run Chromium and support Manifest V3 natively - the extension works on all four without code changes. Store submission is **not** planned (see below); manual install is the supported route.
 
 - [x] Brave Private Network Access (PNA) support: `PrivateNetworkAccessMiddleware` added to API server - responds with `Access-Control-Allow-Private-Network: true` when Brave's PNA preflight fires. 3 tests in `TestPrivateNetworkAccessMiddleware`.
 - [x] Tested on Microsoft Edge - `chrome.*` API aliases work as expected
@@ -349,9 +349,21 @@ Chrome, Brave, Edge, and Opera all run Chromium and support Manifest V3 natively
       privacy policy in `PRIVACY.md`; step-by-step guide in
       `store/SUBMISSION_CHECKLIST.md`. Unused `activeTab` permission removed so
       the listing requests only `storage` + the localhost host permission.
-- [ ] Submit to Chrome Web Store (covers Brave and Opera users via CWS) - **human task**: dev account + $5 fee, screenshots, and the actual submit. Kit ready in `store/`.
-- [ ] Submit to Microsoft Edge Add-ons store - **human task**, same kit carries over
+- [~] Submit to Chrome Web Store - **dropped (2026-09-20)**. The classifier is
+      reliable on one narrow slice of content (loud one-to-many manipulation from
+      strangers: 6/6 controls caught) and unreliable on ordinary human speech
+      (37% false positives on benign jokes, sarcasm and banter - see
+      `KNOWN_LIMITS.md`). A store listing puts it in front of an audience that
+      has not read that document and cannot be expected to. Manual install keeps
+      the audience to people who have read the limits and chosen to accept them.
+      Revisit if the false-positive rate is brought down materially.
+- [~] Submit to Microsoft Edge Add-ons store - **dropped**, same reason.
 - [ ] Document installation instructions for each browser
+
+The submission kit in `store/` is kept, not deleted. Writing it is what forced
+the single-purpose statement and the permission audit that removed the unused
+`activeTab` permission, and it is the starting point if submission is ever
+revisited.
 
 ### 8.2 Firefox
 
@@ -484,7 +496,7 @@ Safari requires Apple developer account, Xcode, and wrapping the extension in a 
 | 4. Reddit | High | Medium | ✅ COMPLETE |
 | 6. User Sensitivity | Medium | Low | ✅ COMPLETE |
 | 7. Statistics | Medium | Medium | 🔜 NEXT |
-| 8. Multi-Browser (Chrome/Brave/Edge/Opera/Firefox) | Medium | Low-Medium | 🟡 Chrome/Brave/Edge/Opera ✅, Store submissions + Firefox 🔵 |
+| 8. Multi-Browser (Chrome/Brave/Edge/Opera/Firefox) | Medium | Low-Medium | 🟡 Chrome/Brave/Edge/Opera ✅, Firefox ✅, store submissions dropped |
 | 8.5. Non-Technical User Access | High | Medium-High | ⏸ DEFERRED - infra overhead before APIs stabilise |
 | 9. Advanced Classification | High | High | 🔵 Long-term |
 | 10. Cross-Platform | Medium | High | 🔵 Long-term |

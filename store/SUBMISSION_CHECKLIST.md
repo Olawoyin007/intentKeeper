@@ -1,5 +1,11 @@
 # Chrome Web Store - Submission Checklist
 
+> **Status: on hold (2026-09-20). Submission is not planned.** The classifier is
+> reliable on loud one-to-many manipulation and unreliable on ordinary human
+> speech - 37% false positives on benign content, see `KNOWN_LIMITS.md`. A store
+> listing reaches users who have not read that document. Manual install is the
+> supported route. This checklist is kept intact in case that changes.
+
 What an agent has prepared, and what only you can do. Work top to bottom.
 
 ## What is ready (in this repo)

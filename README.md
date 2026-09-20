@@ -123,10 +123,10 @@ See [docs/usage.md](docs/usage.md) for the full setup guide and troubleshooting.
 
 | Intent | What It Looks Like | What Happens |
 |--------|-------------------|--------------|
-| **Ragebait** | "This is EXACTLY why I hate [group]. Every. Single. Time." | Blurred with reveal button |
+| **Ragebait** | "This is EXACTLY why I hate [group]. Every. Single. Time." | Tagged with label (optional blur, off by default) |
 | **Fearmongering** | "Society is COLLAPSING. Get out while you still can." | Tagged with label |
 | **Hype** | "This AI tool changes EVERYTHING. You're missing out!" | Tagged with label |
-| **Engagement bait** | "Reply with your favorite X and I'll tell you Y!" | Hidden (expandable) |
+| **Engagement bait** | "Reply with your favorite X and I'll tell you Y!" | Tagged with label (optional hide, off by default) |
 | **Divisive** | "People who don't do X are just lazy. Winners have discipline." | Tagged with label |
 | **Genuine** | "I've dealt with anxiety for 10 years. Here's what helped me." | Passes through unmodified |
 
@@ -142,7 +142,7 @@ Extension intercepts content before you read it
 Local LLM classifies the intent (via Ollama)
         │
         ▼
-Content is blurred, tagged, hidden, or passed through
+Content is tagged or passes through (blur/hide are opt-in)
         │
         ▼
 You decide what to engage with

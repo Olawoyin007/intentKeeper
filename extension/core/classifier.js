@@ -64,8 +64,8 @@ const debug = {
 let settings = {
   enabled: true,
   showTags: true,
-  blurRagebait: true,
-  hideEngagementBait: true,
+  blurRagebait: false,   // tag-only default - see KNOWN_LIMITS.md
+  hideEngagementBait: false,
   manipulationThreshold: 0.6,
   intentEnabled: {
     ragebait: true,

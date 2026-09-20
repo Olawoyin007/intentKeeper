@@ -4,55 +4,23 @@ All notable changes to IntentKeeper are documented here.
 
 ## [Unreleased]
 
-## v0.7.0 (2026-08-23) - Firefox, Store Kit & Honest Media
-
-### Added
-- Chrome Web Store submission kit (Phase 8.1). `store/CHROME_WEB_STORE.md`
-  (listing copy, single-purpose statement, permission justifications,
-  data-safety answers, reviewer notes), `PRIVACY.md` (privacy policy), and
-  `store/SUBMISSION_CHECKLIST.md` (the human steps: dev account, $5 fee,
-  screenshots, submit). Same kit carries over to the Edge Add-ons store.
-- `intentkeeper-server` now accepts `--host`, `--port`, and `--version` CLI
-  flags (issue #117). Host/port precedence is CLI flag > environment variable
-  (`INTENTKEEPER_HOST`/`INTENTKEEPER_PORT`) > built-in default; `--version`
-  prints the server version and exits. Running with no flags is unchanged.
-- Firefox support (Phase 8.2). A new `extension/build.js` (`npm run build`)
-  emits per-browser bundles from one source manifest: `dist/chrome` keeps the
-  MV3 service worker, `dist/firefox` uses an event-page `background.scripts`
-  and the mandatory `browser_specific_settings.gecko.id`. The three files that
-  call extension APIs (`background.js`, `core/classifier.js`, `popup/popup.js`)
-  now use a one-line `globalThis.browser = globalThis.browser || globalThis.chrome`
-  alias and promise-based `browser.*`, so the same code runs on Chromium (where
-  `browser` aliases MV3's promise-based `chrome`) and Firefox (native promises).
-  Chose the alias over vendoring `webextension-polyfill` - it is lighter and
-  keeps the existing `onMessage` `return true`/`sendResponse` pattern, which is
-  native on both engines. All 81 Jest tests pass unchanged. Manual Firefox
-  Developer Edition smoke test and AMO submission remain (human tasks).
-- `/health` now reports `vision: bool` - whether an `OLLAMA_VISION_MODEL` is
-  configured on the server. The extension uses this to decide how to handle
-  media-dominant posts (see below).
-
-### Tests
-- Extension test coverage for the two untested JS surfaces (issue #17). Added
-  `extension/tests/background.test.js` (17 tests: API proxy for `/classify` and
-  `/classify/batch`, health-check fail-open, correction loading/formatting,
-  batch enrichment with user corrections, and the status badge) and
-  `extension/tests/popup.test.js` (12 tests: settings load/save round-trip,
-  connection-status rendering, correction count, and allowlist add with
-  `@`/`u/` normalization). Both files use a small `module.exports` guard added
-  to `background.js` and `popup.js` (same pattern already in `core/classifier.js`)
-  so their functions are importable under Node; browser behaviour is unchanged.
-  `content.js` was not covered - it has been dead code since Phase 3.5 (the
-  content script split into `core/classifier.js` + `platforms/*`). Jest 110 pass.
-
-### Documentation
-- `docs/model-benchmark.md`: added a 2026-07-13 full sweep (full 105-example
-  set, 11 models), superseding the single-model 2026-07-10
-  spot-check. Confirms `llama3.1:8b` as the sweet spot (96% at 8 GB);
-  `qwen2.5:14b-instruct-q4_K_M` edges it at 97%. `README.md` recommended-models
-  table updated to the fresh figures (was the 98-example 2026-06-14 set).
+## v0.7.0 (2026-09-20) - Firefox, Honest Limits & Tag-Only Defaults
 
 ### Changed
+- **Blur and hide now ship off by default.** intentKeeper is tag-only on a fresh
+  install: it labels what it detects and withholds nothing. Blur (ragebait) and
+  hide (engagement bait) remain available and are one toggle away in the popup,
+  but the user now opts in rather than out. Existing installs keep whatever they
+  had set - this changes the default, it does not revoke a choice already made.
+
+  The reason is the false-positive measurement below. Blur and hide are the only
+  two treatments that actually withhold content, and the classifier misreads
+  affectionate banter, sarcasm and self-deprecating jokes as `ragebait` /
+  `engagement_bait` at 0.85-0.95 confidence. Manifesto Principle 3 states that
+  false negatives are acceptable and false positives are not, so the default that
+  withholds genuine content had to go. Covered by a regression test in
+  `extension/tests/background.test.js` so the default cannot drift back silently.
+
 - Honest handling of media-dominant / low-text posts (issues #124, #136). The
   extension measures a post's *readable* text - metadata brackets
   (`[Author: X]`, `[r/news]`, `[Video tweet]`), URLs, and @handles stripped
@@ -92,6 +60,66 @@ All notable changes to IntentKeeper are documented here.
   all four misses `engagement_bait` boundary cases. Added a dated spot-check
   to docs/model-benchmark.md; other models keep their dated 2026-06-14
   numbers until re-measured.
+
+### Added
+- Chrome Web Store submission kit (Phase 8.1). `store/CHROME_WEB_STORE.md`
+  (listing copy, single-purpose statement, permission justifications,
+  data-safety answers, reviewer notes), `PRIVACY.md` (privacy policy), and
+  `store/SUBMISSION_CHECKLIST.md`. **Store submission is not planned** - given
+  the false-positive rate above, a store listing would put the extension in front
+  of an audience that has not read `KNOWN_LIMITS.md`. Manual install remains the
+  supported route. The kit is kept rather than deleted: writing it is what forced
+  the permission audit that removed the unused `activeTab` permission.
+- `intentkeeper-server` now accepts `--host`, `--port`, and `--version` CLI
+  flags (issue #117). Host/port precedence is CLI flag > environment variable
+  (`INTENTKEEPER_HOST`/`INTENTKEEPER_PORT`) > built-in default; `--version`
+  prints the server version and exits. Running with no flags is unchanged.
+- Firefox support (Phase 8.2). A new `extension/build.js` (`npm run build`)
+  emits per-browser bundles from one source manifest: `dist/chrome` keeps the
+  MV3 service worker, `dist/firefox` uses an event-page `background.scripts`
+  and the mandatory `browser_specific_settings.gecko.id`. The three files that
+  call extension APIs (`background.js`, `core/classifier.js`, `popup/popup.js`)
+  now use a one-line `globalThis.browser = globalThis.browser || globalThis.chrome`
+  alias and promise-based `browser.*`, so the same code runs on Chromium (where
+  `browser` aliases MV3's promise-based `chrome`) and Firefox (native promises).
+  Chose the alias over vendoring `webextension-polyfill` - it is lighter and
+  keeps the existing `onMessage` `return true`/`sendResponse` pattern, which is
+  native on both engines. All 81 Jest tests pass unchanged. Manual Firefox
+  Developer Edition smoke test and AMO submission remain (human tasks).
+- `/health` now reports `vision: bool` - whether an `OLLAMA_VISION_MODEL` is
+  configured on the server. The extension uses this to decide how to handle
+  media-dominant posts (see below).
+
+### Documentation
+- `KNOWN_LIMITS.md` - an honest account of where the classifier fails, and a
+  measured false-positive rate. A 27-item set of ordinary benign content plus 6
+  real-manipulation controls (`eval/false_positive_set.yaml`, run with
+  `eval/run_false_positive_eval.py`) found **10 of 27 benign posts flagged as
+  manipulation (37%)**, 7 of them blurred or hidden, at 0.70-0.95 confidence. All
+  6 controls were caught. The failure is structural, not a tuning bug: benign and
+  manipulative content draw the same label at the same confidence, so no
+  threshold separates them. The 96% headline accuracy is measured on a set of
+  loud manipulation only and never tested this. README now says so.
+
+- `docs/model-benchmark.md`: added a 2026-07-13 full sweep (full 105-example
+  set, 11 models), superseding the single-model 2026-07-10
+  spot-check. Confirms `llama3.1:8b` as the sweet spot (96% at 8 GB);
+  `qwen2.5:14b-instruct-q4_K_M` edges it at 97%. `README.md` recommended-models
+  table updated to the fresh figures (was the 98-example 2026-06-14 set).
+
+### Tests
+- Extension test coverage for the two untested JS surfaces (issue #17). Added
+  `extension/tests/background.test.js` (17 tests: API proxy for `/classify` and
+  `/classify/batch`, health-check fail-open, correction loading/formatting,
+  batch enrichment with user corrections, and the status badge) and
+  `extension/tests/popup.test.js` (12 tests: settings load/save round-trip,
+  connection-status rendering, correction count, and allowlist add with
+  `@`/`u/` normalization). Both files use a small `module.exports` guard added
+  to `background.js` and `popup.js` (same pattern already in `core/classifier.js`)
+  so their functions are importable under Node; browser behaviour is unchanged.
+  `content.js` was not covered - it has been dead code since Phase 3.5 (the
+  content script split into `core/classifier.js` + `platforms/*`). Extension suite
+  is 118 tests across 7 files after this release.
 
 ### Security
 - Removed the dead `chrome-extension://*` entry from the CORS `allow_origins` list in `server/api.py`. Starlette matches `allow_origins` by exact string, so the literal never matched a real extension origin - it was misleading config, not an active allowance. No behaviour change: the extension reaches the server via MV3 `host_permissions`, which bypass page CORS, and CORS continues to fail closed for extension origins. Added a comment explaining this and flipped the test that had asserted the dead entry was present (closes #113)

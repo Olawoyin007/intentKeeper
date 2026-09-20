@@ -32,8 +32,9 @@ async function loadSettings() {
 
   elements.enabled.checked = settings.enabled !== false;
   elements.showTags.checked = settings.showTags !== false;
-  elements.blurRagebait.checked = settings.blurRagebait !== false;
-  elements.hideEngagementBait.checked = settings.hideEngagementBait !== false;
+  // === true, not !== false: with the default now off, an absent key means off
+  elements.blurRagebait.checked = settings.blurRagebait === true;
+  elements.hideEngagementBait.checked = settings.hideEngagementBait === true;
 
   const threshold = Math.round((settings.manipulationThreshold || 0.6) * 100);
   elements.threshold.value = threshold;
