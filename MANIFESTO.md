@@ -4,9 +4,10 @@
 
 ## What This Is 
 
-IntentKeeper is a digital bodyguard for your mind. It sits between you and the content designed to hijack your attention, your emotions, and your time.
+intentKeeper labels social media posts by the manipulation patterns they use, so
+you can see what a post is doing before you react to it.
 
-It doesn't censor topics. It surfaces manipulation.
+It does not filter topics. It names framing.
 
 A post about politics can be thoughtful analysis or manufactured outrage. A health tip can be genuine advice or fearmongering. IntentKeeper classifies the **energy** behind the words - not the words themselves.
 
@@ -16,13 +17,13 @@ A post about politics can be thoughtful analysis or manufactured outrage. A heal
 
 IntentKeeper never decides what you can and cannot see. It **labels intent** and lets you decide. Blur, tag, and hide are suggestions - every piece of content can be revealed with a click.
 
-Censorship is someone else deciding for you. Transparency is giving you information to decide for yourself.
+The difference that matters: deciding for you, versus giving you something to decide with.
 
 ### 2. Local-First, Always
 
 All classification happens on your device via Ollama. Your browsing patterns, the content you consume, your sensitivity settings - none of it leaves your machine. Ever.
 
-No cloud. No analytics. No "improving our models with your data." Your mind is yours.
+No cloud, no analytics, and no using your data to improve anything.
 
 ### 3. Fail Open, Not Closed
 
@@ -71,9 +72,12 @@ We don't hide behind "trust the algorithm." We show our work.
 
 ## On Imperfection
 
-IntentKeeper will make mistakes. It will struggle with sarcasm, irony, and cultural context. It will sometimes disagree with your judgment.
+intentKeeper makes mistakes. It struggles with sarcasm, irony and cultural
+context, and it will sometimes disagree with your judgment. This is measured, not
+estimated: see `KNOWN_LIMITS.md`.
 
-That's okay. IntentKeeper is a second opinion, not an authority. When it disagrees with you, trust yourself.
+It is a second opinion, not an authority. When it disagrees with you, trust
+yourself.
 
 ## Relationship to empathySync
 

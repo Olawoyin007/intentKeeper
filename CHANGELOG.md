@@ -4,6 +4,20 @@ All notable changes to IntentKeeper are documented here.
 
 ## [Unreleased]
 
+### Documentation
+- Calmer MANIFESTO, matching the README. It opened "intentKeeper is a digital
+  bodyguard for your mind. It sits between you and the content designed to
+  hijack your attention" - the same interception promise removed from the README
+  and the extension description, and the last place still making it. The
+  "On Imperfection" section now points at `KNOWN_LIMITS.md`, so the admission
+  that it struggles with sarcasm and irony is backed by the measurement rather
+  than left as a general caveat.
+  **No principle was weakened.** Every heading, every rule and every absolute
+  claim is unchanged - including "none of it leaves your machine. Ever." and
+  Principle 3's "false positives are not acceptable". Only phrasing moved. This
+  change necessarily fails the `Protect MANIFESTO.md` CI job, which blocks any
+  PR touching the file; it was made with maintainer approval.
+
 ### Changed
 - Extension description rewritten. `extension/manifest.json` read "A digital
   bodyguard for your mind - filters content by intent", which was wrong on both
