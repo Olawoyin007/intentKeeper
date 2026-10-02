@@ -48,7 +48,7 @@ Configure in `.env` (see `.env.example`):
 
 **Required:**
 - `OLLAMA_HOST` - Ollama server URL (default: `http://localhost:11434`)
-- `OLLAMA_MODEL` - Model name (default: `mistral:7b-instruct`)
+- `OLLAMA_MODEL` - Model name (default: `llama3.1:8b` - the model the 96% baseline is measured on)
 
 **Optional:**
 - `OLLAMA_TEMPERATURE` - LLM temperature (default: `0.1`)

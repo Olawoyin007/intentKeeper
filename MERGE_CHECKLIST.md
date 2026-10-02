@@ -65,25 +65,26 @@ Find your change type below and check every item in that row.
 ## Release procedure
 
 A release is any PR that bumps the public version number.
-**All four version-bearing files must match before the PR is merged.**
+**All five version-bearing files must match before the PR is merged.**
 
-### Version-bearing files (update all four, in this order)
+### Version-bearing files (update all five, in this order)
 
 | File | Location | Note |
 |------|----------|------|
 | `pyproject.toml` | `version = "..."` | source of truth |
 | `extension/manifest.json` | `"version": "..."` | must match pyproject.toml |
+| `extension/package.json` | `"version": "..."` | must match pyproject.toml |
 | `README.md` | version badge | must match |
 | `CHANGELOG.md` | top entry header | rename `[Unreleased]` to `vX.Y.Z (YYYY-MM-DD)` |
 
-To verify all four are consistent before merging, run:
+To verify all five are consistent before merging, run:
 ```bash
 python scripts/check_version.py
 ```
 
 ### Release steps (in order)
 
-1. Update all four version-bearing files above
+1. Update all five version-bearing files above
 2. Run `python scripts/check_version.py` - must pass
 3. Run `pytest tests/ -q` - must pass
 4. Run `python eval/run_eval.py` - note accuracy, must not regress from baseline
@@ -114,7 +115,7 @@ intent) does NOT require updating this checklist - the existing rows cover it.
 
 | Concept | Files that must stay in sync |
 |---------|------------------------------|
-| Version string | `pyproject.toml`, `extension/manifest.json`, `README.md` badge, `CHANGELOG.md` header |
+| Version string | `pyproject.toml`, `extension/manifest.json`, `extension/package.json`, `README.md` badge, `CHANGELOG.md` header |
 | API endpoints | `server/api.py`, `docs/architecture.md`, `CLAUDE.md` |
 | Environment variables | `.env.example`, `README.md`, `CLAUDE.md`, `server/classifier.py` / `server/api.py` |
 | Platform support | `extension/manifest.json`, `extension/platforms/`, `docs/architecture.md`, `README.md`, `ROADMAP.md` |

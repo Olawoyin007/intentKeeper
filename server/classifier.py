@@ -100,7 +100,7 @@ class IntentClassifier:
     ):
         raw_host = ollama_host or os.getenv("OLLAMA_HOST", "http://localhost:11434")
         self.ollama_host = self._validate_ollama_host(raw_host)
-        self.model = model or os.getenv("OLLAMA_MODEL", "llama3.2")
+        self.model = model or os.getenv("OLLAMA_MODEL", "llama3.1:8b")
         self.temperature = (
             temperature
             if temperature is not None

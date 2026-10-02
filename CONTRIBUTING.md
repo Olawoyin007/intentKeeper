@@ -29,7 +29,7 @@ pip install -e ".[dev]"
 cp .env.example .env
 
 # Pull the default model
-ollama pull mistral:7b-instruct
+ollama pull llama3.1:8b
 
 # Run the test suite
 pytest tests/
