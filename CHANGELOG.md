@@ -4,6 +4,16 @@ All notable changes to IntentKeeper are documented here.
 
 ## [Unreleased]
 
+### Changed
+- Extension description rewritten. `extension/manifest.json` read "A digital
+  bodyguard for your mind - filters content by intent", which was wrong on both
+  halves: it is not a bodyguard, and since v0.7.0 it does not filter by default.
+  This string is user-facing - it is what the browser shows on the extensions
+  page - so it was the last place still promising interception. Now: "Labels
+  social media posts by the manipulation patterns they use. Runs locally."
+  (78 characters, within the 132 limit.) Carries through to both
+  `dist/chrome` and `dist/firefox`.
+
 ### Documentation
 - Calmer README. The old copy promised interception - "a digital bodyguard for
   your mind", "before it lands", "before they affect you", "before they hook

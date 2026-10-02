@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "intentKeeper",
   "version": "0.7.0",
-  "description": "A digital bodyguard for your mind - filters content by intent",
+  "description": "Labels social media posts by the manipulation patterns they use. Runs locally.",
   "permissions": [
     "storage"
   ],
@@ -34,8 +34,13 @@
         "https://x.com/*",
         "https://mobile.twitter.com/*"
       ],
-      "js": ["core/classifier.js", "platforms/twitter.js"],
-      "css": ["styles.css"],
+      "js": [
+        "core/classifier.js",
+        "platforms/twitter.js"
+      ],
+      "css": [
+        "styles.css"
+      ],
       "run_at": "document_idle"
     },
     {
@@ -43,8 +48,13 @@
         "https://www.youtube.com/*",
         "https://youtube.com/*"
       ],
-      "js": ["core/classifier.js", "platforms/youtube.js"],
-      "css": ["styles.css"],
+      "js": [
+        "core/classifier.js",
+        "platforms/youtube.js"
+      ],
+      "css": [
+        "styles.css"
+      ],
       "run_at": "document_idle"
     },
     {
@@ -53,8 +63,13 @@
         "https://old.reddit.com/*",
         "https://reddit.com/*"
       ],
-      "js": ["core/classifier.js", "platforms/reddit.js"],
-      "css": ["styles.css"],
+      "js": [
+        "core/classifier.js",
+        "platforms/reddit.js"
+      ],
+      "css": [
+        "styles.css"
+      ],
       "run_at": "document_idle"
     }
   ]
