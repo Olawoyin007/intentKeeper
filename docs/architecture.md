@@ -9,7 +9,7 @@ This document provides a visual overview of IntentKeeper's architecture. For det
 │                         User's Machine                              │
 │                                                                      │
 │  ┌──────────────────────────────────────────────────────────────┐   │
-│  │         Browser (Chrome / Brave / Edge / Opera)              │   │
+│  │      Browser (Chrome / Brave / Edge / Opera / Firefox)       │   │
 │  │  ┌─────────────┐                                             │   │
 │  │  │  Extension   │ ◄── Intercepts content from:               │   │
 │  │  │              │     Twitter/X (tweets, replies)            │   │

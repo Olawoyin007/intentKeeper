@@ -4,13 +4,12 @@
 
 <h1 align="center">intentKeeper</h1>
 
-<p align="center"><strong>A digital bodyguard for your mind.</strong></p>
+<p align="center"><strong>Labels what a post is doing to you, not what it is about.</strong></p>
 
 <p align="center">
   <!-- Project -->
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License: MIT"></a>
   <img src="https://img.shields.io/badge/version-0.7.0-green.svg" alt="Version: 0.7.0">
-  <img src="https://img.shields.io/badge/accuracy-96%25-brightgreen.svg" alt="Accuracy: 96%">
   <a href="https://github.com/Olawoyin007/intentKeeper/actions/workflows/ci.yml"><img src="https://github.com/Olawoyin007/intentKeeper/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
 </p>
 <p align="center">
@@ -23,12 +22,14 @@
   <!-- Tech -->
   <img src="https://img.shields.io/badge/python-3.10%2B-blue.svg" alt="Python: 3.10+">
   <img src="https://img.shields.io/badge/local--first-Ollama-orange.svg" alt="Local-First: Ollama">
-  <img src="https://img.shields.io/badge/browser-Chrome%20%7C%20Brave%20%7C%20Edge%20%7C%20Opera-4285F4.svg" alt="Browser: Chrome, Brave, Edge, Opera">
+  <img src="https://img.shields.io/badge/browser-Chrome%20%7C%20Brave%20%7C%20Edge%20%7C%20Opera%20%7C%20Firefox-4285F4.svg" alt="Browser: Chrome, Brave, Edge, Opera, Firefox">
 </p>
 
-You open Twitter to check one thing. Forty minutes later you're exhausted and angry about something you don't even care about. IntentKeeper shows you what's doing that - on Twitter, YouTube, and Reddit - before it lands.
+intentKeeper reads posts on Twitter/X, YouTube and Reddit and labels the ones using ragebait, fearmongering, hype, divisive framing or engagement bait. It judges the patterns a post uses, not the topic it covers.
 
-Ragebait, fearmongering, hype, divisive framing - all detected by the patterns they use, not the topics they cover, before they affect you. Everything runs on your hardware via Ollama. No cloud. No tracking. No data leaving your machine.
+Classification runs on your own machine via Ollama. Nothing is sent anywhere and nothing is tracked.
+
+By default it hides nothing. You see the post and the label together, and decide for yourself.
 
 ---
 
@@ -36,11 +37,9 @@ Ragebait, fearmongering, hype, divisive framing - all detected by the patterns t
 <summary><strong>Why this exists</strong></summary>
 <br>
 
-Every major platform optimizes for engagement. Engagement is driven by emotion. The strongest emotions - outrage, fear, tribal identity - are the easiest to manufacture.
+Platforms rank posts by engagement, and emotional posts tend to engage. Outrage, fear and tribal identity are among the cheapest emotions to manufacture, so a feed ranked this way tends to carry more of them. That is a property of the ranking, not a conspiracy.
 
-The result: your feed is optimized to make you angry, afraid, and divided. Not because the platform is evil, but because that's what the algorithm rewards.
-
-IntentKeeper doesn't fix the platforms. It gives you a lens to see the manipulation before it hooks you.
+intentKeeper does not change any of that. It puts a name on what a post is doing, so you can notice it rather than only feel it.
 
 </details>
 
@@ -52,7 +51,7 @@ https://github.com/user-attachments/assets/8982dc1c-227b-4695-97ef-4fdfd91cf45c
 
 A post about politics can be thoughtful analysis or manufactured outrage. A health tip can be genuine advice or fearmongering. Same topic, opposite effect on your wellbeing.
 
-IntentKeeper classifies the **manipulation patterns** in content - not the topics themselves. It doesn't censor subjects. It flags the framing patterns associated with ragebait, fearmongering, divisive content, and hype before they land.
+intentKeeper classifies the **framing** a post uses, not its subject. It does not filter topics. It marks the patterns associated with ragebait, fearmongering, divisive content and hype, and leaves the post in place.
 
 **Accuracy**: up to 96% on a 105-example labeled eval set (measured 2026-07-13 with `llama3.1:8b`). The set has grown harder over time - most remaining misses are deliberately included boundary cases, like alarming-but-sourced facts labeled genuine. Classification confidence is shown alongside each label so you know when the model is uncertain. This number measures loud manipulation only; it does not test false positives on jokes, sarcasm, or banter, where the classifier is weak - see [`KNOWN_LIMITS.md`](KNOWN_LIMITS.md).
 
@@ -107,6 +106,8 @@ Don't have Ollama yet? [Install it here](https://ollama.com) - it runs entirely 
 
 ### Part 2 - Extension
 
+**Chrome, Brave, Edge, Opera**
+
 1. Open your browser and go to the extensions page:
    - Chrome: `chrome://extensions`
    - Brave: `brave://extensions`
@@ -114,6 +115,21 @@ Don't have Ollama yet? [Install it here](https://ollama.com) - it runs entirely 
    - Opera: `opera://extensions`
 2. Enable **Developer mode** (top right toggle)
 3. Click **Load unpacked** and select the `extension/` folder
+
+**Firefox**
+
+Firefox needs a separate build, since it uses an event page rather than a
+service worker:
+
+```bash
+cd extension && npm install && npm run build   # writes dist/chrome and dist/firefox
+```
+
+Then open `about:debugging#/runtime/this-firefox`, click **Load Temporary
+Add-on**, and select `extension/dist/firefox/manifest.json`.
+
+The Firefox build is newer than the others: it is confirmed to install and run,
+but has had less real-world use. Report anything that misbehaves.
 
 Then open [Twitter/X](https://twitter.com), [YouTube](https://youtube.com), or [Reddit](https://reddit.com) and scroll your feed. Intent labels appear on content automatically.
 
@@ -136,7 +152,7 @@ See [docs/usage.md](docs/usage.md) for the full setup guide and troubleshooting.
 You open Twitter/X, YouTube, or Reddit
         │
         ▼
-Extension intercepts content before you read it
+Extension reads the posts on the page        
         │
         ▼
 Local LLM classifies the intent (via Ollama)

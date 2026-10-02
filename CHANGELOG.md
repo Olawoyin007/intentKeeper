@@ -4,6 +4,26 @@ All notable changes to IntentKeeper are documented here.
 
 ## [Unreleased]
 
+### Documentation
+- Calmer README. The old copy promised interception - "a digital bodyguard for
+  your mind", "before it lands", "before they affect you", "before they hook
+  you", and a flow diagram reading "Extension intercepts content before you
+  read it". Since v0.7.0 it intercepts nothing by default: it labels, and
+  withholds nothing. The register now matches what the tool does, and the
+  opening says the tag-only default outright instead of leaving it to be
+  discovered further down. The "Why this exists" section keeps its argument but
+  states it as reasoning rather than proclamation.
+- Dropped the bare `accuracy-96%` badge. The number is real but narrow - it is
+  measured on loud manipulation only, and says nothing about the 37%
+  false-positive rate on ordinary content (`KNOWN_LIMITS.md`). A badge cannot
+  carry that qualification; the prose underneath already does, and keeps the
+  figure.
+- Firefox added to the browser badge, to the architecture diagram's browser
+  line, and to the install steps, which now cover the separate `npm run build`
+  plus `about:debugging` route and say plainly that the Firefox build has had
+  less real-world use than the others. It shipped in v0.7.0 but the README had
+  never mentioned it.
+
 ### Fixed
 - One default model name instead of three. The code fell back to `llama3.2`
   (`server/classifier.py`) while `CLAUDE.md`, `.env.example`, `CONTRIBUTING.md`
