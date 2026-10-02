@@ -4,6 +4,23 @@ All notable changes to IntentKeeper are documented here.
 
 ## [Unreleased]
 
+### Fixed
+- One default model name instead of three. The code fell back to `llama3.2`
+  (`server/classifier.py`) while `CLAUDE.md`, `.env.example`, `CONTRIBUTING.md`
+  and `docker-compose.yaml` all said `mistral:7b-instruct`, and the README
+  already called `llama3.1:8b` "the best all-round default". All five now say
+  `llama3.1:8b` - the model the 96% baseline is actually measured on. This is
+  why a nightly eval run scored 94% against a 96% baseline and read as a
+  regression: nothing stated which model produced a number, and the silent
+  fallback was a model no baseline covered. Note this changes the fallback for
+  anyone running with no `OLLAMA_MODEL` set at all; the documented path copies
+  `.env.example`, which already pinned an 8 GB model.
+- `extension/package.json` was still on `0.3.0` while every other
+  version-bearing file was on `0.7.0`. `scripts/check_version.py` read four
+  files and never looked at it, so the drift was invisible to the check that
+  exists to catch exactly this. It is now the fifth checked file, and
+  `MERGE_CHECKLIST.md` updated from "all four" to "all five".
+
 ### Security
 - Cleared the two open advisories in the extension's dev toolchain: `browserslist`
   (**high** - unbounded memory growth with no cache eviction, leading to eventual

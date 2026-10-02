@@ -48,6 +48,20 @@ def read_manifest_version():
     return version, None
 
 
+def read_package_json_version():
+    path = ROOT / "extension" / "package.json"
+    if not path.exists():
+        return None, "extension/package.json not found"
+    try:
+        data = json.loads(path.read_text())
+    except json.JSONDecodeError as e:
+        return None, f"extension/package.json: JSON parse error: {e}"
+    version = data.get("version")
+    if not version:
+        return None, 'extension/package.json: "version" field not found'
+    return version, None
+
+
 def read_readme_version():
     path = ROOT / "README.md"
     if not path.exists():
@@ -73,6 +87,11 @@ CHECKS = [
         "extension/manifest.json",
         read_manifest_version,
         'Update "version": "{version}" in extension/manifest.json',
+    ),
+    (
+        "extension/package.json",
+        read_package_json_version,
+        'Update "version": "{version}" in extension/package.json',
     ),
     (
         "README.md",
