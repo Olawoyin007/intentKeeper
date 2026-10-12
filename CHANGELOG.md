@@ -4,6 +4,18 @@ All notable changes to IntentKeeper are documented here.
 
 ## [Unreleased]
 
+### Security
+- Cleared the `braces` advisory (GHSA-vfj7-8cjw-p6xm, **high** - stack exhaustion
+  via deeply nested patterns) by moving the extension's dev toolchain to
+  `jest` 30. `npm audit` reported 28 high findings, which is the one advisory
+  counted across 28 dependency paths under `jest` -> `@jest/core` -> `micromatch`.
+  Dev-only: the extension's `dependencies` block is empty, so it ships no
+  `node_modules` and nothing reached anyone who installed it.
+  An `overrides` pin could not fix this one - the advisory's affected range is
+  `*`, so every published version of `braces` is affected and there is nothing to
+  pin to. jest 30 drops the dependency entirely. All 118 Jest tests pass
+  unchanged, and both browser bundles build.
+
 ### Documentation
 - Calmer MANIFESTO, matching the README. It opened "intentKeeper is a digital
   bodyguard for your mind. It sits between you and the content designed to
