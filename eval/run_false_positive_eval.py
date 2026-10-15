@@ -31,14 +31,17 @@ def classify(text):
 def main():
     path = Path(sys.argv[1]) if len(sys.argv) > 1 else DEFAULT_SET
     data = yaml.safe_load(path.read_text())
-    benign, controls = data["benign"], data["controls"]
+    groups, controls = data["benign"], data["controls"]
 
-    fp, benign_rows = [], []
-    for t in benign:
-        d = classify(t)
-        benign_rows.append((t, d["intent"], d["confidence"], d["action"]))
-        if d["action"] != "pass":
-            fp.append((t, d["intent"], d["confidence"], d["action"]))
+    fp, benign_rows, per_group = [], [], {}
+    for group, items in groups.items():
+        per_group[group] = {"total": len(items), "fp": 0}
+        for t in items:
+            d = classify(t)
+            benign_rows.append((group, t, d["intent"], d["confidence"], d["action"]))
+            if d["action"] != "pass":
+                fp.append((t, d["intent"], d["confidence"], d["action"]))
+                per_group[group]["fp"] += 1
 
     missed, control_rows = [], []
     for t in controls:
@@ -48,7 +51,11 @@ def main():
             missed.append((t, d["intent"], d["confidence"], d["action"]))
 
     print("=== BENIGN (should all pass) ===")
-    for t, i, c, a in benign_rows:
+    last = None
+    for group, t, i, c, a in benign_rows:
+        if group != last:
+            print(f"\n  [{group}]")
+            last = group
         mark = "  FP->" if a != "pass" else "  ok  "
         print(f"{mark} {a:5} {i:15} {c:.2f}  {t[:60]}")
 
@@ -57,7 +64,15 @@ def main():
         mark = "  MISS" if a == "pass" else "  ok  "
         print(f"{mark} {a:5} {i:15} {c:.2f}  {t[:60]}")
 
-    n = len(benign)
+    n = sum(g["total"] for g in per_group.values())
+    print("\n=== BY GROUP ===")
+    # Worst first: the point of the groups is to say which kind of good content
+    # fails, not just how much of it does.
+    for g, r in sorted(per_group.items(), key=lambda kv: -kv[1]["fp"] / kv[1]["total"]):
+        pct = 100 * r["fp"] / r["total"]
+        bar = "#" * round(pct / 10)
+        print(f"  {g:38} {r['fp']:>2}/{r['total']:<2} {pct:>3.0f}%  {bar}")
+
     print("\n=== RESULT ===")
     print(f"Benign items:            {n}")
     print(f"False positives:         {len(fp)}  ({100*len(fp)/n:.0f}% of good content flagged)")
