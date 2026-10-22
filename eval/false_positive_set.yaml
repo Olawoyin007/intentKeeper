@@ -6,55 +6,158 @@
 #
 #   How often does the classifier flag GOOD content as manipulation?
 #
-# `benign`   - ordinary good posts (jokes, banter, sarcasm, life updates,
-#              wholesome notes). These MUST pass through. Any flag is a false
-#              positive.
+# `benign`   - ordinary good posts, grouped by the kind of thing they are.
+#              These MUST pass through. Any flag is a false positive.
 # `controls` - real loud manipulation, to confirm the classifier still catches
 #              what it is good at.
+#
+# The groups are not decoration. An overall rate cannot tell you whether a
+# change fixed something or just added easier examples, because adding items
+# moves the denominator. Per-group rates survive that.
 #
 # Run:  python eval/run_false_positive_eval.py   (server must be running)
 
 benign:
-  # --- self-deprecating jokes ---
-  - "lol I have the emotional range of a teaspoon before coffee, send help"
-  - "my toxic trait is thinking I'll remember it without writing it down"
-  - "me, a functioning adult: googles 'how to boil egg' for the 40th time"
-  - "started the day with a plan and a smoothie. it's noon. the smoothie is gone and so is the plan"
 
-  # --- affectionate roast / banter between friends ---
-  - "mate your fantasy team is so bad even the AI feels sorry for you 😂"
-  - "imagine losing to me at FIFA and then blaming the controller, couldn't be me... oh wait that was you"
-  - "you calling ME slow? bestie you took 3 business days to reply to a yes/no question"
-  - "not you turning up an hour late to your OWN birthday dinner, iconic behaviour honestly"
+  # --- sarcasm and irony ---
+  # Tone carries the meaning and the words contradict it.
+  sarcasm_and_irony:
+    - "oh WONDERFUL, another Monday, truly my favourite gift the universe keeps giving"
+    - "cannot wait for the 6am gym alarm I set with such hope and delusion last night"
+    - "love when the bus is 'due' for 15 straight minutes. real one. never shows"
+    - "great, the one day I dress nice and I see literally nobody. the universe is efficient"
+    - "ah yes, the quarterly reorg. nothing says stability like a new org chart every 90 days"
+    - "nothing like a 9am meeting that could have been an email to really set the tone"
+    - "my favourite genre of email is 'per my last email'"
+    - "incredible how the printer knows exactly when the deadline is"
+    - "the gym at 6pm in January, truly a peaceful and uncrowded sanctuary"
+    - "sure, I'll just 'circle back'. I'll circle back so hard"
 
-  # --- sarcasm / irony (non-hostile) ---
-  - "oh WONDERFUL, another Monday, truly my favourite gift the universe keeps giving"
-  - "cannot wait for the 6am gym alarm I set with such hope and delusion last night"
-  - "love when the bus is 'due' for 15 straight minutes. real one. never shows"
-  - "great, the one day I dress nice and I see literally nobody. the universe is efficient"
+  # --- affectionate roast ---
+  # Insults between people who like each other.
+  affectionate_roast:
+    - "mate your fantasy team is so bad even the AI feels sorry for you 😂"
+    - "imagine losing to me at FIFA and then blaming the controller, couldn't be me... oh wait that was you"
+    - "you calling ME slow? bestie you took 3 business days to reply to a yes/no question"
+    - "not you turning up an hour late to your OWN birthday dinner, iconic behaviour honestly"
+    - "my brother has been 'five minutes away' since 2019 and we have simply accepted this"
+    - "she has strong opinions about pasta shapes and I respect her for it, deeply, from a distance"
+    - "my flatmate alphabetises the spice rack and then cannot find the cumin. every time"
+    - "love this man but he has never once picked a restaurant in his life"
+    - "you have the worst music taste of anyone I have ever loved"
 
-  # --- dry / absurd humour ---
-  - "my plan today: drink coffee, question all my life choices, repeat"
-  - "in this house we support all pronouns including 'it' when referring to the roomba"
-  - "the duck at the park looked at me like it knew my bank balance. it was right to"
-  - "sir this is a Wendy's (there was no Wendy's, I was in my kitchen, talking to myself)"
+  # --- self deprecating ---
+  # The target is the speaker.
+  self_deprecating:
+    - "lol I have the emotional range of a teaspoon before coffee, send help"
+    - "my toxic trait is thinking I'll remember it without writing it down"
+    - "me, a functioning adult: googles 'how to boil egg' for the 40th time"
+    - "started the day with a plan and a smoothie. it's noon. the smoothie is gone and so is the plan"
+    - "I have been 'about to start' this essay for four hours and the document is still called Untitled"
+    - "paid for a gym membership as a form of emotional support. have not attended"
+    - "confidently gave someone directions to a place I have never been. they are lost. I am sorry"
+    - "my cooking has two settings: raw, and archaeological"
 
-  # --- genuine enthusiasm (real, not hype-manipulation) ---
-  - "finally beat my 5k time after 6 months, so happy I could cry, legs are jelly"
-  - "the bread came out perfect this time. crumb structure is beautiful. I am so proud of this loaf"
-  - "just finished the book everyone recommended and yeah okay they were right, wonderful read"
-  - "we adopted the shy cat nobody wanted and she just sat on my lap for the first time 🥹"
+  # --- dry absurd humour ---
+  # Understated or surreal; no target at all.
+  dry_absurd_humour:
+    - "my plan today: drink coffee, question all my life choices, repeat"
+    - "in this house we support all pronouns including 'it' when referring to the roomba"
+    - "the duck at the park looked at me like it knew my bank balance. it was right to"
+    - "sir this is a Wendy's (there was no Wendy's, I was in my kitchen, talking to myself)"
 
-  # --- neutral life updates / logistics ---
-  - "heads up the 4pm meeting moved to 4:30, same link"
-  - "anyone know a good dentist near the station, mine just retired"
-  - "reminder that the shops close early today for the bank holiday"
-  - "rained the whole walk home but the podcast was good so, net positive"
+  # --- hyperbole as ordinary speech ---
+  # Violent words used as ordinary emphasis.
+  hyperbole_as_ordinary_speech:
+    - "I would genuinely die for this sandwich, no notes, perfect"
+    - "this playlist is a war crime and I mean that as the highest compliment"
+    - "that film destroyed me. absolutely obliterated. ten out of ten"
 
-  # --- wholesome / supportive ---
-  - "proud of you for going to that appointment you were dreading. that took real courage"
-  - "gentle reminder to drink some water and unclench your jaw, you're doing fine"
-  - "whoever needs to hear this: the messy first draft still counts as writing"
+  # --- dialect and slang ---
+  # Reads aggressive to a model trained on standard English.
+  # Flags here are a fairness problem, not only an accuracy one.
+  dialect_and_slang:
+    - "nah fam that's mad, you can't just do that to someone and act surprised"
+    - "she ATE and left no crumbs, the audacity, the range, I'm obsessed"
+    - "bro really said that with his whole chest and thought he understood 💀"
+    - "it's giving 'I peaked in secondary school' and I won't be elaborating"
+
+  # --- dark humour about own hardship ---
+  # The speaker joking about their own illness or grief.
+  dark_humour_about_own_hardship:
+    - "my chemo playlist is genuinely unhinged and it is the one creative decision I still control"
+    - "physio says 'mild discomfort'. physio is a liar and we both know it"
+    - "grief is weird. cried at a cereal advert today. he'd have found that hilarious"
+
+  # --- genuine venting ---
+  # Real frustration at a situation. Not manufactured, not aimed at a group.
+  genuine_venting:
+    - "third time the landlord has 'scheduled' the boiler repair and cancelled. I am so tired"
+    - "spent two hours on hold to be told I needed a different department. that is my evening gone"
+    - "got the rejection after the fourth interview round. gutted honestly, I really wanted it"
+    - "the trains have been cancelled every day this week and nobody will say why"
+
+  # --- sincere strong opinion ---
+  # A firm position argued with substance. Holding one is not tribe-sorting.
+  sincere_strong_opinion:
+    - "I think the open-plan office was a mistake and the productivity research has been saying so for a decade"
+    - "spending £400 on a mattress felt mad until I did it. eight hours a day on the thing, it is not an indulgence"
+    - "unpopular locally, but the cycle lane has made my commute safer and I will defend it"
+    - "I don't think remote work suits everyone, and pretending otherwise helps nobody"
+
+  # --- sincere question ---
+  # Asked because they want an answer. Structurally identical to engagement bait.
+  sincere_question:
+    - "what are people reading at the moment, I have run dry"
+    - "has anyone done the coast path in October, trying to work out if the weather makes it miserable"
+    - "genuine question, is it worth learning Rust if I only write Python at work"
+
+  # --- genuine enthusiasm ---
+  # Real excitement about something specific. Not hype.
+  genuine_enthusiasm:
+    - "finally beat my 5k time after 6 months, so happy I could cry, legs are jelly"
+    - "the bread came out perfect this time. crumb structure is beautiful. I am so proud of this loaf"
+    - "just finished the book everyone recommended and yeah okay they were right, wonderful read"
+    - "we adopted the shy cat nobody wanted and she just sat on my lap for the first time 🥹"
+
+  # --- wholesome supportive ---
+  # Encouragement, offered plainly.
+  wholesome_supportive:
+    - "proud of you for going to that appointment you were dreading. that took real courage"
+    - "gentle reminder to drink some water and unclench your jaw, you're doing fine"
+    - "whoever needs to hear this: the messy first draft still counts as writing"
+
+  # --- life updates ---
+  # Logistics and small talk. The easiest class; the control group for the rest.
+  life_updates:
+    - "heads up the 4pm meeting moved to 4:30, same link"
+    - "anyone know a good dentist near the station, mine just retired"
+    - "reminder that the shops close early today for the bank holiday"
+    - "rained the whole walk home but the podcast was good so, net positive"
+
+  # --- real urgency ---
+  # Urgent, specific and actionable - the opposite of manufactured FOMO.
+  real_urgency:
+    - "flat is flooding, does anyone have an emergency plumber number for the N4 area"
+    - "lost dog, black lab, last seen near the canal bridge about an hour ago, please share"
+    - "if you ordered from us this week your parcel is delayed, we are sorting it, DM for a refund"
+    - "road closed at the junction after an accident, take the long way if you are heading in"
+
+  # --- genuine warning ---
+  # Alarming subject with real substance behind it.
+  genuine_warning:
+    - "black ice on the hill by the school this morning, two people went down, take it slow"
+    - "heads up, there's a scam text going round pretending to be the delivery company, it asks for card details"
+    - "the recall notice covers the 2019-2021 models, check your serial number, mine was on the list"
+
+  # --- quoting manipulation to criticise it ---
+  # Contains the manipulative text, means the opposite.
+  # Flagging the critic is the worst failure available here.
+  quoting_manipulation_to_criticise_it:
+    - "saw a post saying 'they're DESTROYING our country, RT before they delete this' and genuinely, who falls for this"
+    - "the 'doctors HATE him' adverts are back. reminder that this is how supplement scams open"
+    - "getting a lot of 'you're already behind on AI' posts lately. that framing is the product, not the news"
+    - "screenshot of a 5am-club post with the caption: imagine being this certain about anything"
 
 controls:
   # --- real manipulation, must be flagged ---

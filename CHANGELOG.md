@@ -4,6 +4,36 @@ All notable changes to IntentKeeper are documented here.
 
 ## [Unreleased]
 
+### Eval
+- **False-positive probe grown from 27 benign items to 74, and grouped by kind**
+  (issue #125). The 37% figure that drove v0.7.0's tag-only default rested on 27
+  items; the groups below give it a wider base and, more usefully, say *which*
+  kind of good content fails rather than only how much.
+  Nine groups are new ground the probe never covered: `genuine_venting` (real
+  frustration, not manufactured outrage), `sincere_strong_opinion` (a firm
+  position is not tribe-sorting), `real_urgency` (urgent and specific - the
+  opposite of manufactured FOMO), `genuine_warning` (alarming subject, real
+  substance), `sincere_question` (asked for an answer, structurally identical to
+  engagement bait), `dialect_and_slang` (reads aggressive to a model trained on
+  standard English - a fairness problem, not only an accuracy one),
+  `dark_humour_about_own_hardship`, `hyperbole_as_ordinary_speech`, and
+  `quoting_manipulation_to_criticise_it` (contains the manipulative text, means
+  the opposite - flagging the critic is the worst failure available here).
+- `run_false_positive_eval.py` reports per-group rates, worst group first. An
+  overall rate alone cannot tell you whether a change fixed something or just
+  added easier examples, because adding items moves the denominator.
+- **No new baseline is recorded yet.** The expanded set has not had a clean run:
+  the box ran out of memory mid-probe and Ollama returned 500s for the rest
+  (`llama-server` holds pre-allocated unified memory that does not show as
+  process RSS). The 37% in `KNOWN_LIMITS.md` therefore still refers to the
+  original 27-item set and is left as it stands. Run `run-eval.sh prepare`
+  first, then the probe, to get the number on the new set.
+
+### Tests
+- `tests/test_false_positive_eval.py` - 5 tests pinning the probe-set shape and
+  the per-group arithmetic, using a stubbed classifier so no server or model is
+  needed.
+
 ### Security
 - Cleared the `braces` advisory (GHSA-vfj7-8cjw-p6xm, **high** - stack exhaustion
   via deeply nested patterns) by moving the extension's dev toolchain to
