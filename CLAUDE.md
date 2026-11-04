@@ -193,13 +193,14 @@ features. Never leave docs stale.**
 
 ## Roadmap
 
-Phases 1-6 complete. Phase 8 is code complete (Chromium shipped; the Firefox
-build is untested on a real Firefox - `about:debugging` smoke test outstanding).
-See `ROADMAP.md` for full history.
+Phases 1-6 complete. Phase 8 is in progress: Chromium shipped, and the Firefox
+build is confirmed to install in a real Firefox 156 with the popup rendering
+correctly - what remains is the visual check on a live timeline, which needs a
+display. See `ROADMAP.md` for full history.
 
 **Default posture (v0.7.0)**: tag-only. `blurRagebait` and `hideEngagementBait`
 ship `false`. They are the only treatments that withhold content, and the measured
-false-positive rate on benign content is 37% (`KNOWN_LIMITS.md`), which Manifesto
+false-positive rate on benign content is 41% (`KNOWN_LIMITS.md`), which Manifesto
 Principle 3 rules out. Four sites define this - `DEFAULT_SETTINGS` in
 `extension/background.js`, the fallback in `extension/core/classifier.js`, the
 `checked` attributes in `popup.html`, and the load logic in `popup.js` (which uses

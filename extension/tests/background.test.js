@@ -173,7 +173,7 @@ describe('DEFAULT_SETTINGS', () => {
 
   // Manifesto Principle 3: false positives (withholding genuine content) are
   // unacceptable. Blur and hide are the only treatments that withhold, and the
-  // classifier's measured false-positive rate on benign content is 37%
+  // classifier's measured false-positive rate on benign content is 41%
   // (KNOWN_LIMITS.md). They must ship off and stay off by default.
   test('ships tag-only - blur and hide are opt-in', () => {
     expect(DEFAULT_SETTINGS.showTags).toBe(true);

@@ -352,7 +352,7 @@ Chrome, Brave, Edge, and Opera all run Chromium and support Manifest V3 natively
 - [~] Submit to Chrome Web Store - **dropped (2026-09-20)**. The classifier is
       reliable on one narrow slice of content (loud one-to-many manipulation from
       strangers: 6/6 controls caught) and unreliable on ordinary human speech
-      (37% false positives on benign jokes, sarcasm and banter - see
+      (41% false positives on benign jokes, sarcasm and banter - see
       `KNOWN_LIMITS.md`). A store listing puts it in front of an audience that
       has not read that document and cannot be expected to. Manual install keeps
       the audience to people who have read the limits and chosen to accept them.
@@ -537,14 +537,19 @@ Safari requires Apple developer account, Xcode, and wrapping the extension in a 
 
 ---
 
-## Current Status (2026-09-20)
+## Current Status (2026-11-04)
 
-**Completed**: Phase 1 (Core + Twitter/X), Phase 2 (Hardening), Phase 3.1-3.3 + 3.5 (YouTube + platform abstraction), Phase 4 (Reddit - 3 DOM variants), Phase 5.1-5.2 (98% accuracy), Phase 6.1-6.5 (User-Configurable Sensitivity - all subphases complete), Phase 8 (Multi-browser: Chromium shipped, Firefox code complete - the `about:debugging` smoke test on Firefox Dev Edition is still outstanding) - **v0.7.0 released** (2026-09-20)
+**Completed**: Phase 1 (Core + Twitter/X), Phase 2 (Hardening), Phase 3.1-3.3 + 3.5 (YouTube + platform abstraction), Phase 4 (Reddit - 3 DOM variants), Phase 5.1-5.2 (98% accuracy), Phase 6.1-6.5 (User-Configurable Sensitivity - all subphases complete), Phase 8 (Multi-browser: Chromium shipped; the Firefox build is confirmed to install in Firefox 156 with the popup rendering correctly, and the live-timeline check is what remains) - **v0.7.1 released** (2026-11-04)
 
 **Default posture changed in v0.7.0**: intentKeeper is tag-only on a fresh
-install. A false-positive probe measured 37% of benign content flagged, 7 of 10
+install. A false-positive probe measured 41% of benign content flagged, 10 of 30
 blurred or hidden (`KNOWN_LIMITS.md`), which is the failure Manifesto Principle 3
-rules out. Blur and hide remain available as opt-in toggles. Public store
+rules out. That figure is from the 74-item, 16-group probe (v0.7.1); the
+original 27-item set read 37%, and the rate rose as the set got wider rather
+than falling. Two groups fail every item: `dialect_and_slang`, which is a
+fairness problem rather than an accuracy one, and
+`quoting_manipulation_to_criticise_it`, where the tool flags the person
+criticising manipulation. Blur and hide remain available as opt-in toggles. Public store
 submission (Chrome, Edge, AMO) is dropped for the same reason - manual install
 keeps the audience to people who have read the limits.
 

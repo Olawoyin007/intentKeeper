@@ -19,7 +19,7 @@ const DEFAULT_SETTINGS = {
   enabled: true,
   showTags: true,
   // Tag-only by default. The classifier misreads jokes, sarcasm and affectionate
-  // banter as ragebait / engagement_bait at high confidence (37% false-positive
+  // banter as ragebait / engagement_bait at high confidence (41% false-positive
   // rate on benign content - see KNOWN_LIMITS.md), and blur/hide are the two
   // treatments that actually withhold content. Manifesto Principle 3 says false
   // positives are unacceptable, so these ship off and the user opts in.

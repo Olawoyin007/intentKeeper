@@ -1,6 +1,6 @@
 {
   "name": "intentkeeper-extension",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "private": true,
   "scripts": {
     "test": "jest",
@@ -15,7 +15,9 @@
     "js-yaml": "^4.3.2",
     "brace-expansion": "^5.0.12",
     "browserslist": "^4.28.9",
-    "baseline-browser-mapping": "^2.11.22"
+    "baseline-browser-mapping": "^2.11.22",
+    "glob": "^14.0.3",
+    "minimatch": "^11.0.1"
   },
   "jest": {
     "testEnvironment": "jsdom",
