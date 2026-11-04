@@ -28,21 +28,54 @@ two most aggressive actions - blur and hide.
 
 ## Measured false-positive rate
 
-The four jokes above were an anecdote. To get a real number, a 27-item set of
-ordinary good content (jokes, banter, sarcasm, life updates, wholesome notes)
-plus 6 real-manipulation controls was run through the classifier (`gemma3:12b`,
-2026-08-23). Reproduce with `python eval/run_false_positive_eval.py` against
+The four jokes above were an anecdote. To get a real number, a set of ordinary
+good content plus real-manipulation controls was run through the classifier.
+Reproduce with `python eval/run_false_positive_eval.py` against
 `eval/false_positive_set.yaml`.
 
-- **10 of 27 benign posts flagged as manipulation - 37%.**
-- **7 of those 10 were blurred or hidden**, not merely labelled.
-- False-positive confidence ran **0.70 to 0.95**.
+**Current figure - 74 benign items, 16 groups (`llama3.1:8b`, 2026-10-22):**
+
+- **30 of 74 benign posts flagged as manipulation - 41%.**
+- **10 of those 30 were blurred or hidden**, not merely labelled.
+- False-positive confidence ran **0.80 to 0.90**.
 - All **6 controls were caught** - the classifier reliably flags loud manipulation.
 
-The good content that survived was the earnest kind: neutral life updates,
-wholesome notes, genuine enthusiasm. The playful kind - roasts, sarcasm, absurd
-humour - did not. Affectionate roasting reads as `ragebait`; irony reads as
-`ragebait` / `engagement_bait`.
+The first measurement (2026-08-23, `gemma3:12b`) was 10 of 27, or 37%. The rate
+went **up**, not down, when the set got wider. That is the expected direction:
+the original 27 items were weighted toward content the tool handles, and the
+new groups went looking for where it does not.
+
+Two groups fail **every single item**:
+
+| Group | Flagged | What it is |
+|---|:---:|---|
+| `dialect_and_slang` | **4/4** | "nah fam that's mad", "bro really said that with his whole chest" |
+| `quoting_manipulation_to_criticise_it` | **4/4** | a post quoting ragebait in order to mock it |
+| `affectionate_roast` | 7/9 | insults between people who like each other |
+| `hyperbole_as_ordinary_speech` | 2/3 | "I would die for this sandwich" |
+| `sarcasm_and_irony` | 6/10 | tone carries the meaning, words contradict it |
+
+Five groups score **0%** - `genuine_enthusiasm`, `wholesome_supportive`,
+`life_updates`, `real_urgency`, `genuine_warning`.
+
+Two of these deserve naming separately from the rate.
+
+**`dialect_and_slang` is a fairness problem, not an accuracy one.** Every item
+flagged. The posts are ordinary speech; what they are not is standard English.
+A tool that reads "bro really said that with his whole chest" as manipulation
+is not making a random error - it is making that error consistently, against
+particular people, and a single overall percentage hides it completely.
+
+**`quoting_manipulation_to_criticise_it` inverts the tool's purpose.** All four
+flagged. These are posts quoting ragebait in order to criticise it. The
+classifier reads the quoted text, misses the frame around it, and flags the
+person doing the criticising. That is the worst failure available to a tool
+whose stated job is to help people notice manipulation.
+
+The good content that survives is the earnest kind: neutral life updates,
+wholesome notes, genuine enthusiasm, real warnings. The playful kind - roasts,
+sarcasm, absurd humour - does not. Affectionate roasting reads as `ragebait`;
+irony reads as `ragebait` / `engagement_bait`.
 
 The decisive detail is that the confidences overlap. A benign joke ("turning up
 late to your OWN birthday dinner, iconic") and a real control ("people who don't
@@ -78,7 +111,7 @@ It contains no affectionate banter, no sarcasm, no visual posts. So the number
 is real but narrow: it says the tool is good at spotting the loud manipulation
 it was built to spot. It says nothing about false positives on ordinary content
 - which is the failure this document is about. The main eval never tested that;
-`eval/false_positive_set.yaml` now does, and the measured rate is 37% (above).
+`eval/false_positive_set.yaml` now does, and the measured rate is 41% (above).
 
 That is itself the lesson: a curated benchmark can hide an entire failure
 distribution. High accuracy on the examples you thought to include is not the

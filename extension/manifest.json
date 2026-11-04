@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "intentKeeper",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "description": "Labels social media posts by the manipulation patterns they use. Runs locally.",
   "permissions": [
     "storage"

@@ -4,6 +4,97 @@ All notable changes to IntentKeeper are documented here.
 
 ## [Unreleased]
 
+## v0.7.1 (2026-11-04) - Honest Numbers & a Quieter Toolchain
+
+> **Eval note.** `MERGE_CHECKLIST` asks for an accuracy run on every release.
+> This one did not get a clean pass - Ollama returned 500s mid-run under memory
+> pressure on the dev box, twice - so the 96% baseline is carried forward rather
+> than re-measured. That is defensible here and would not be for most releases:
+> `scenarios/intents.yaml` and `eval/test_set.yaml` are untouched since v0.7.0,
+> and the only change to `server/classifier.py` is the `OLLAMA_MODEL` fallback
+> used when nothing is set - which the eval never hits, because it pins the
+> model. Nothing in this release can move the number.
+
+### Security
+- Cleared both moderate advisories in the extension's dev toolchain with
+  `overrides` floors: `glob` `^14.0.3` (AbortSignal cancellation bypass allowing
+  post-timeout filesystem traversal) and `minimatch` `^11.0.1` (denial of service
+  via globparts amplification). `npm audit` goes from 19 findings (3 low, 16
+  moderate) to 5 low.
+  The 5 that remain are all one advisory - `deepmerge` prototype poisoning,
+  **low** - counted across jest's dependency paths. It cannot be fixed: the
+  affected range is `>=4.2.0` and 4.3.1 is the latest published version, so
+  there is nothing to pin to. Dev-only, as all of these are: the extension's
+  `dependencies` block is empty and it ships no `node_modules`.
+
+- Cleared the `braces` advisory (GHSA-vfj7-8cjw-p6xm, **high** - stack exhaustion
+  via deeply nested patterns) by moving the extension's dev toolchain to
+  `jest` 30. `npm audit` reported 28 high findings, which is the one advisory
+  counted across 28 dependency paths under `jest` -> `@jest/core` -> `micromatch`.
+  Dev-only: the extension's `dependencies` block is empty, so it ships no
+  `node_modules` and nothing reached anyone who installed it.
+  An `overrides` pin could not fix this one - the advisory's affected range is
+  `*`, so every published version of `braces` is affected and there is nothing to
+  pin to. jest 30 drops the dependency entirely. All 118 Jest tests pass
+  unchanged, and both browser bundles build.
+
+- Cleared the two open advisories in the extension's dev toolchain: `browserslist`
+  (**high** - unbounded memory growth with no cache eviction, leading to eventual
+  OOM, plus an uncaught crash / prototype write via an untrusted
+  `browserslist-stats.json`) and `baseline-browser-mapping` (moderate - process
+  termination on invalid input). Both are transitive under
+  `jest` -> `@babel/core` -> `helper-compilation-targets`. The extension's
+  `dependencies` block is empty - it ships no runtime npm packages - so neither
+  ever reached anyone who installs it. Fixed with `overrides` floors
+  (`browserslist` `^4.28.9`, `baseline-browser-mapping` `^2.11.22`) rather than by
+  merging the dependabot PRs: #142 and #144 both rewrite `package-lock.json` and
+  so conflicted with each other, and an override pins the floor instead of leaving
+  the version to whatever the lockfile resolves next time. Same pattern already
+  used for js-yaml and brace-expansion in #138. Also raises the `js-yaml` floor to
+  `^4.3.2` (#145 - a routine patch, no advisory), so one change supersedes all
+  three dependabot PRs. `npm audit` reports 0 vulnerabilities.
+
+### Fixed
+- One default model name instead of three. The code fell back to `llama3.2`
+  (`server/classifier.py`) while `CLAUDE.md`, `.env.example`, `CONTRIBUTING.md`
+  and `docker-compose.yaml` all said `mistral:7b-instruct`, and the README
+  already called `llama3.1:8b` "the best all-round default". All five now say
+  `llama3.1:8b` - the model the 96% baseline is actually measured on. This is
+  why a nightly eval run scored 94% against a 96% baseline and read as a
+  regression: nothing stated which model produced a number, and the silent
+  fallback was a model no baseline covered. Note this changes the fallback for
+  anyone running with no `OLLAMA_MODEL` set at all; the documented path copies
+  `.env.example`, which already pinned an 8 GB model.
+- `extension/package.json` was still on `0.3.0` while every other
+  version-bearing file was on `0.7.0`. `scripts/check_version.py` read four
+  files and never looked at it, so the drift was invisible to the check that
+  exists to catch exactly this. It is now the fifth checked file, and
+  `MERGE_CHECKLIST.md` updated from "all four" to "all five".
+
+- The eval verdict now records the model that produced the score, and the run
+  prints it in its header. A score without a model is not comparable: the
+  documented baseline is 96% on `llama3.1:8b`, so a nightly run scoring 94% on a
+  different model is a model difference, not a regression - which is what issues
+  #141 and #143 were reporting, twice. `result.json` gains a `model` field.
+  Related trap: `OLLAMA_MODEL` is not exported on the eval box and
+  `eval/run_eval.py` deliberately does not read `.env`, so an unpinned run falls
+  back to the classifier default `"llama3.2"` (`server/classifier.py`) - a model
+  no baseline was measured on. The nightly runner is now pinned to `llama3.1:8b`
+  (outside this repo, in `~/eval-runs/run-eval.sh`).
+- Committed the `--result-json` flag for `eval/run_eval.py`. The nightly runner
+  already invoked it, but it existed only as an uncommitted working-tree change,
+  so any run from a clean checkout would have died on an unrecognised argument.
+
+### Changed
+- Extension description rewritten. `extension/manifest.json` read "A digital
+  bodyguard for your mind - filters content by intent", which was wrong on both
+  halves: it is not a bodyguard, and since v0.7.0 it does not filter by default.
+  This string is user-facing - it is what the browser shows on the extensions
+  page - so it was the last place still promising interception. Now: "Labels
+  social media posts by the manipulation patterns they use. Runs locally."
+  (78 characters, within the 132 limit.) Carries through to both
+  `dist/chrome` and `dist/firefox`.
+
 ### Eval
 - **False-positive probe grown from 27 benign items to 74, and grouped by kind**
   (issue #125). The 37% figure that drove v0.7.0's tag-only default rested on 27
@@ -29,24 +120,27 @@ All notable changes to IntentKeeper are documented here.
   original 27-item set and is left as it stands. Run `run-eval.sh prepare`
   first, then the probe, to get the number on the new set.
 
-### Tests
-- `tests/test_false_positive_eval.py` - 5 tests pinning the probe-set shape and
-  the per-group arithmetic, using a stubbed classifier so no server or model is
-  needed.
-
-### Security
-- Cleared the `braces` advisory (GHSA-vfj7-8cjw-p6xm, **high** - stack exhaustion
-  via deeply nested patterns) by moving the extension's dev toolchain to
-  `jest` 30. `npm audit` reported 28 high findings, which is the one advisory
-  counted across 28 dependency paths under `jest` -> `@jest/core` -> `micromatch`.
-  Dev-only: the extension's `dependencies` block is empty, so it ships no
-  `node_modules` and nothing reached anyone who installed it.
-  An `overrides` pin could not fix this one - the advisory's affected range is
-  `*`, so every published version of `braces` is affected and there is nothing to
-  pin to. jest 30 drops the dependency entirely. All 118 Jest tests pass
-  unchanged, and both browser bundles build.
-
 ### Documentation
+- **`KNOWN_LIMITS.md` carries the measurement from the expanded probe.** It had
+  been quoting 10 of 27 benign posts (37%) from a set that #155 replaced. The
+  74-item, 16-group probe measures **30 of 74 - 41%** (`llama3.1:8b`,
+  2026-10-22). The rate went up, not down, which is the expected direction: the
+  original 27 items were weighted toward content the tool handles, and the new
+  groups went looking for where it does not.
+  Two groups fail **every item**, and both are named in the doc rather than
+  folded into a percentage. `dialect_and_slang` (4/4) is a fairness problem
+  rather than an accuracy one - the posts are ordinary speech that is not
+  standard English, and the tool misreads them consistently, against particular
+  people. `quoting_manipulation_to_criticise_it` (4/4) inverts the tool's
+  purpose: it reads the quoted ragebait, misses the frame around it, and flags
+  the person doing the criticising.
+  The figure was updated in the six other places that cited it - `CLAUDE.md`,
+  `ROADMAP.md` (twice), `docs/architecture.md`, `store/SUBMISSION_CHECKLIST.md`,
+  and the comments in `extension/background.js` and its regression test.
+- `CLAUDE.md`'s Phase 8 line said the Firefox build was "untested on a real
+  Firefox". #146 established that it installs in Firefox 156 and that the popup
+  renders with blur and hide off; what remains is the live-timeline check.
+
 - Calmer MANIFESTO, matching the README. It opened "intentKeeper is a digital
   bodyguard for your mind. It sits between you and the content designed to
   hijack your attention" - the same interception promise removed from the README
@@ -60,17 +154,6 @@ All notable changes to IntentKeeper are documented here.
   change necessarily fails the `Protect MANIFESTO.md` CI job, which blocks any
   PR touching the file; it was made with maintainer approval.
 
-### Changed
-- Extension description rewritten. `extension/manifest.json` read "A digital
-  bodyguard for your mind - filters content by intent", which was wrong on both
-  halves: it is not a bodyguard, and since v0.7.0 it does not filter by default.
-  This string is user-facing - it is what the browser shows on the extensions
-  page - so it was the last place still promising interception. Now: "Labels
-  social media posts by the manipulation patterns they use. Runs locally."
-  (78 characters, within the 132 limit.) Carries through to both
-  `dist/chrome` and `dist/firefox`.
-
-### Documentation
 - Calmer README. The old copy promised interception - "a digital bodyguard for
   your mind", "before it lands", "before they affect you", "before they hook
   you", and a flow diagram reading "Extension intercepts content before you
@@ -90,63 +173,6 @@ All notable changes to IntentKeeper are documented here.
   less real-world use than the others. It shipped in v0.7.0 but the README had
   never mentioned it.
 
-### Fixed
-- One default model name instead of three. The code fell back to `llama3.2`
-  (`server/classifier.py`) while `CLAUDE.md`, `.env.example`, `CONTRIBUTING.md`
-  and `docker-compose.yaml` all said `mistral:7b-instruct`, and the README
-  already called `llama3.1:8b` "the best all-round default". All five now say
-  `llama3.1:8b` - the model the 96% baseline is actually measured on. This is
-  why a nightly eval run scored 94% against a 96% baseline and read as a
-  regression: nothing stated which model produced a number, and the silent
-  fallback was a model no baseline covered. Note this changes the fallback for
-  anyone running with no `OLLAMA_MODEL` set at all; the documented path copies
-  `.env.example`, which already pinned an 8 GB model.
-- `extension/package.json` was still on `0.3.0` while every other
-  version-bearing file was on `0.7.0`. `scripts/check_version.py` read four
-  files and never looked at it, so the drift was invisible to the check that
-  exists to catch exactly this. It is now the fifth checked file, and
-  `MERGE_CHECKLIST.md` updated from "all four" to "all five".
-
-### Security
-- Cleared the two open advisories in the extension's dev toolchain: `browserslist`
-  (**high** - unbounded memory growth with no cache eviction, leading to eventual
-  OOM, plus an uncaught crash / prototype write via an untrusted
-  `browserslist-stats.json`) and `baseline-browser-mapping` (moderate - process
-  termination on invalid input). Both are transitive under
-  `jest` -> `@babel/core` -> `helper-compilation-targets`. The extension's
-  `dependencies` block is empty - it ships no runtime npm packages - so neither
-  ever reached anyone who installs it. Fixed with `overrides` floors
-  (`browserslist` `^4.28.9`, `baseline-browser-mapping` `^2.11.22`) rather than by
-  merging the dependabot PRs: #142 and #144 both rewrite `package-lock.json` and
-  so conflicted with each other, and an override pins the floor instead of leaving
-  the version to whatever the lockfile resolves next time. Same pattern already
-  used for js-yaml and brace-expansion in #138. Also raises the `js-yaml` floor to
-  `^4.3.2` (#145 - a routine patch, no advisory), so one change supersedes all
-  three dependabot PRs. `npm audit` reports 0 vulnerabilities.
-
-### Fixed
-- The eval verdict now records the model that produced the score, and the run
-  prints it in its header. A score without a model is not comparable: the
-  documented baseline is 96% on `llama3.1:8b`, so a nightly run scoring 94% on a
-  different model is a model difference, not a regression - which is what issues
-  #141 and #143 were reporting, twice. `result.json` gains a `model` field.
-  Related trap: `OLLAMA_MODEL` is not exported on the eval box and
-  `eval/run_eval.py` deliberately does not read `.env`, so an unpinned run falls
-  back to the classifier default `"llama3.2"` (`server/classifier.py`) - a model
-  no baseline was measured on. The nightly runner is now pinned to `llama3.1:8b`
-  (outside this repo, in `~/eval-runs/run-eval.sh`).
-- Committed the `--result-json` flag for `eval/run_eval.py`. The nightly runner
-  already invoked it, but it existed only as an uncommitted working-tree change,
-  so any run from a clean checkout would have died on an unrecognised argument.
-
-### Tests
-- Five tests for `build_result()` in `eval/run_eval.py` covering the verdict
-  shape - that it carries the model, that an empty set does not divide by zero,
-  per-intent accuracy, and failed-check truncation. This harness (the
-  105-example set the nightly drives) previously had no tests, distinct from
-  `tests/eval/run_eval.py` which `tests/test_eval.py` covers.
-
-### Documentation
 - Phase 8.2 (Firefox) moved from `CODE COMPLETE` to `IN PROGRESS` and the
   verification actually done is recorded. A real Firefox loads the build:
   `web-ext run` against a standalone Firefox 156.0 (linux-aarch64), headless,
@@ -162,6 +188,17 @@ All notable changes to IntentKeeper are documented here.
   AMO-listing field that no longer applies. The visual check on a live timeline
   remains open: it needs a display and signed-in accounts, and the dev box is
   headless ARM64 with no X server.
+
+### Tests
+- `tests/test_false_positive_eval.py` - 5 tests pinning the probe-set shape and
+  the per-group arithmetic, using a stubbed classifier so no server or model is
+  needed.
+
+- Five tests for `build_result()` in `eval/run_eval.py` covering the verdict
+  shape - that it carries the model, that an empty set does not divide by zero,
+  per-intent accuracy, and failed-check truncation. This harness (the
+  105-example set the nightly drives) previously had no tests, distinct from
+  `tests/eval/run_eval.py` which `tests/test_eval.py` covers.
 
 ## v0.7.0 (2026-09-20) - Firefox, Honest Limits & Tag-Only Defaults
 

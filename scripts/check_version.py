@@ -62,6 +62,16 @@ def read_package_json_version():
     return version, None
 
 
+def read_api_version():
+    path = ROOT / "server" / "api.py"
+    if not path.exists():
+        return None, "server/api.py not found"
+    match = re.search(r'version\s*=\s*"([0-9]+\.[0-9]+(?:\.[0-9]+)?)"', path.read_text())
+    if not match:
+        return None, 'server/api.py: version="X.Y.Z" not found'
+    return match.group(1), None
+
+
 def read_readme_version():
     path = ROOT / "README.md"
     if not path.exists():
@@ -92,6 +102,11 @@ CHECKS = [
         "extension/package.json",
         read_package_json_version,
         'Update "version": "{version}" in extension/package.json',
+    ),
+    (
+        "server/api.py",
+        read_api_version,
+        'Update version="{version}" in server/api.py',
     ),
     (
         "README.md",

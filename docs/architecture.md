@@ -243,7 +243,7 @@ Visual Treatment Applied (classifier.js)
 ```
 Blur and hide ship **off** by default (tag-only). They are the two treatments
 that withhold content, and the classifier's measured false-positive rate on
-benign content is 37% (see `KNOWN_LIMITS.md`), so the user opts in rather than
+benign content is 41% (see `KNOWN_LIMITS.md`), so the user opts in rather than
 out. The diagram below shows each treatment as it behaves once enabled.
 
 ┌─────────────────────────────────────────────────────────────────┐
