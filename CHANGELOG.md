@@ -4,6 +4,23 @@ All notable changes to IntentKeeper are documented here.
 
 ## [Unreleased]
 
+### Eval
+- **A broken run no longer looks like a regression.** `classify()` fails open by
+  design - an unreachable Ollama returns `neutral` at confidence 0.0 rather than
+  raising - so every failed item silently costs a point. The 2026-11-17 nightly
+  scored 92% that way: same model, same dataset, four items fail-opened to
+  `neutral` after Ollama errored. Nothing in the recorded verdict distinguished
+  that from the classifier genuinely getting worse.
+  `eval/run_eval.py` now counts those items and records `errors` and `usable` in
+  the verdict JSON, and prints a loud "NOT A CLEAN RUN" line in the summary when
+  any occur. Compare runs on `usable` first, then `score_pct`.
+  This is the same failure as the model-not-recorded bug fixed in #147: the
+  number was being saved without the context needed to read it.
+
+### Tests
+- 3 tests covering the error count and the `usable` flag, including that
+  `build_result()` still defaults to zero for callers that do not pass it.
+
 ## v0.7.1 (2026-11-04) - Honest Numbers & a Quieter Toolchain
 
 > **Eval note.** `MERGE_CHECKLIST` asks for an accuracy run on every release.

@@ -39,7 +39,9 @@ def load_test_set(path: str, filter_intent: str | None = None) -> list[dict]:
     return items
 
 
-def build_result(meta: dict, correct: int, total: int, per_intent: dict, wrong: list[dict]) -> dict:
+def build_result(
+    meta: dict, correct: int, total: int, per_intent: dict, wrong: list[dict], errors: int = 0
+) -> dict:
     """Assemble the structured verdict. score_pct + correct/total is the grade;
     `wrong` is the failed_checks; per_intent is the rationale (where it failed).
     Kept separate from run() so it can be tested without loading a model."""
@@ -52,6 +54,11 @@ def build_result(meta: dict, correct: int, total: int, per_intent: dict, wrong: 
         "score_pct": round(correct / total * 100, 1) if total else 0.0,
         "correct": correct,
         "total": total,
+        # Items where the classifier failed open instead of classifying. Any
+        # value above 0 means the score understates the classifier: compare
+        # runs on this first, not on score_pct.
+        "errors": errors,
+        "usable": errors == 0,
         "per_intent": {
             k: {
                 "correct": v["correct"],
@@ -83,6 +90,7 @@ async def run(test_set: list[dict], verbose: bool, meta: dict, result_path: str 
 
     total = len(test_set)
     correct = 0
+    errors = 0
     per_intent: dict[str, dict] = defaultdict(lambda: {"total": 0, "correct": 0})
     wrong: list[dict] = []
 
@@ -96,6 +104,12 @@ async def run(test_set: list[dict], verbose: bool, meta: dict, result_path: str 
         result = await classifier.classify(content)
         got = result.intent
         is_correct = got == expected
+
+        # classify() fails open rather than raising, so an unreachable Ollama
+        # produces neutral/0.0 and silently costs a point. Counted, because a
+        # score with errors behind it is not a measurement of the classifier.
+        if result.confidence == 0.0 and result.reasoning.startswith("Classification failed"):
+            errors += 1
 
         per_intent[expected]["total"] += 1
         if is_correct:
@@ -124,6 +138,11 @@ async def run(test_set: list[dict], verbose: bool, meta: dict, result_path: str 
     pct = correct / total * 100 if total else 0
     print(f"\n{'─' * 60}")
     print(f"  Overall accuracy: {correct}/{total}  ({pct:.0f}%)")
+    if errors:
+        # Loud, because the score below is not a measurement of the classifier:
+        # these items fail open to neutral and cost a point each.
+        print(f"  NOT A CLEAN RUN: {errors}/{total} items failed to classify.")
+        print("  The classifier failed open on those, so this score understates it.")
     print(f"{'─' * 60}\n")
 
     # Per-intent breakdown
@@ -153,7 +172,7 @@ async def run(test_set: list[dict], verbose: bool, meta: dict, result_path: str 
     # Structured verdict, alongside the human-readable output above. The DAG's
     # digest still reads the "accuracy" line; this file is for comparing runs.
     if result_path:
-        result = build_result(meta, correct, total, per_intent, wrong)
+        result = build_result(meta, correct, total, per_intent, wrong, errors)
         Path(result_path).write_text(json.dumps(result, indent=2))
         print(f"  wrote verdict: {result_path}\n")
 
