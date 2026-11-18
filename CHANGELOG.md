@@ -4,6 +4,29 @@ All notable changes to IntentKeeper are documented here.
 
 ## [Unreleased]
 
+### Security
+- **`picomatch` ReDoS (GHSA-fc5q-39xc-vjpf, high) is accepted, not fixed - there
+  is no fix to apply.** `npm audit` reports it 36 times, which is one advisory
+  counted once per dependency path. Triaged 2026-11-18 against the GitHub
+  advisory API rather than npm's suggestion:
+  - vulnerable range is `<= 4.0.7`, and **4.0.7 is the newest version
+    published** - the advisory lists no patched version, so an `overrides` pin
+    has nothing to point at.
+  - npm's `fixAvailable` suggests `jest` 30.2.0, which is a **downgrade** from
+    the 30.5.2 already installed. Following it would move backwards and still
+    not fix it.
+  - `picomatch` reaches the tree only through jest internals (`jest-util`,
+    `jest-haste-map`, `anymatch`, `fdir`, `@parcel/watcher`). Dropping it means
+    dropping jest.
+  - Dev-only, like every advisory in this toolchain: the extension's
+    `dependencies` block is empty and it ships no `node_modules`. GitHub's own
+    Dependabot raises no alert for it.
+  Revisit when upstream publishes a patched `picomatch`. Recorded here so the
+  next `npm audit` does not start this investigation again.
+- Dismissed Dependabot alert #22 (`deepmerge`, GHSA-gcqx-w48m-w2h4) as
+  inaccurate. The advisory was **withdrawn upstream on 2026-11-16** - there is
+  no vulnerability and no patched version because it was retracted.
+
 ### Eval
 - **A broken run no longer looks like a regression.** `classify()` fails open by
   design - an unreachable Ollama returns `neutral` at confidence 0.0 rather than
