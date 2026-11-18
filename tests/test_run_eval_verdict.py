@@ -24,6 +24,26 @@ def _meta(model="llama3.1:8b"):
     }
 
 
+class TestErrorCounting:
+    # A run where Ollama was unreachable scores low for a reason that has
+    # nothing to do with the classifier. 2026-11-17 scored 92% that way and
+    # was indistinguishable from a regression in the recorded verdict.
+    def test_clean_run_is_marked_usable(self):
+        result = build_result(_meta(), 101, 105, {}, [], 0)
+        assert result["errors"] == 0
+        assert result["usable"] is True
+
+    def test_any_error_marks_the_run_unusable(self):
+        result = build_result(_meta(), 97, 105, {}, [], 4)
+        assert result["errors"] == 4
+        assert result["usable"] is False
+
+    def test_errors_defaults_to_zero_for_older_callers(self):
+        result = build_result(_meta(), 101, 105, {}, [])
+        assert result["errors"] == 0
+        assert result["usable"] is True
+
+
 class TestBuildResult:
     def test_records_the_model_that_produced_the_score(self):
         # A score with no model is not comparable: the 96% baseline is
